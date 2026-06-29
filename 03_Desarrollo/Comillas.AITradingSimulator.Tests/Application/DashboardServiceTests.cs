@@ -417,6 +417,40 @@ public sealed class DashboardServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GetSnapshot_AdjuntaPnLConvertidoABasePorFila()
+    {
+        await using (var ctx = NewContext())
+        {
+            var aapl = TrackedSymbol.Create("AAPL", "Apple", BaseTime);
+            aapl.SetCurrency("USD");
+            ctx.TrackedSymbols.Add(aapl);
+
+            // Abierta: 100×10, precio actual 120 → PnL no realizado 200 USD.
+            ctx.Trades.Add(Trade.Open("AAPL", 100m, 10m, BaseTime));
+            ctx.MarketTicks.Add(MarketTick.Create("AAPL", 120m, 100m, BaseTime.AddMinutes(1)));
+
+            // Cerrada: 100→90 ×10 → PnL realizado −100 USD.
+            var closed = Trade.Open("AAPL", 100m, 10m, BaseTime);
+            closed.Close(90m, BaseTime.AddHours(1));
+            ctx.Trades.Add(closed);
+            await ctx.SaveChangesAsync();
+        }
+
+        var fx = new StubFxRateProvider(new() { [("USD", "EUR")] = 0.90m });
+
+        await using var ctx2 = NewContext();
+        var snap = await NewService(ctx2, fx).GetSnapshotAsync();
+
+        var open = snap.OpenTrades.Single();
+        Assert.Equal(200m, open.UnrealizedPnL);       // nativo USD
+        Assert.Equal(180m, open.UnrealizedPnLBase);   // 200 × 0,90
+
+        var closedDto = snap.RecentClosedTrades.Single();
+        Assert.Equal(-100m, closedDto.RealizedPnL);
+        Assert.Equal(-90m, closedDto.RealizedPnLBase); // −100 × 0,90
+    }
+
+    [Fact]
     public async Task GetSnapshot_ConvierteAportacionesPorSuDivisa()
     {
         await using (var ctx = NewContext())

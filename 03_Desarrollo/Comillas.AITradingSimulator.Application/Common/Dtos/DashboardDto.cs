@@ -55,6 +55,7 @@ public sealed record OpenTradeDto(
     decimal UnrealizedPnL,
     decimal ReturnPct,
     string Currency,
+    decimal UnrealizedPnLBase,
     DateTime CreatedAt);
 
 public sealed record ClosedTradeDto(
@@ -66,6 +67,7 @@ public sealed record ClosedTradeDto(
     decimal RealizedPnL,
     decimal ReturnPct,
     string Currency,
+    decimal RealizedPnLBase,
     DateTime CreatedAt,
     DateTime ClosedAt);
 

@@ -13,20 +13,6 @@
 
                                       },
                          "versionProyecto":  "0.0.0",
-                         "fecha":  "2026-05-26 15:05:23"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "0.0.0",
                          "fecha":  "2026-05-26 15:19:04"
                      },
                      {
@@ -701,6 +687,20 @@
                                       },
                          "versionProyecto":  "1.9.0-fx",
                          "fecha":  "2026-06-29 14:52:37"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.10.0-cash-fx",
+                         "fecha":  "2026-06-29 15:04:38"
                      }
                  ]
 }
