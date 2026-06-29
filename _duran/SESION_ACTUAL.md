@@ -22,7 +22,14 @@
 
 ---
 
-## Resumen de lo Trabajado (2026-06-29 · rentabilidad % + histórico + import + divisa)
+## Resumen de lo Trabajado (2026-06-29 · rentabilidad % + histórico + import + divisa + FX)
+
+### HV-020 · Conversión FX a divisa base
+- [x] `IFxRateProvider`/`FxRateProvider` (Yahoo `{FROM}{TO}=X`, caché por par con TTL, degradación a 1).
+- [x] `DashboardService` convierte los totales a `Fx:BaseCurrency` (EUR) por el tipo de cada símbolo; invariante `accountValue = netDeposits + totalPnL` preservado. `DashboardDto.BaseCurrency` + nota en UI.
+- [x] Cierra la deuda de divisas de HV-019 (los totales ya no mezclan monedas). Aportaciones de caja asumidas en base.
+- [x] 6 tests nuevos; **129 verdes**. Smoke real: `USDEUR=X=0,8768`, dashboard `base=EUR`.
+- [x] Desarrollado en rama `feature/HV-020-conversion-fx`.
 
 ### HV-019 · Divisa por instrumento
 - [x] `TrackedSymbol.Currency` + `SetCurrency` + migración `AddTrackedSymbolCurrency`.

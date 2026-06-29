@@ -12,13 +12,19 @@ public sealed class DashboardService : IDashboardService
 {
     private readonly ITradingDbContext _db;
     private readonly IOptionsMonitor<MarketDataOptions> _marketData;
+    private readonly IFxRateProvider _fx;
+    private readonly IOptions<FxOptions> _fxOptions;
 
     public DashboardService(
         ITradingDbContext db,
-        IOptionsMonitor<MarketDataOptions> marketData)
+        IOptionsMonitor<MarketDataOptions> marketData,
+        IFxRateProvider fx,
+        IOptions<FxOptions> fxOptions)
     {
         _db = db;
         _marketData = marketData;
+        _fx = fx;
+        _fxOptions = fxOptions;
     }
 
     public async Task<DashboardDto> GetSnapshotAsync(
@@ -35,10 +41,6 @@ public sealed class DashboardService : IDashboardService
             .Where(t => t.Status == TradeStatus.Closed)
             .OrderByDescending(t => t.ClosedAt)
             .ToListAsync(cancellationToken);
-
-        var realizedPnL = allClosed
-            .Where(t => t.ExitPrice.HasValue)
-            .Sum(t => (t.ExitPrice!.Value - t.EntryPrice) * t.Quantity);
 
         var closedCount = allClosed.Count;
         var winnersCount = allClosed.Count(t => t.ExitPrice.HasValue && t.ExitPrice.Value > t.EntryPrice);
@@ -82,15 +84,43 @@ public sealed class DashboardService : IDashboardService
             return new OpenTradeDto(t.Id, t.Symbol, t.EntryPrice, current, t.Quantity, unrealized, pct, currency, t.CreatedAt);
         }).ToList();
 
-        var unrealizedPnL = openDtos.Sum(o => o.UnrealizedPnL);
+        // Conversión a divisa base: los totales mezclarían divisas si no se convirtieran
+        // (HV-020). Cada posición se convierte con el tipo de su símbolo. Las filas de las
+        // tablas se siguen mostrando en su divisa nativa (HV-019).
+        var baseCurrency = (_fxOptions.Value.BaseCurrency ?? "EUR").Trim().ToUpperInvariant();
+
+        string CcyOf(string symbol)
+        {
+            var c = currencyBySymbol.GetValueOrDefault(symbol, string.Empty).Trim().ToUpperInvariant();
+            return c.Length == 0 ? baseCurrency : c;   // desconocida → se asume base (rate 1)
+        }
+
+        var distinctCcy = openTrades.Select(t => t.Symbol)
+            .Concat(allClosed.Select(t => t.Symbol))
+            .Select(CcyOf)
+            .Distinct()
+            .ToList();
+
+        var rateByCcy = new Dictionary<string, decimal>(distinctCcy.Count);
+        foreach (var ccy in distinctCcy)
+            rateByCcy[ccy] = await _fx.GetRateAsync(ccy, baseCurrency, cancellationToken);
+
+        decimal RateOf(string symbol) => rateByCcy.GetValueOrDefault(CcyOf(symbol), 1m);
+
+        // Agregados convertidos a base (sin redondear, para preservar el invariante exacto).
+        var realizedPnL = allClosed
+            .Where(t => t.ExitPrice.HasValue)
+            .Sum(t => (t.ExitPrice!.Value - t.EntryPrice) * t.Quantity * RateOf(t.Symbol));
+
+        var unrealizedPnL = openDtos.Sum(o => o.UnrealizedPnL * RateOf(o.Symbol));
 
         // Capital derivado de las posiciones abiertas (cartera real, sin capital ficticio).
-        var invested = openTrades.Sum(t => t.EntryPrice * t.Quantity);     // coste base
-        var marketValue = openDtos.Sum(o => o.CurrentPrice * o.Quantity);  // valor a precio real
+        var invested = openTrades.Sum(t => t.EntryPrice * t.Quantity * RateOf(t.Symbol));      // coste base (en divisa base)
+        var marketValue = openDtos.Sum(o => o.CurrentPrice * o.Quantity * RateOf(o.Symbol));   // valor a precio real (en divisa base)
 
         // Caja: aportaciones netas + efecto de operaciones.
         // cash = aportado − invertido(abiertas) + realizado(cerradas)   (las ventas devuelven coste+PnL)
-        // Importe se guarda como TEXT (decimal); sumar en memoria.
+        // Las aportaciones (CashMovement) se asumen ya en la divisa base.
         var netDeposits = (await _db.CashMovements.Select(m => m.Amount).ToListAsync(cancellationToken)).Sum();
         var cash = netDeposits - invested + realizedPnL;
         var accountValue = cash + marketValue;
@@ -156,6 +186,7 @@ public sealed class DashboardService : IDashboardService
             NetDeposits = netDeposits,
             Cash = cash,
             AccountValue = accountValue,
+            BaseCurrency = baseCurrency,
             ReturnPct = returnPct,
             RealizedPnL = realizedPnL,
             UnrealizedPnL = unrealizedPnL,

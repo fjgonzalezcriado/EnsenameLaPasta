@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-020 Conversión FX a divisa base ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-020.md`
+- **Resumen**: Los **totales de cuenta** dejan de mezclar divisas: se convierten a una **divisa base** (EUR, config `Fx:BaseCurrency`). `IFxRateProvider`/`FxRateProvider` obtiene tipos vía Yahoo `{FROM}{TO}=X` (p.ej. `USDEUR=X`) con caché en memoria por par + TTL (`Fx:CacheMinutes`, 30) y degradación a último valor/1 si falla. `DashboardService` convierte invested/marketValue/realized/unrealized por el tipo de cada símbolo (aportaciones de caja asumidas en base); invariante `accountValue = netDeposits + totalPnL` preservado. `DashboardDto.BaseCurrency` + nota en UI ("Totales convertidos a EUR"). Las filas de posiciones siguen en su divisa nativa (HV-019). 6 tests nuevos. 129 verdes. Smoke real: `USDEUR=X=0,8768`; dashboard `base=EUR`. Cierra la deuda de divisas de HV-019.
+
 #### HV-019 Divisa por instrumento ✅
 - **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-019.md`

@@ -1,4 +1,4 @@
-﻿{
+{
     "_comentario":  "Este archivo mantiene el estado actual del proyecto. Claude lo lee automaticamente.",
     "ecosistema":  {
                        "nombre":  "STIC.IA",
@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.8.0-currency",
+                   "version_actual":  "1.9.0-fx",
                    "ultima_actualizacion":  "2026-06-29",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-020",
+                                               "titulo":  "Conversion FX a divisa base",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-29",
+                                               "fechaInicio":  "2026-06-29",
+                                               "fechaCompletado":  "2026-06-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-020.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Los totales de cuenta dejan de mezclar divisas: se convierten a divisa base (EUR, Fx:BaseCurrency). IFxRateProvider/FxRateProvider obtiene tipos via Yahoo {FROM}{TO}=X (USDEUR=X) con cache por par mas TTL (Fx:CacheMinutes 30) y degradacion a ultimo valor/1 si falla. DashboardService convierte invested/marketValue/realized/unrealized por el tipo de cada simbolo (aportaciones de caja asumidas en base); invariante accountValue = netDeposits + totalPnL preservado (sin redondear agregados). DashboardDto.BaseCurrency mas nota en UI. Filas en divisa nativa (HV-019). 6 tests. 129 verdes. Smoke real: USDEUR=X=0,8768; dashboard base=EUR. Rama feature/HV-020-conversion-fx. Cierra la deuda de divisas de HV-019."
+                                           },
                                            {
                                                "codigo":  "HV-019",
                                                "titulo":  "Divisa por instrumento",
@@ -627,8 +644,8 @@
                          "evolutivoActivo":  null,
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
-                         "proximoPaso":  "Opcional: CONVERSION FX a divisa base (que los totales dejen de mezclar divisas; HV-019 ya captura la divisa por instrumento), dashboard visor puro, retencion/rango temporal del grafico de evolucion, importar tambien trades cerrados.",
-                         "resumenSesion":  "HV-015 rentabilidad % cuenta mas HV-016 rentabilidad por posicion mas HV-017 historico del valor de cuenta (PortfolioSnapshotService mas grafico) mas HV-018 importar CSV de compras mas HV-019 divisa por instrumento (TrackedSymbol.Currency sellada por el generador; MarketQuote; columna Div mas formateo por fila; totales siguen en EUR hasta FX). 123 tests verdes; smokes reales OK.",
+                         "proximoPaso":  "Opcional: divisa por movimiento de caja (hoy se asumen en base), PnL convertido por fila, refrescar FX en background, dashboard visor puro, importar trades cerrados, AlphaVantage/Binance, ML.NET.",
+                         "resumenSesion":  "HV-015 rentabilidad % cuenta, HV-016 rentabilidad por posicion, HV-017 historico del valor de cuenta (PortfolioSnapshotService mas grafico), HV-018 importar CSV de compras, HV-019 divisa por instrumento, HV-020 conversion FX a divisa base (IFxRateProvider via Yahoo {FROM}{TO}=X con cache; DashboardService convierte totales a EUR; invariante preservado). Proyecto subido a GitHub privado. HV-020 en rama feature/HV-020-conversion-fx (pendiente merge a main). 129 tests verdes; smokes reales OK.",
                          "archivosModificados":  [
                                                      "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
@@ -637,10 +654,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-06-29 OK (123 tests verdes; HV-019 divisa por instrumento: TrackedSymbol.Currency sellada por el generador, columna Div mas formateo por fila; migracion AddTrackedSymbolCurrency; smoke real HY9H.F-\u003eEUR / ^GSPC-\u003eUSD)",
+                     "ultimo_build":  "2026-06-29 OK (129 tests verdes; HV-020 conversion FX a divisa base: FxRateProvider via Yahoo {FROM}{TO}=X con cache, DashboardService convierte totales a EUR; smoke real USDEUR=X=0,8768)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  19
+                     "evolutivos_completados_mes":  20
                  },
     "alertas":  {
                     "activas":  [

@@ -74,6 +74,8 @@
     }
 
     function renderMetrics(d) {
+        const baseCcy = document.getElementById('baseCcy');
+        if (baseCcy && d.baseCurrency) baseCcy.textContent = d.baseCurrency;
         document.getElementById('accountValue').textContent = eur(d.accountValue);
         setSigned('returnPct', d.returnPct, pctSigned);
         setSigned('cash', d.cash, eur);

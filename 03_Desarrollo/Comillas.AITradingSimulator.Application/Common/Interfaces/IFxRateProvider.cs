@@ -1,0 +1,14 @@
+namespace Comillas.AITradingSimulator.Application.Common.Interfaces;
+
+/// <summary>
+/// Proporciona tipos de cambio entre divisas (para convertir los totales a la divisa base).
+/// </summary>
+public interface IFxRateProvider
+{
+    /// <summary>
+    /// Devuelve cuántas unidades de <paramref name="to"/> equivalen a 1 unidad de
+    /// <paramref name="from"/>. Devuelve 1 si las divisas coinciden o alguna está vacía.
+    /// Ante un fallo de la fuente, degrada al último valor conocido o a 1 (no lanza).
+    /// </summary>
+    Task<decimal> GetRateAsync(string from, string to, CancellationToken cancellationToken = default);
+}
