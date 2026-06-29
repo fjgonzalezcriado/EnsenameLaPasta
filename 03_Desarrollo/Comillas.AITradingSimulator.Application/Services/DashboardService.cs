@@ -60,33 +60,9 @@ public sealed class DashboardService : IDashboardService
         var currencyBySymbol = await _db.TrackedSymbols
             .ToDictionaryAsync(t => t.Symbol, t => t.Currency, cancellationToken);
 
-        // Último precio por símbolo (necesario para unrealized PnL)
-        var symbols = openTrades.Select(t => t.Symbol).Distinct().ToList();
-        var lastPriceBySymbol = new Dictionary<string, decimal>();
-        foreach (var symbol in symbols)
-        {
-            var lastTick = await _db.MarketTicks
-                .Where(t => t.Symbol == symbol)
-                .OrderByDescending(t => t.Timestamp)
-                .FirstOrDefaultAsync(cancellationToken);
-            if (lastTick is not null)
-                lastPriceBySymbol[symbol] = lastTick.Price;
-        }
-
-        var openDtos = openTrades.Select(t =>
-        {
-            var current = lastPriceBySymbol.GetValueOrDefault(t.Symbol, t.EntryPrice);
-            var unrealized = (current - t.EntryPrice) * t.Quantity;
-            var pct = t.EntryPrice != 0m
-                ? Math.Round((current - t.EntryPrice) / t.EntryPrice * 100m, 2)
-                : 0m;
-            var currency = currencyBySymbol.GetValueOrDefault(t.Symbol, string.Empty);
-            return new OpenTradeDto(t.Id, t.Symbol, t.EntryPrice, current, t.Quantity, unrealized, pct, currency, t.CreatedAt);
-        }).ToList();
-
-        // Conversión a divisa base: los totales mezclarían divisas si no se convirtieran
-        // (HV-020). Cada posición se convierte con el tipo de su símbolo. Las filas de las
-        // tablas se siguen mostrando en su divisa nativa (HV-019).
+        // Conversión a divisa base (HV-020/021/022): cada posición/aportación se convierte
+        // con el tipo de su divisa. Las filas muestran su divisa nativa (HV-019) y, además,
+        // el PnL convertido a base por fila (HV-022). Se prepara aquí para usarlo al construir las filas.
         var baseCurrency = (_fxOptions.Value.BaseCurrency ?? "EUR").Trim().ToUpperInvariant();
 
         string Norm(string? c)
@@ -113,6 +89,30 @@ public sealed class DashboardService : IDashboardService
             rateByCcy[ccy] = await _fx.GetRateAsync(ccy, baseCurrency, cancellationToken);
 
         decimal RateOf(string symbol) => rateByCcy.GetValueOrDefault(CcyOf(symbol), 1m);
+
+        // Último precio por símbolo (necesario para unrealized PnL)
+        var symbols = openTrades.Select(t => t.Symbol).Distinct().ToList();
+        var lastPriceBySymbol = new Dictionary<string, decimal>();
+        foreach (var symbol in symbols)
+        {
+            var lastTick = await _db.MarketTicks
+                .Where(t => t.Symbol == symbol)
+                .OrderByDescending(t => t.Timestamp)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (lastTick is not null)
+                lastPriceBySymbol[symbol] = lastTick.Price;
+        }
+
+        var openDtos = openTrades.Select(t =>
+        {
+            var current = lastPriceBySymbol.GetValueOrDefault(t.Symbol, t.EntryPrice);
+            var unrealized = (current - t.EntryPrice) * t.Quantity;
+            var pct = t.EntryPrice != 0m
+                ? Math.Round((current - t.EntryPrice) / t.EntryPrice * 100m, 2)
+                : 0m;
+            var currency = currencyBySymbol.GetValueOrDefault(t.Symbol, string.Empty);
+            return new OpenTradeDto(t.Id, t.Symbol, t.EntryPrice, current, t.Quantity, unrealized, pct, currency, unrealized * RateOf(t.Symbol), t.CreatedAt);
+        }).ToList();
 
         // Agregados convertidos a base (sin redondear, para preservar el invariante exacto).
         var realizedPnL = allClosed
@@ -145,9 +145,10 @@ public sealed class DashboardService : IDashboardService
                 ? Math.Round((t.ExitPrice!.Value - t.EntryPrice) / t.EntryPrice * 100m, 2)
                 : 0m;
             var currency = currencyBySymbol.GetValueOrDefault(t.Symbol, string.Empty);
+            var realized = (t.ExitPrice!.Value - t.EntryPrice) * t.Quantity;
             return new ClosedTradeDto(
-                t.Id, t.Symbol, t.EntryPrice, t.ExitPrice!.Value, t.Quantity,
-                (t.ExitPrice.Value - t.EntryPrice) * t.Quantity, pct, currency,
+                t.Id, t.Symbol, t.EntryPrice, t.ExitPrice.Value, t.Quantity,
+                realized, pct, currency, realized * RateOf(t.Symbol),
                 t.CreatedAt, t.ClosedAt!.Value);
         }).ToList();
 

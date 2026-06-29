@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.10.0-cash-fx",
+                   "version_actual":  "1.11.0-pnl-base",
                    "ultima_actualizacion":  "2026-06-29",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-022",
+                                               "titulo":  "PnL convertido por fila",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-06-29",
+                                               "fechaInicio":  "2026-06-29",
+                                               "fechaCompletado":  "2026-06-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-022.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Cada fila de posiciones muestra el PnL en su divisa y el equivalente en divisa base cuando difieren. OpenTradeDto.UnrealizedPnLBase/ClosedTradeDto.RealizedPnLBase calculados en DashboardService (PnL por tipo del simbolo); se reordeno el bloque FX (RateOf) para construirlo antes de las filas. UI: helper pnlCell anade el equivalente en base solo si divisa distinta de base. 1 test. 132 verdes. Sin migracion. Rama feature/HV-022-pnl-convertido."
+                                           },
+                                           {
                                                "codigo":  "HV-021",
                                                "titulo":  "Divisa por movimiento de caja",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-021.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Cada movimiento de caja lleva su divisa (antes se asumian todos en EUR). CashMovement.Currency (default EUR) mas migracion AddCashMovementCurrency (defaultValue EUR para filas previas). CashMovementDto/ICashService.AddAsync/CashController aceptan divisa. DashboardService convierte netDeposits = suma amount por rate(divisa->base); invariante accountValue = netDeposits + totalPnL preservado. UI: campo Divisa en el alta del modal Caja, importe por fila en su divisa y Aportado neto agrupado por divisa. 2 tests. 131 verdes. Smoke real: alta 100 USD -> netDeposits 30000 a 30087,67 (x0,8767) y limpieza OK. Rama feature/HV-021-divisa-caja. Completa la deuda de HV-020."
+                                               "notas":  "Cada movimiento de caja lleva su divisa (antes se asumian todos en EUR). CashMovement.Currency (default EUR) mas migracion AddCashMovementCurrency (defaultValue EUR para filas previas). CashMovementDto/ICashService.AddAsync/CashController aceptan divisa. DashboardService convierte netDeposits = suma amount por rate(divisa-\u003ebase); invariante accountValue = netDeposits + totalPnL preservado. UI: campo Divisa en el alta del modal Caja, importe por fila en su divisa y Aportado neto agrupado por divisa. 2 tests. 131 verdes. Smoke real: alta 100 USD -\u003e netDeposits 30000 a 30087,67 (x0,8767) y limpieza OK. Rama feature/HV-021-divisa-caja. Completa la deuda de HV-020."
                                            },
                                            {
                                                "codigo":  "HV-020",
@@ -662,7 +679,7 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: editar divisa de un movimiento, PnL convertido por fila, refrescar FX en background, dashboard visor puro, importar trades cerrados, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-015..HV-021 (rentabilidad %, rentabilidad por posicion, historico del valor de cuenta, importar CSV, divisa por instrumento, conversion FX a base, divisa por movimiento de caja). Proyecto en GitHub privado. 131 tests verdes; smokes reales OK. HV-020/021 via ramas feature merge --no-ff a main.",
+                         "resumenSesion":  "HV-015..HV-022 (rentabilidad %, por posicion, historico valor cuenta, importar CSV, divisa por instrumento, conversion FX a base, divisa por movimiento de caja, PnL convertido por fila). Proyecto en GitHub privado; HV-020..022 via ramas feature merge --no-ff. 132 tests verdes; smokes reales OK.",
                          "archivosModificados":  [
                                                      "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
@@ -671,10 +688,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-06-29 OK (131 tests verdes; HV-021 divisa por movimiento de caja: CashMovement.Currency mas conversion de netDeposits por divisa; migracion AddCashMovementCurrency; smoke real 100 USD -> +87,67 EUR)",
+                     "ultimo_build":  "2026-06-29 OK (132 tests verdes; HV-022 PnL convertido por fila: UnrealizedPnLBase/RealizedPnLBase en los DTOs mas helper pnlCell en UI)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  21
+                     "evolutivos_completados_mes":  22
                  },
     "alertas":  {
                     "activas":  [

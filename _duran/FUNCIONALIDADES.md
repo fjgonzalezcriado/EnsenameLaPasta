@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-022 PnL convertido por fila ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-022.md`
+- **Resumen**: Cada fila de posiciones muestra, además del PnL en su divisa, el **equivalente en divisa base** cuando difieren. `OpenTradeDto.UnrealizedPnLBase`/`ClosedTradeDto.RealizedPnLBase` calculados en `DashboardService` (PnL × tipo del símbolo); se reordenó el bloque FX (`RateOf`) para construirlo antes de las filas. UI: helper `pnlCell` que añade `≈ <importe base>` en gris solo si divisa ≠ base. 1 test nuevo. 132 verdes. Sin migración.
+
 #### HV-021 Divisa por movimiento de caja ✅
 - **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-021.md`

@@ -9,6 +9,7 @@
     let historyPoints = 50;      // nº de puntos de histórico a pedir por símbolo
     const HISTORY_ALLOWED = [50, 250, 1000, 5000];
     let chartMode = 'LIVE';      // 'LIVE' (ticks simulados) | rango Yahoo ('1D','1M',…)
+    let baseCurrency = 'EUR';    // divisa base de los totales (HV-020); para el PnL convertido por fila (HV-022)
 
     // ── Formateadores (es-ES) ──────────────────────────────────────────────
     const EUR = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
@@ -47,6 +48,15 @@
     function gridColor() { return isDarkTheme() ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)'; }
     function axisTextColor() { return isDarkTheme() ? 'rgba(233,241,255,0.75)' : 'rgba(33,37,41,0.75)'; }
     function pctSigned(v) { const n = Number(v) || 0; return (n >= 0 ? '+' : '') + n.toFixed(2) + '%'; }
+    // Celda de PnL: importe en su divisa y, si difiere de la base, el equivalente convertido (HV-022).
+    function pnlCell(nativeVal, currency, baseVal) {
+        const cur = (currency || baseCurrency).toUpperCase();
+        let html = money(nativeVal, currency);
+        if (cur !== baseCurrency.toUpperCase()) {
+            html += ' <small class="text-muted">≈ ' + money(baseVal, baseCurrency) + '</small>';
+        }
+        return html;
+    }
     function signClass(v) { return (Number(v) || 0) >= 0 ? 'text-success' : 'text-danger'; }
 
     function setSigned(elId, value, formatter) {
@@ -74,6 +84,7 @@
     }
 
     function renderMetrics(d) {
+        if (d.baseCurrency) baseCurrency = d.baseCurrency;
         const baseCcy = document.getElementById('baseCcy');
         if (baseCcy && d.baseCurrency) baseCcy.textContent = d.baseCurrency;
         document.getElementById('accountValue').textContent = eur(d.accountValue);
@@ -103,7 +114,7 @@
                 + '<td>' + num(t.entryPrice) + '</td>'
                 + '<td>' + num(t.currentPrice) + '</td>'
                 + '<td>' + num(t.quantity) + '</td>'
-                + '<td class="' + signClass(t.unrealizedPnL) + '">' + money(t.unrealizedPnL, t.currency) + '</td>'
+                + '<td class="' + signClass(t.unrealizedPnL) + '">' + pnlCell(t.unrealizedPnL, t.currency, t.unrealizedPnLBase) + '</td>'
                 + '<td class="' + signClass(t.returnPct) + '">' + pctSigned(t.returnPct) + '</td>'
                 + '<td><small>' + new Date(t.createdAt).toLocaleString('es-ES') + '</small></td>'
                 + '<td class="text-end text-nowrap">'
@@ -128,7 +139,7 @@
                 + '<td><span class="badge text-bg-secondary">' + (t.currency || '—') + '</span></td>'
                 + '<td>' + num(t.entryPrice) + ' → ' + num(t.exitPrice) + '</td>'
                 + '<td>' + num(t.quantity) + '</td>'
-                + '<td class="' + signClass(t.realizedPnL) + '">' + money(t.realizedPnL, t.currency) + '</td>'
+                + '<td class="' + signClass(t.realizedPnL) + '">' + pnlCell(t.realizedPnL, t.currency, t.realizedPnLBase) + '</td>'
                 + '<td class="' + signClass(t.returnPct) + '">' + pctSigned(t.returnPct) + '</td>'
                 + '<td><small>' + new Date(t.closedAt).toLocaleString('es-ES') + '</small></td>'
                 + '</tr>';

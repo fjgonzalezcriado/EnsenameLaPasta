@@ -22,7 +22,12 @@
 
 ---
 
-## Resumen de lo Trabajado (2026-06-29 · rentabilidad % + histórico + import + divisa + FX + caja FX)
+## Resumen de lo Trabajado (2026-06-29 · rentabilidad % + histórico + import + divisa + FX + caja FX + PnL base)
+
+### HV-022 · PnL convertido por fila
+- [x] `OpenTradeDto.UnrealizedPnLBase`/`ClosedTradeDto.RealizedPnLBase` (PnL × tipo del símbolo → base); se reordenó el bloque FX (`RateOf`) para construirlo antes de las filas.
+- [x] UI: helper `pnlCell` muestra el equivalente en base (`≈ …`) solo si la divisa de la fila ≠ base.
+- [x] 1 test nuevo; **132 verdes**. Sin migración. Rama `feature/HV-022-pnl-convertido`.
 
 ### HV-021 · Divisa por movimiento de caja
 - [x] `CashMovement.Currency` (default EUR) + migración `AddCashMovementCurrency` (defaultValue "EUR" para filas previas).

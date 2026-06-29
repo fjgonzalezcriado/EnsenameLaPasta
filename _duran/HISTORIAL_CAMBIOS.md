@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.11.0-pnl-base] - 2026-06-29
+
+### Added
+- ✅ **HV-022** **PnL convertido por fila**. `OpenTradeDto.UnrealizedPnLBase`/`ClosedTradeDto.RealizedPnLBase` (PnL × tipo del símbolo → base). UI: helper `pnlCell` muestra el equivalente en base (`≈ …`) cuando la divisa de la fila ≠ base.
+
+### Métricas
+- 132 tests verdes (131 + 1). Smoke real: campo presente (cartera all-EUR → base = nativo).
+
+---
+
 ## [1.10.0-cash-fx] - 2026-06-29
 
 ### Added
