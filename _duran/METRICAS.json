@@ -4,20 +4,6 @@
                      {
                          "archivosModificados":  0,
                          "agentsDisponibles":  0,
-                         "modoProyecto":  "puesta_a_punto",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "0.0.0",
-                         "fecha":  "2026-05-26 14:51:48"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
                          "modoProyecto":  "desarrollo",
                          "commitsHoy":  0,
                          "skillsTocados":  [
@@ -701,6 +687,20 @@
                                       },
                          "versionProyecto":  "1.8.0-currency",
                          "fecha":  "2026-06-29 14:39:44"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.9.0-fx",
+                         "fecha":  "2026-06-29 14:52:37"
                      }
                  ]
 }

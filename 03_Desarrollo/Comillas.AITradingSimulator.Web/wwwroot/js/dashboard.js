@@ -912,6 +912,7 @@
         const modalEl = document.getElementById('cashModal');
         if (!modalEl) return;
         const amountInput = document.getElementById('cashAmount');
+        const currencyInput = document.getElementById('cashCurrency');
         const noteInput = document.getElementById('cashNote');
         const errBox = document.getElementById('cashError');
         const body = document.getElementById('cashMovementsBody');
@@ -926,7 +927,16 @@
                 const resp = await fetch('/api/cash/movements');
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 const items = await resp.json();
-                if (netEl) netEl.textContent = eur(items.reduce(function (s, m) { return s + (Number(m.amount) || 0); }, 0));
+                // Aportado neto agrupado por divisa (no se mezclan monedas; el total en base está en el dashboard).
+                if (netEl) {
+                    const byCcy = {};
+                    items.forEach(function (m) {
+                        const c = (m.currency || 'EUR').toUpperCase();
+                        byCcy[c] = (byCcy[c] || 0) + (Number(m.amount) || 0);
+                    });
+                    const parts = Object.keys(byCcy).sort().map(function (c) { return money(byCcy[c], c); });
+                    netEl.textContent = parts.length ? parts.join(' · ') : money(0, 'EUR');
+                }
                 if (!items.length) {
                     body.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin movimientos</td></tr>';
                     return;
@@ -935,7 +945,7 @@
                     return '<tr>'
                         + '<td><small>' + new Date(m.createdAt).toLocaleString('es-ES') + '</small></td>'
                         + '<td>' + escapeHtml(m.note || (m.amount >= 0 ? 'Ingreso' : 'Retirada')) + '</td>'
-                        + '<td class="text-end ' + signClass(m.amount) + '">' + eur(m.amount) + '</td>'
+                        + '<td class="text-end ' + signClass(m.amount) + '">' + money(m.amount, m.currency) + '</td>'
                         + '<td class="text-end"><button type="button" class="btn btn-outline-danger btn-sm py-0" '
                         + 'data-cash-del="' + m.id + '" title="Eliminar movimiento">✕</button></td>'
                         + '</tr>';
@@ -949,11 +959,12 @@
             clearErr();
             const amt = parseFloat(String(amountInput.value).replace(',', '.'));
             if (!(amt > 0)) { showErr('Indica un importe > 0.'); return; }
+            const currency = ((currencyInput && currencyInput.value) || 'EUR').trim().toUpperCase() || 'EUR';
             try {
                 const resp = await fetch('/api/cash', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: sign * amt, note: noteInput.value || '' })
+                    body: JSON.stringify({ amount: sign * amt, note: noteInput.value || '', currency: currency })
                 });
                 if (!resp.ok) throw new Error((await resp.text()) || ('HTTP ' + resp.status));
                 amountInput.value = '';

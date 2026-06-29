@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.10.0-cash-fx] - 2026-06-29
+
+### Added
+- ✅ **HV-021** **Divisa por movimiento de caja**. `CashMovement.Currency` (default EUR) + migración `AddCashMovementCurrency`. `CashMovementDto`/`ICashService.AddAsync`/`CashController` aceptan divisa. `DashboardService` convierte el aportado neto por la divisa de cada movimiento. UI: campo Divisa en el alta + neto agrupado por divisa + importe por fila en su moneda.
+
+### Métricas
+- 131 tests verdes (129 + 2). Smoke real: alta 100 USD → netDeposits +87,67 (×0,8767) y limpieza OK.
+
+---
+
 ## [1.9.0-fx] - 2026-06-29
 
 ### Added

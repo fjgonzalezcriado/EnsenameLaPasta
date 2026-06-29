@@ -76,5 +76,20 @@ public sealed class CashServiceTests : IDisposable
         Assert.Equal(0m, await NewService(ctx3).GetNetDepositsAsync());
     }
 
+    [Fact]
+    public async Task AddAsync_GuardaLaDivisaNormalizada_YGetMovementsLaDevuelve()
+    {
+        await using var ctx = NewContext();
+        var sut = NewService(ctx);
+
+        await sut.AddAsync(1000m, "aporte usd", BaseTime, "usd");          // se normaliza a USD
+        await sut.AddAsync(500m, "aporte sin divisa", BaseTime.AddHours(1)); // default EUR
+
+        var movs = await sut.GetMovementsAsync();
+
+        Assert.Equal("EUR", movs[0].Currency);   // más reciente (default)
+        Assert.Equal("USD", movs[1].Currency);
+    }
+
     public void Dispose() => _connection.Dispose();
 }

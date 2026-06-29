@@ -89,15 +89,22 @@ public sealed class DashboardService : IDashboardService
         // tablas se siguen mostrando en su divisa nativa (HV-019).
         var baseCurrency = (_fxOptions.Value.BaseCurrency ?? "EUR").Trim().ToUpperInvariant();
 
-        string CcyOf(string symbol)
+        string Norm(string? c)
         {
-            var c = currencyBySymbol.GetValueOrDefault(symbol, string.Empty).Trim().ToUpperInvariant();
-            return c.Length == 0 ? baseCurrency : c;   // desconocida → se asume base (rate 1)
+            var v = (c ?? string.Empty).Trim().ToUpperInvariant();
+            return v.Length == 0 ? baseCurrency : v;   // desconocida/vacía → se asume base (rate 1)
         }
+        string CcyOf(string symbol) => Norm(currencyBySymbol.GetValueOrDefault(symbol, string.Empty));
+
+        // Movimientos de caja con su divisa (las aportaciones pueden ser en distintas monedas).
+        var cashMovements = await _db.CashMovements
+            .Select(m => new { m.Amount, m.Currency })
+            .ToListAsync(cancellationToken);
 
         var distinctCcy = openTrades.Select(t => t.Symbol)
             .Concat(allClosed.Select(t => t.Symbol))
             .Select(CcyOf)
+            .Concat(cashMovements.Select(m => Norm(m.Currency)))
             .Distinct()
             .ToList();
 
@@ -120,8 +127,8 @@ public sealed class DashboardService : IDashboardService
 
         // Caja: aportaciones netas + efecto de operaciones.
         // cash = aportado − invertido(abiertas) + realizado(cerradas)   (las ventas devuelven coste+PnL)
-        // Las aportaciones (CashMovement) se asumen ya en la divisa base.
-        var netDeposits = (await _db.CashMovements.Select(m => m.Amount).ToListAsync(cancellationToken)).Sum();
+        // Cada aportación se convierte a la divisa base por su propia divisa (HV-021).
+        var netDeposits = cashMovements.Sum(m => m.Amount * rateByCcy.GetValueOrDefault(Norm(m.Currency), 1m));
         var cash = netDeposits - invested + realizedPnL;
         var accountValue = cash + marketValue;
 

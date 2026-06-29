@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-021 Divisa por movimiento de caja ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-021.md`
+- **Resumen**: Cada movimiento de caja lleva su **divisa** (antes se asumían todos en EUR). `CashMovement.Currency` (default EUR) + migración `AddCashMovementCurrency` (defaultValue "EUR" para filas previas). `CashMovementDto`/`ICashService.AddAsync`/`CashController` aceptan divisa. `DashboardService` convierte `netDeposits = Σ amount·rate(divisa→base)` (invariante preservado). UI: campo **Divisa** en el alta del modal Caja, importe por fila en su divisa y "Aportado neto" **agrupado por divisa**. 2 tests nuevos. 131 verdes. Smoke real: alta 100 USD → netDeposits 30000→30087,67 (×0,8767) y limpieza OK. Completa la deuda que HV-020 dejó (caja asumida en base).
+
 #### HV-020 Conversión FX a divisa base ✅
 - **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-020.md`

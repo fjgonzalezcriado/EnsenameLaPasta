@@ -15,6 +15,7 @@ internal sealed class CashMovementConfiguration : IEntityTypeConfiguration<CashM
         builder.Property(m => m.Amount).HasConversion<string>();
 
         builder.Property(m => m.Note).HasMaxLength(200);
+        builder.Property(m => m.Currency).HasMaxLength(8);
         builder.Property(m => m.CreatedAt).IsRequired();
 
         builder.HasIndex(m => m.CreatedAt);

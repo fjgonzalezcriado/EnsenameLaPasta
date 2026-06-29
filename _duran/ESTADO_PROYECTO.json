@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.9.0-fx",
+                   "version_actual":  "1.10.0-cash-fx",
                    "ultima_actualizacion":  "2026-06-29",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-021",
+                                               "titulo":  "Divisa por movimiento de caja",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-29",
+                                               "fechaInicio":  "2026-06-29",
+                                               "fechaCompletado":  "2026-06-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-021.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Cada movimiento de caja lleva su divisa (antes se asumian todos en EUR). CashMovement.Currency (default EUR) mas migracion AddCashMovementCurrency (defaultValue EUR para filas previas). CashMovementDto/ICashService.AddAsync/CashController aceptan divisa. DashboardService convierte netDeposits = suma amount por rate(divisa->base); invariante accountValue = netDeposits + totalPnL preservado. UI: campo Divisa en el alta del modal Caja, importe por fila en su divisa y Aportado neto agrupado por divisa. 2 tests. 131 verdes. Smoke real: alta 100 USD -> netDeposits 30000 a 30087,67 (x0,8767) y limpieza OK. Rama feature/HV-021-divisa-caja. Completa la deuda de HV-020."
+                                           },
                                            {
                                                "codigo":  "HV-020",
                                                "titulo":  "Conversion FX a divisa base",
@@ -644,8 +661,8 @@
                          "evolutivoActivo":  null,
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
-                         "proximoPaso":  "Opcional: divisa por movimiento de caja (hoy se asumen en base), PnL convertido por fila, refrescar FX en background, dashboard visor puro, importar trades cerrados, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-015 rentabilidad % cuenta, HV-016 rentabilidad por posicion, HV-017 historico del valor de cuenta (PortfolioSnapshotService mas grafico), HV-018 importar CSV de compras, HV-019 divisa por instrumento, HV-020 conversion FX a divisa base (IFxRateProvider via Yahoo {FROM}{TO}=X con cache; DashboardService convierte totales a EUR; invariante preservado). Proyecto subido a GitHub privado. HV-020 en rama feature/HV-020-conversion-fx (pendiente merge a main). 129 tests verdes; smokes reales OK.",
+                         "proximoPaso":  "Opcional: editar divisa de un movimiento, PnL convertido por fila, refrescar FX en background, dashboard visor puro, importar trades cerrados, AlphaVantage/Binance, ML.NET.",
+                         "resumenSesion":  "HV-015..HV-021 (rentabilidad %, rentabilidad por posicion, historico del valor de cuenta, importar CSV, divisa por instrumento, conversion FX a base, divisa por movimiento de caja). Proyecto en GitHub privado. 131 tests verdes; smokes reales OK. HV-020/021 via ramas feature merge --no-ff a main.",
                          "archivosModificados":  [
                                                      "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
@@ -654,10 +671,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-06-29 OK (129 tests verdes; HV-020 conversion FX a divisa base: FxRateProvider via Yahoo {FROM}{TO}=X con cache, DashboardService convierte totales a EUR; smoke real USDEUR=X=0,8768)",
+                     "ultimo_build":  "2026-06-29 OK (131 tests verdes; HV-021 divisa por movimiento de caja: CashMovement.Currency mas conversion de netDeposits por divisa; migracion AddCashMovementCurrency; smoke real 100 USD -> +87,67 EUR)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  20
+                     "evolutivos_completados_mes":  21
                  },
     "alertas":  {
                     "activas":  [
