@@ -110,7 +110,7 @@
                   "formato_salida":  "HTML (Razor) + JSON cuando se expongan endpoints internos",
                   "autenticacion":  null,
                   "_autenticacion_nota":  "Sin autenticacion en MVP. Planificada para fases futuras (roadmap).",
-                  "vcs":  "Git (decision de remoto pendiente)",
+                  "vcs":  "Git + GitHub (repo privado: github.com/fjgonzalezcriado/EnsenameLaPasta)",
                   "nuget_feeds":  [
                                       "nuget.org (default)"
                                   ],

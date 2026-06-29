@@ -16,6 +16,12 @@
 
 ---
 
+## Control de versiones (2026-06-29)
+- [x] Proyecto bajo **Git** e inicializado; commit base de todo (HV-001..HV-019) + `.gitattributes`; excluidos binarios SQLite.
+- [x] Subido a **GitHub (repo privado)** `github.com/fjgonzalezcriado/EnsenameLaPasta` (rama `main`). Resuelto un cruce de credenciales (cuenta `RemitiraLaLluvia` cacheada por error) y merge del init remoto conservando nuestro `.gitignore`.
+
+---
+
 ## Resumen de lo Trabajado (2026-06-29 · rentabilidad % + histórico + import + divisa)
 
 ### HV-019 · Divisa por instrumento
