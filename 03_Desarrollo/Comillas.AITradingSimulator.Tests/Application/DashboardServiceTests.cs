@@ -1,3 +1,4 @@
+using Comillas.AITradingSimulator.Application.Common.Interfaces;
 using Comillas.AITradingSimulator.Application.Common.Options;
 using Comillas.AITradingSimulator.Application.Services;
 using Comillas.AITradingSimulator.Domain.Entities;
@@ -32,7 +33,14 @@ public sealed class DashboardServiceTests : IDisposable
     }
 
     private TradingDbContext NewContext() => new(_options);
-    private DashboardService NewService(TradingDbContext ctx) => new(ctx, _marketDataOpts);
+
+    // FX por defecto: identidad (rate 1) → los tests sin divisa no cambian.
+    private DashboardService NewService(TradingDbContext ctx)
+        => NewService(ctx, new StubFxRateProvider());
+
+    private DashboardService NewService(TradingDbContext ctx, IFxRateProvider fx)
+        => new(ctx, _marketDataOpts, fx,
+            Microsoft.Extensions.Options.Options.Create(new FxOptions { BaseCurrency = "EUR" }));
 
     [Fact]
     public async Task GetSnapshot_SinTrades_CapitalActualIgualAInicial()
@@ -376,6 +384,39 @@ public sealed class DashboardServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GetSnapshot_ConvierteTotalesAlaDivisaBase()
+    {
+        await using (var ctx = NewContext())
+        {
+            // Aporta 10000 € (base). Posición en AAPL (USD): 100×10 = 1000 USD invertido,
+            // precio actual 120 → 1200 USD, PnL no realizado 200 USD.
+            ctx.CashMovements.Add(CashMovement.Create(10_000m, "inicial", BaseTime));
+            var aapl = TrackedSymbol.Create("AAPL", "Apple", BaseTime);
+            aapl.SetCurrency("USD");
+            ctx.TrackedSymbols.Add(aapl);
+            ctx.Trades.Add(Trade.Open("AAPL", 100m, 10m, BaseTime));
+            ctx.MarketTicks.Add(MarketTick.Create("AAPL", 120m, 100m, BaseTime.AddMinutes(1)));
+            await ctx.SaveChangesAsync();
+        }
+
+        // USD→EUR = 0,90
+        var fx = new StubFxRateProvider(new() { [("USD", "EUR")] = 0.90m });
+
+        await using var ctx2 = NewContext();
+        var snap = await NewService(ctx2, fx).GetSnapshotAsync();
+
+        Assert.Equal("EUR", snap.BaseCurrency);
+        Assert.Equal(900m, snap.Invested);        // 1000 USD × 0,90
+        Assert.Equal(1080m, snap.MarketValue);    // 1200 USD × 0,90
+        Assert.Equal(180m, snap.UnrealizedPnL);   // 200 USD × 0,90
+        Assert.Equal(0m, snap.RealizedPnL);
+        Assert.Equal(9_100m, snap.Cash);          // 10000 − 900 invertido
+        Assert.Equal(10_180m, snap.AccountValue); // 9100 + 1080 cartera
+        // Invariante preservado tras la conversión.
+        Assert.Equal(snap.NetDeposits + snap.TotalPnL, snap.AccountValue);
+    }
+
+    [Fact]
     public async Task GetAccountHistory_SinSnapshots_DevuelveVacio()
     {
         await using var ctx = NewContext();
@@ -415,6 +456,22 @@ public sealed class DashboardServiceTests : IDisposable
     }
 
     public void Dispose() => _connection.Dispose();
+
+    /// <summary>Stub de IFxRateProvider: rate 1 salvo los pares configurados.</summary>
+    private sealed class StubFxRateProvider : IFxRateProvider
+    {
+        private readonly Dictionary<(string, string), decimal> _rates;
+        public StubFxRateProvider(Dictionary<(string, string), decimal>? rates = null)
+            => _rates = rates ?? new();
+
+        public Task<decimal> GetRateAsync(string from, string to, CancellationToken cancellationToken = default)
+        {
+            var f = (from ?? "").ToUpperInvariant();
+            var t = (to ?? "").ToUpperInvariant();
+            if (f.Length == 0 || t.Length == 0 || f == t) return Task.FromResult(1m);
+            return Task.FromResult(_rates.GetValueOrDefault((f, t), 1m));
+        }
+    }
 
     /// <summary>Stub mínimo de IOptionsMonitor para tests.</summary>
     private sealed class StaticOptionsMonitor<T> : IOptionsMonitor<T>

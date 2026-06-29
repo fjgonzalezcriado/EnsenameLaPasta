@@ -18,6 +18,19 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.9.0-fx] - 2026-06-29
+
+### Added
+- ✅ **HV-020** **Conversión FX a divisa base**. `IFxRateProvider`/`FxRateProvider` (Yahoo `{FROM}{TO}=X`, caché por par con TTL `Fx:CacheMinutes`, degradación a 1). `DashboardService` convierte los totales (invested/marketValue/realized/unrealized) a `Fx:BaseCurrency` (EUR) usando el tipo de cada símbolo; invariante `accountValue = netDeposits + totalPnL` preservado. `DashboardDto.BaseCurrency` + nota en UI.
+
+### Fixed
+- Los totales de cuenta ya **no mezclan divisas** (deuda dejada por HV-019). Las aportaciones de caja se asumen en divisa base.
+
+### Métricas
+- 129 tests verdes (123 + 6). Smoke real: fuente FX `USDEUR=X=0,8768`; dashboard `base=EUR`.
+
+---
+
 ## [1.8.0-currency] - 2026-06-29
 
 ### Added

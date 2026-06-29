@@ -17,6 +17,9 @@ public sealed class DashboardDto
     /// <summary>Valor de cuenta = efectivo + valor de mercado de las posiciones abiertas.</summary>
     public decimal AccountValue { get; init; }
 
+    /// <summary>Divisa base en la que se expresan los totales (ISO, p.ej. "EUR").</summary>
+    public string BaseCurrency { get; init; } = "EUR";
+
     /// <summary>Rentabilidad de la cuenta en % sobre el aportado neto = PnL total / aportado × 100 (0 si no hay aportaciones).</summary>
     public decimal ReturnPct { get; init; }
 

@@ -54,6 +54,12 @@ public static class DependencyInjection
         // Búsqueda de instrumentos (nombre / ISIN / ticker) vía Yahoo /v1/finance/search.
         services.AddSingleton<IInstrumentSearchProvider, YahooInstrumentSearchProvider>();
 
+        // Conversión de divisas (totales en divisa base). Usa el HttpClient de Yahoo.
+        services.AddOptions<FxOptions>()
+            .Bind(configuration.GetSection(FxOptions.SectionName))
+            .ValidateOnStart();
+        services.AddSingleton<IFxRateProvider, FxRateProvider>();
+
         // Watchlist (instrumentos seguidos). El generador lee de aquí en cada ciclo.
         services.AddScoped<IWatchlistService, WatchlistService>();
 
