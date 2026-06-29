@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-023 Refrescar FX en background ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-023.md`
+- **Resumen**: Saca la llamada HTTP a la fuente FX del hot path del dashboard. `IFxRateProvider.RefreshAsync` (fuerza fetch ignorando TTL) + `FxRefreshService : BackgroundService` que cada `Fx:RefreshSeconds` (300) refresca los tipos de las divisas en uso (watchlist + caja), excluyendo la base y duplicados. El dashboard sigue usando `GetRateAsync` (caché perezosa con fallback), ahora siempre caliente. 3 tests nuevos. 135 verdes. Smoke real: arranque sin errores con el hosted service.
+
 #### HV-022 PnL convertido por fila ✅
 - **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-022.md`

@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.11.0-pnl-base",
+                   "version_actual":  "1.12.0-fx-background",
                    "ultima_actualizacion":  "2026-06-29",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-023",
+                                               "titulo":  "Refrescar FX en background",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-06-29",
+                                               "fechaInicio":  "2026-06-29",
+                                               "fechaCompletado":  "2026-06-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-023.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Saca la llamada HTTP a la fuente FX del hot path del dashboard. IFxRateProvider.RefreshAsync (fuerza fetch ignorando TTL; default delega en GetRateAsync) mas FxRefreshService BackgroundService que cada Fx:RefreshSeconds (300) refresca los tipos de las divisas en uso (watchlist + caja), excluyendo base y duplicados. RefreshInUseAsync publico como seam de pruebas. El dashboard sigue usando GetRateAsync (cache perezosa con fallback), ahora siempre caliente. 3 tests. 135 verdes. Smoke real: arranque sin errores con el hosted service. Rama feature/HV-023-fx-background."
+                                           },
                                            {
                                                "codigo":  "HV-022",
                                                "titulo":  "PnL convertido por fila",
@@ -679,7 +696,7 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: editar divisa de un movimiento, PnL convertido por fila, refrescar FX en background, dashboard visor puro, importar trades cerrados, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-015..HV-022 (rentabilidad %, por posicion, historico valor cuenta, importar CSV, divisa por instrumento, conversion FX a base, divisa por movimiento de caja, PnL convertido por fila). Proyecto en GitHub privado; HV-020..022 via ramas feature merge --no-ff. 132 tests verdes; smokes reales OK.",
+                         "resumenSesion":  "HV-015..HV-023 (rentabilidad %, por posicion, historico valor cuenta, importar CSV, divisa por instrumento, conversion FX a base, divisa por movimiento de caja, PnL convertido por fila, refrescar FX en background). GitHub privado; HV-020..023 via ramas feature merge --no-ff. 135 tests verdes; smokes reales OK.",
                          "archivosModificados":  [
                                                      "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
@@ -688,10 +705,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-06-29 OK (132 tests verdes; HV-022 PnL convertido por fila: UnrealizedPnLBase/RealizedPnLBase en los DTOs mas helper pnlCell en UI)",
+                     "ultimo_build":  "2026-06-29 OK (135 tests verdes; HV-023 refrescar FX en background: FxRefreshService mas IFxRateProvider.RefreshAsync; el dashboard ya no llama a la fuente FX en el hot path)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  22
+                     "evolutivos_completados_mes":  23
                  },
     "alertas":  {
                     "activas":  [

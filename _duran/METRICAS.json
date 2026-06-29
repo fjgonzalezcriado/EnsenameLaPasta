@@ -12,20 +12,6 @@
                          "archivos":  {
 
                                       },
-                         "versionProyecto":  "0.0.0",
-                         "fecha":  "2026-05-26 15:19:04"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
                          "versionProyecto":  "1.0.0-MVP",
                          "fecha":  "2026-05-26 16:51:29"
                      },
@@ -701,6 +687,20 @@
                                       },
                          "versionProyecto":  "1.10.0-cash-fx",
                          "fecha":  "2026-06-29 15:04:38"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.11.0-pnl-base",
+                         "fecha":  "2026-06-29 15:11:03"
                      }
                  ]
 }

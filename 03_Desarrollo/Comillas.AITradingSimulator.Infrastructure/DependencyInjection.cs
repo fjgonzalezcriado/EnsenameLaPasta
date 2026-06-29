@@ -59,6 +59,8 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(FxOptions.SectionName))
             .ValidateOnStart();
         services.AddSingleton<IFxRateProvider, FxRateProvider>();
+        // Refresco de tipos en background (saca la llamada HTTP del hot path del dashboard).
+        services.AddHostedService<FxRefreshService>();
 
         // Watchlist (instrumentos seguidos). El generador lee de aquí en cada ciclo.
         services.AddScoped<IWatchlistService, WatchlistService>();
