@@ -11,8 +11,8 @@
 |-------|-------|
 | **Fecha** | 2026-06-29 |
 | **Usuario** | Francisco Javier Gonzalez Criado |
-| **Evolutivo activo** | ninguno (HV-015..HV-019 cerrados) |
-| **Duración aprox.** | larga |
+| **Evolutivo activo** | ninguno (HV-015..HV-023 cerrados) |
+| **Duración aprox.** | muy larga (9 evolutivos + alta en GitHub) |
 
 ---
 
@@ -134,20 +134,25 @@
 ### Estado del evolutivo actual
 ```
 ID: ninguno
-Fase: 9 evolutivos completados (HV-001 … HV-009)
-Tests: 89 verdes
-Build: OK
+Fase: 23 evolutivos completados (HV-001 … HV-023)
+Tests: 135 verdes
+Build: OK · versión 1.12.0-fx-background
+Git: main = origin/main (50926cd), GitHub privado, árbol limpio
 ```
 
 ### Tareas pendientes prioritarias
-1. [ ] (Opcional) Fase 2: AlphaVantage / Binance (mismo patrón provider + histórico).
-2. [ ] (Opcional) Fase 3: ML.NET para señales.
-3. [ ] (Opcional) Pulidos: precisión de la cuenta atrás vía SignalR (push), importador de histórico pasado, retención por tiempo además de tamaño.
+1. [ ] (Opcional) Importar **trades cerrados** por CSV (con exit/fecha de cierre).
+2. [ ] (Opcional) **Dashboard visor puro** / pulidos de UI.
+3. [ ] (Opcional) Fase 3: AlphaVantage / Binance (2º proveedor, mismo patrón) y ML.NET para señales.
+4. [ ] (Opcional) Métrica/health del último refresco FX; backoff si la fuente FX falla repetidamente.
+5. [ ] Smoke real manual pendiente (no bloqueante) de HV-015/HV-016 con la app en marcha.
 
 ### Notas importantes
-- **Go-dark activo**: no reinstalar context7 ni ejecutar comandos que contacten Comillas (ver memoria `go-dark-comillas`).
-- El histórico de la barra de rangos requiere Internet (Yahoo `/v8/chart`); funciona con símbolos reales (AAPL, GOOG, BTCUSD→BTC-USD).
-- Recargar la web con `Ctrl+F5` tras cambios de JS/CSS (.NET 10 sirve estáticos desde el build).
+- **Go-dark activo**: no reinstalar context7 ni ejecutar comandos que contacten Comillas (ver memoria `go-dark-comillas`). Yahoo Finance **sí** está permitido (feed y FX).
+- **Tras un smoke con `dotnet run`, matar el proceso `Comillas.AITradingSimulator.Web` antes de recompilar** o el build falla por DLL bloqueada (MSB3027). Ver memoria `smoke-test-mata-proceso-web`.
+- Editar valores con `>` dentro de `ESTADO_PROYECTO.json` falla con Edit (PowerShell los escribe como `>`); usar PowerShell regex y validar con `ConvertFrom-Json`.
+- FX y feed requieren Internet (Yahoo). Recargar la web con `Ctrl+F5` tras cambios de JS/CSS.
+- Credenciales GitHub cacheadas correctamente (cuenta `fjgonzalezcriado`); puedo commitear/push directamente.
 
 ---
 
@@ -155,6 +160,7 @@ Build: OK
 
 | Fecha | Usuario | Trabajo principal |
 |-------|---------|-------------------|
+| 2026-06-29 | FJGC | HV-015..HV-023 (rentabilidad %, por posición, histórico de cuenta, importar CSV, divisas: instrumento→FX→caja→por fila→background) + alta del repo en GitHub privado · 135 tests |
 | 2026-06-16 | FJGC | HV-013 tracker de cartera real: alta/cierre/borrado de posiciones + modal de alta + buscador en modal · 103 tests |
 | 2026-06-16 | FJGC | Pivote a tracker real: HV-010 buscador + HV-011 watchlist persistida + HV-012 feed 100% Yahoo (RandomWalk fuera, auto-trading off) · 96 tests |
 | 2026-06-15/16 | FJGC | Go-dark Comillas + HV-008/009 + overhaul UI dashboard + retención BD + cuenta atrás |

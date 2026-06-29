@@ -13,11 +13,11 @@
 
 | # | Leccion | Categoria |
 |---|---------|-----------|
-| 1 | [Leccion mas critica] | [Patron/Error/Tecnica/Preferencia] |
-| 2 | [Segunda leccion] | [Patron/Error/Tecnica/Preferencia] |
-| 3 | [Tercera leccion] | [Patron/Error/Tecnica/Preferencia] |
-| 4 | [Cuarta leccion] | [Patron/Error/Tecnica/Preferencia] |
-| 5 | [Quinta leccion] | [Patron/Error/Tecnica/Preferencia] |
+| 1 | Tras `dotnet run` (smoke), matar el proceso `*.Web` antes de recompilar o el build falla (DLL bloqueada, MSB3027) | Error |
+| 2 | Editar valores con `>` en `ESTADO_PROYECTO.json` falla con Edit (PowerShell los escribe como `>`); usar PowerShell regex + validar con `ConvertFrom-Json` | Tecnica |
+| 3 | Conversión FX a divisa base: convertir por posición y **no redondear** los agregados monetarios preserva el invariante `accountValue = netDeposits + totalPnL` | Patron |
+| 4 | Al extender entidades/servicios, usar parámetros opcionales (default) y métodos de interfaz por defecto para no romper llamadas/tests existentes | Patron |
+| 5 | SQLite: `DELETE` no encoge el fichero (usar `VACUUM`); medir tamaño con `PRAGMA page_count × page_size`, no con `FileInfo` (el WAL falsea) | Tecnica |
 
 ---
 
@@ -150,6 +150,34 @@ Ejemplos de preferencias:
   2. **No medir el tamaño con `FileInfo` del `.db` + `-wal`**: el WAL transitorio se infla bajo escritura intensa y da lecturas falsas (provocaba disparos repetidos y log "compactada a 4 MB" cuando en realidad bajaba). Medir el tamaño lógico con `PRAGMA page_count × page_size` (refleja el VACUUM y excluye el WAL).
   3. Borrado masivo eficiente sin cargar entidades: calcular un `Timestamp` de corte (`OrderBy(Timestamp).Skip(n).Select(...).FirstOrDefault()`) y `Where(t => t.Timestamp <= cutoff).ExecuteDeleteAsync()`.
   4. `VACUUM` convive con el generador de ticks (SQLite serializa), no hubo "database is locked" en pruebas.
+
+### L-003 (Error/Build) — Proceso `*.Web` del smoke bloquea las DLLs y rompe el siguiente build
+- **Fecha**: 2026-06-29 (sesión HV-015..023)
+- **Síntoma**: `dotnet test`/`build` falla con `MSB3026`/`MSB3027` "The process cannot access the file ...Infrastructure.dll because it is being used by another process: Comillas.AITradingSimulator.Web (PID)".
+- **Causa**: tras un smoke con `dotnet run` en background, matar el wrapper (`kill <pid>` de bash) no siempre mata el proceso real `Comillas.AITradingSimulator.Web`, que queda vivo bloqueando `bin/Debug/net10.0`.
+- **Fix/Prevención**: parar la app antes de recompilar — `Get-Process -Name "Comillas.AITradingSimulator.Web" | Stop-Process -Force` y confirmar 0 procesos. La app ignora `ASPNETCORE_URLS` y usa el puerto de `launchSettings.json` (5177); sacar el puerto real del log.
+
+### L-004 (Técnica/DURAN) — `ESTADO_PROYECTO.json` escapa `>` como `>`; Edit literal falla
+- **Fecha**: 2026-06-29
+- **Síntoma**: editar con la herramienta Edit cualquier valor que contenga `>` (p.ej. `HY9H.F->EUR`, `{FROM}{TO}=X`) falla con "String to replace not found".
+- **Causa**: el JSON lo serializa PowerShell (`ConvertTo-Json`), que escapa `>`, `<` y `'` como `>`, `<`, `'`. El texto en disco no coincide con lo que se ve/teclea.
+- **Fix**: para esos valores, editar con PowerShell por regex sobre el texto crudo (`[regex]::Replace(...)`), reescribir con `Set-Content -Encoding UTF8 -NoNewline` y validar con `ConvertFrom-Json`. Para campos sin caracteres especiales, Edit funciona normal.
+
+### L-005 (Patrón/FX) — Conversión a divisa base preservando el invariante de cuenta
+- **Fecha**: 2026-06-29 (HV-020/021/022)
+- **Contexto**: cartera multidivisa; los totales deben expresarse en una divisa base sin romper `accountValue = netDeposits + totalPnL`.
+- **Patrón**:
+  1. Convertir **cada posición/aportación** por el tipo de SU divisa (`Σ valor·rate(ccy→base)`), no el total por un único tipo.
+  2. **No redondear** los agregados monetarios (solo se redondean ratios como `returnPct`/`winrate`); así el invariante se mantiene exacto en los tests.
+  3. Tipos vía Yahoo `{FROM}{TO}=X`; caché por par con TTL + **refresco en background** (`FxRefreshService`) para sacar el HTTP del hot path; degradar a último valor/1 si falla (nunca lanzar en el dashboard).
+
+### L-006 (Patrón/Compatibilidad) — Extender sin romper: parámetros opcionales y métodos de interfaz por defecto
+- **Fecha**: 2026-06-29 (HV-019/021/023)
+- **Patrón**: al añadir capacidades a entidades/servicios usados por muchos tests:
+  - parámetros nuevos como **opcionales con default** (`Create(..., currency = "EUR")`, `AddAsync(..., currency = "EUR")`) → las llamadas/tests existentes compilan sin tocarse;
+  - métodos nuevos de interfaz con **implementación por defecto** (`RefreshAsync => GetRateAsync(...)`) → los stubs de test no necesitan implementarlos;
+  - campos nuevos en `record` posicionales: insertarlos sin reordenar los previos; ningún test construye los DTO directamente (van por el servicio), así que el cambio es seguro.
+- **Migraciones EF de columnas nuevas**: poner `defaultValue` (p.ej. `"EUR"`) para que las filas existentes queden coherentes.
 
 ---
 
