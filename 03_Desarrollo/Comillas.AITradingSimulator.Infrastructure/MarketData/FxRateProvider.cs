@@ -49,10 +49,26 @@ public sealed class FxRateProvider : IFxRateProvider
         if (_cache.TryGetValue(key, out var cached) && now - cached.At < ttl)
             return cached.Rate;
 
+        return await FetchStoreOrFallbackAsync(f, t, cancellationToken);
+    }
+
+    public async Task RefreshAsync(string from, string to, CancellationToken cancellationToken = default)
+    {
+        var f = (from ?? string.Empty).Trim().ToUpperInvariant();
+        var t = (to ?? string.Empty).Trim().ToUpperInvariant();
+        if (f.Length == 0 || t.Length == 0 || f == t) return;
+
+        // Fuerza el fetch (ignora TTL) para mantener el tipo caliente en caché.
+        await FetchStoreOrFallbackAsync(f, t, cancellationToken);
+    }
+
+    private async Task<decimal> FetchStoreOrFallbackAsync(string f, string t, CancellationToken ct)
+    {
+        var key = f + t;
         try
         {
-            var rate = await FetchRateAsync(f, t, cancellationToken);
-            _cache[key] = new CacheEntry(rate, now);
+            var rate = await FetchRateAsync(f, t, ct);
+            _cache[key] = new CacheEntry(rate, _time.GetUtcNow());
             return rate;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

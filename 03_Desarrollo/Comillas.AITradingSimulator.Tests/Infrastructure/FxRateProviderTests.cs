@@ -80,6 +80,38 @@ public class FxRateProviderTests
     }
 
     [Fact]
+    public async Task RefreshAsync_FuerzaFetchAunqueEsteCacheado()
+    {
+        var calls = 0;
+        var handler = new MockHttpMessageHandler(_ =>
+        {
+            calls++;
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(UsdEurJson, System.Text.Encoding.UTF8, "application/json")
+            };
+        });
+        var provider = NewProvider(handler);
+
+        await provider.GetRateAsync("USD", "EUR");   // 1ª llamada, cachea
+        await provider.RefreshAsync("USD", "EUR");   // fuerza fetch ignorando TTL
+        await provider.GetRateAsync("USD", "EUR");   // lee de caché (no llama)
+
+        Assert.Equal(2, calls);
+    }
+
+    [Fact]
+    public async Task RefreshAsync_MismaDivisa_NoLlamaHttp()
+    {
+        var handler = new MockHttpMessageHandler(_ => throw new InvalidOperationException("no debería llamar"));
+        var provider = NewProvider(handler);
+
+        await provider.RefreshAsync("EUR", "EUR");
+
+        Assert.Empty(handler.ReceivedRequests);
+    }
+
+    [Fact]
     public async Task GetRateAsync_FallaHttp_DegradaA1()
     {
         var provider = NewProvider(MockHttpMessageHandler.Status(HttpStatusCode.InternalServerError));

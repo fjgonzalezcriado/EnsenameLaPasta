@@ -24,6 +24,11 @@
 
 ## Resumen de lo Trabajado (2026-06-29 · rentabilidad % + histórico + import + divisa + FX + caja FX + PnL base)
 
+### HV-023 · Refrescar FX en background
+- [x] `IFxRateProvider.RefreshAsync` (fuerza fetch ignorando TTL) + `FxRefreshService : BackgroundService` que refresca las divisas en uso (watchlist + caja) cada `Fx:RefreshSeconds` (300).
+- [x] El dashboard ya no llama a la fuente FX en el hot path: lee de caché siempre caliente.
+- [x] 3 tests nuevos; **135 verdes**. Smoke real: arranque sin errores. Rama `feature/HV-023-fx-background`.
+
 ### HV-022 · PnL convertido por fila
 - [x] `OpenTradeDto.UnrealizedPnLBase`/`ClosedTradeDto.RealizedPnLBase` (PnL × tipo del símbolo → base); se reordenó el bloque FX (`RateOf`) para construirlo antes de las filas.
 - [x] UI: helper `pnlCell` muestra el equivalente en base (`≈ …`) solo si la divisa de la fila ≠ base.

@@ -13,4 +13,7 @@ public sealed class FxOptions
 
     /// <summary>Minutos de validez de un tipo de cambio en caché.</summary>
     public int CacheMinutes { get; set; } = 30;
+
+    /// <summary>Cada cuántos segundos el servicio en background refresca los tipos en uso.</summary>
+    public int RefreshSeconds { get; set; } = 300;
 }

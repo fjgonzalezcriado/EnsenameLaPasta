@@ -11,4 +11,12 @@ public interface IFxRateProvider
     /// Ante un fallo de la fuente, degrada al último valor conocido o a 1 (no lanza).
     /// </summary>
     Task<decimal> GetRateAsync(string from, string to, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Fuerza la actualización del tipo en caché (ignora el TTL). Lo usa el servicio
+    /// de refresco en background para mantener los tipos calientes y sacar la llamada
+    /// HTTP del hot path del dashboard. Por defecto delega en <see cref="GetRateAsync"/>.
+    /// </summary>
+    Task RefreshAsync(string from, string to, CancellationToken cancellationToken = default)
+        => GetRateAsync(from, to, cancellationToken);
 }

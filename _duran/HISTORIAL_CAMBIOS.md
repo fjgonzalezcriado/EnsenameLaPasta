@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.12.0-fx-background] - 2026-06-29
+
+### Added
+- ✅ **HV-023** **Refrescar FX en background**. `IFxRateProvider.RefreshAsync` (fuerza fetch ignorando TTL) + `FxRefreshService : BackgroundService` que refresca las divisas en uso (watchlist + caja) cada `Fx:RefreshSeconds` (300). El dashboard ya no hace la llamada HTTP a la fuente FX en el hot path: lee de una caché siempre caliente.
+
+### Métricas
+- 135 tests verdes (132 + 3). Smoke real: arranque sin errores con el hosted service; dashboard OK.
+
+---
+
 ## [1.11.0-pnl-base] - 2026-06-29
 
 ### Added
