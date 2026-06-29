@@ -26,7 +26,7 @@
                      "responsable_tecnico":  "stic.claude3",
                      "lider_tecnico":  "stic.claude3",
                      "fecha_inicio":  "2026-05-26",
-                     "repositorio":  null
+                     "repositorio":  "https://github.com/fjgonzalezcriado/EnsenameLaPasta.git"
                  },
     "equipo":  {
                    "_comentario":  "Proyecto personal de 1 desarrollador. Todos los roles los asume el mismo usuario.",
@@ -631,25 +631,7 @@
                          "resumenSesion":  "HV-015 rentabilidad % cuenta mas HV-016 rentabilidad por posicion mas HV-017 historico del valor de cuenta (PortfolioSnapshotService mas grafico) mas HV-018 importar CSV de compras mas HV-019 divisa por instrumento (TrackedSymbol.Currency sellada por el generador; MarketQuote; columna Div mas formateo por fila; totales siguen en EUR hasta FX). 123 tests verdes; smokes reales OK.",
                          "archivosModificados":  [
                                                      "_duran/ESTADO_PROYECTO.json",
-                                                     "_duran/FUNCIONALIDADES.md",
-                                                     "_duran/HISTORIAL_CAMBIOS.md",
-                                                     "_duran/SESION_ACTUAL.md",
-                                                     "_duran/specs/HV-015.md",
-                                                     "_duran/specs/HV-016.md",
-                                                     "_duran/specs/HV-017.md",
-                                                     "_duran/specs/HV-018.md",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Application/Common/Dtos/* (DashboardDto, AccountHistoryPointDto, ImportResultDto)",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Application/Common/Options/SnapshotOptions.cs",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Application/Common/Interfaces/* (IDashboardService, IPositionService)",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Application/Services/* (DashboardService, PositionService)",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Infrastructure/Persistence/PortfolioSnapshotService.cs",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Infrastructure/DependencyInjection.cs",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Web/Controllers/* (DashboardController, PositionsController)",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Web/appsettings.json",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Web/Views/Dashboard/Index.cshtml",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Web/wwwroot/js/dashboard.js",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Tests/Application/* (DashboardServiceTests, PositionServiceTests)",
-                                                     "03_Desarrollo/Comillas.AITradingSimulator.Tests/Infrastructure/PortfolioSnapshotServiceTests.cs"
+                                                     "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 19 evolutivos completados. Feed real requiere Internet. Migracion nueva AddTrackedSymbolCurrency (se auto-aplica al arrancar)."
                      },

@@ -13,20 +13,6 @@
 
                                       },
                          "versionProyecto":  "0.0.0",
-                         "fecha":  "2026-05-26 14:05:13"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "puesta_a_punto",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "0.0.0",
                          "fecha":  "2026-05-26 14:09:52"
                      },
                      {
@@ -658,6 +644,63 @@
                                       },
                          "versionProyecto":  "1.8.0-currency",
                          "fecha":  "2026-06-29 14:21:24"
+                     },
+                     {
+                         "archivosModificados":  1,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  "_duran/ESTADO_PROYECTO.json",
+                         "versionProyecto":  "1.8.0-currency",
+                         "fecha":  "2026-06-29 14:29:36"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.8.0-currency",
+                         "fecha":  "2026-06-29 14:32:54"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.8.0-currency",
+                         "fecha":  "2026-06-29 14:34:43"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.8.0-currency",
+                         "fecha":  "2026-06-29 14:35:23"
                      }
                  ]
 }
