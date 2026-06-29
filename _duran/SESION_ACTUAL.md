@@ -22,7 +22,14 @@
 
 ---
 
-## Resumen de lo Trabajado (2026-06-29 · rentabilidad % + histórico + import + divisa + FX)
+## Resumen de lo Trabajado (2026-06-29 · rentabilidad % + histórico + import + divisa + FX + caja FX)
+
+### HV-021 · Divisa por movimiento de caja
+- [x] `CashMovement.Currency` (default EUR) + migración `AddCashMovementCurrency` (defaultValue "EUR" para filas previas).
+- [x] `CashMovementDto`/`ICashService.AddAsync`/`CashController` aceptan divisa; `DashboardService` convierte `netDeposits` por divisa de cada movimiento (invariante preservado).
+- [x] UI: campo **Divisa** en el alta del modal Caja, importe por fila en su divisa y "Aportado neto" agrupado por divisa.
+- [x] 2 tests nuevos; **131 verdes**. Smoke real: alta 100 USD → netDeposits 30000→30087,67 (×0,8767), divisa USD, DELETE 204, vuelve a 30000.
+- [x] Rama `feature/HV-021-divisa-caja`. Completa la deuda de HV-020.
 
 ### HV-020 · Conversión FX a divisa base
 - [x] `IFxRateProvider`/`FxRateProvider` (Yahoo `{FROM}{TO}=X`, caché por par con TTL, degradación a 1).

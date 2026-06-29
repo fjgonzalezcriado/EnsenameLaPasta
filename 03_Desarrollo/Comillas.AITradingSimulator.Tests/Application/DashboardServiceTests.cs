@@ -417,6 +417,27 @@ public sealed class DashboardServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GetSnapshot_ConvierteAportacionesPorSuDivisa()
+    {
+        await using (var ctx = NewContext())
+        {
+            ctx.CashMovements.Add(CashMovement.Create(10_000m, "eur", BaseTime, "EUR"));
+            ctx.CashMovements.Add(CashMovement.Create(1_000m, "usd", BaseTime.AddHours(1), "USD"));
+            await ctx.SaveChangesAsync();
+        }
+
+        // USD→EUR = 0,90
+        var fx = new StubFxRateProvider(new() { [("USD", "EUR")] = 0.90m });
+
+        await using var ctx2 = NewContext();
+        var snap = await NewService(ctx2, fx).GetSnapshotAsync();
+
+        Assert.Equal(10_900m, snap.NetDeposits);    // 10000 EUR + 1000 USD × 0,90
+        Assert.Equal(10_900m, snap.AccountValue);   // sin posiciones → cash = aportado
+        Assert.Equal("EUR", snap.BaseCurrency);
+    }
+
+    [Fact]
     public async Task GetAccountHistory_SinSnapshots_DevuelveVacio()
     {
         await using var ctx = NewContext();

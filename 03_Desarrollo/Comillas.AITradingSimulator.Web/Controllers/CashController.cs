@@ -27,7 +27,7 @@ public sealed class CashController : Controller
 
         try
         {
-            var id = await _cash.AddAsync(request.Amount, request.Note, request.CreatedAt, cancellationToken);
+            var id = await _cash.AddAsync(request.Amount, request.Note, request.CreatedAt, request.Currency, cancellationToken);
             return Json(new { id });
         }
         catch (ArgumentException ex)
@@ -43,5 +43,5 @@ public sealed class CashController : Controller
         return ok ? NoContent() : NotFound();
     }
 
-    public sealed record CashMovementRequest(decimal Amount, string? Note, DateTime? CreatedAt);
+    public sealed record CashMovementRequest(decimal Amount, string? Note, DateTime? CreatedAt, string? Currency);
 }

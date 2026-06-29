@@ -23,7 +23,7 @@ public sealed class CashService : ICashService
             .ToListAsync(cancellationToken);
 
         return movements
-            .Select(m => new CashMovementDto(m.Id, m.Amount, m.Note, m.CreatedAt))
+            .Select(m => new CashMovementDto(m.Id, m.Amount, m.Note, m.Currency, m.CreatedAt))
             .ToList();
     }
 
@@ -34,9 +34,9 @@ public sealed class CashService : ICashService
         return amounts.Sum();
     }
 
-    public async Task<Guid> AddAsync(decimal amount, string? note, DateTime? createdAtUtc = null, CancellationToken cancellationToken = default)
+    public async Task<Guid> AddAsync(decimal amount, string? note, DateTime? createdAtUtc = null, string? currency = "EUR", CancellationToken cancellationToken = default)
     {
-        var movement = CashMovement.Create(amount, note, createdAtUtc ?? _time.GetUtcNow().UtcDateTime);
+        var movement = CashMovement.Create(amount, note, createdAtUtc ?? _time.GetUtcNow().UtcDateTime, currency);
         _db.CashMovements.Add(movement);
         await _db.SaveChangesAsync(cancellationToken);
         return movement.Id;
