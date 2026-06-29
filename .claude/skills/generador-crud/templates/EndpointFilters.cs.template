@@ -1,0 +1,69 @@
+// TEMPLATE: EndpointFilters | Skill: generador-crud | Version: 3.1.0
+// Endpoint filters for validation and logging in Minimal APIs
+// Placeholders: {{ProjectNamespace}}
+
+using System.Diagnostics;
+using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace {{ProjectNamespace}}.Web.Filters;
+
+public sealed class ValidationFilter<T> : IEndpointFilter where T : class
+{
+    private readonly IValidator<T> _validator;
+    public ValidationFilter(IValidator<T> validator) => _validator = validator;
+
+    public async ValueTask<object?> InvokeAsync(
+        EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        var argument = context.Arguments.OfType<T>().FirstOrDefault();
+        if (argument is null)
+            return TypedResults.Problem(title: "Request invalido", statusCode: 400);
+
+        var result = await _validator.ValidateAsync(argument);
+        if (!result.IsValid)
+        {
+            var errors = result.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+            return TypedResults.ValidationProblem(errors);
+        }
+        return await next(context);
+    }
+}
+
+public sealed class LoggingFilter : IEndpointFilter
+{
+    private readonly ILogger<LoggingFilter> _logger;
+    public LoggingFilter(ILogger<LoggingFilter> logger) => _logger = logger;
+
+    public async ValueTask<object?> InvokeAsync(
+        EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        var sw = Stopwatch.StartNew();
+        var method = context.HttpContext.Request.Method;
+        var path = context.HttpContext.Request.Path;
+
+        try
+        {
+            var result = await next(context);
+            _logger.LogInformation("{Method} {Path} completado en {Ms}ms",
+                method, path, sw.ElapsedMilliseconds);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Method} {Path} fallo tras {Ms}ms",
+                method, path, sw.ElapsedMilliseconds);
+            throw;
+        }
+    }
+}
+
+public static class EndpointFilterExtensions
+{
+    public static RouteHandlerBuilder WithValidation<T>(this RouteHandlerBuilder b) where T : class
+        => b.AddEndpointFilter<ValidationFilter<T>>();
+    public static RouteHandlerBuilder WithLogging(this RouteHandlerBuilder b)
+        => b.AddEndpointFilter<LoggingFilter>();
+}

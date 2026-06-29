@@ -1,0 +1,79 @@
+/* TEMPLATE: forms.css | Skill: webapp-layout | Version: 3.1.0 */
+/* Estilos de formulario - Comillas branding */
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary, #212529);
+}
+
+/* Inputs */
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-primary, #212529);
+    background-color: var(--bg-primary, #ffffff);
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 4px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: var(--accent, #003366);
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.15);
+}
+
+/* Validation States */
+.form-control.is-valid { border-color: #28a745; }
+.form-control.is-invalid { border-color: #dc3545; }
+
+.validation-message {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+.validation-message.error { color: #dc3545; }
+.validation-message.success { color: #28a745; }
+
+/* Help Text */
+.form-text {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary, #6c757d);
+}
+
+/* Responsive Layout */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.form-row .form-group { flex: 1; min-width: 200px; }
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+.btn-primary { background-color: var(--accent, #003366); color: #fff; }
+.btn-primary:hover { background-color: #002244; }
+.btn-secondary { background-color: #6c757d; color: #fff; }
+.btn-secondary:hover { background-color: #5a6268; }
+.btn-danger { background-color: #dc3545; color: #fff; }

@@ -1,0 +1,106 @@
+// TEMPLATE: CommandHandler | Skill: generador-crud | Version: 3.1.0
+// CQRS Command Handler with validation using Mediator
+// Placeholders: {{EntityName}}, {{ProjectNamespace}}
+
+using FluentValidation;
+using Mediator;
+using Microsoft.Extensions.Logging;
+
+namespace {{ProjectNamespace}}.Application.{{EntityName}}.Commands;
+
+public sealed class Create{{EntityName}}CommandHandler
+    : ICommandHandler<Create{{EntityName}}Command, {{EntityName}}Dto>
+{
+    private readonly I{{EntityName}}Repository _repository;
+    private readonly IValidator<Create{{EntityName}}Command> _validator;
+    private readonly ILogger<Create{{EntityName}}CommandHandler> _logger;
+
+    public Create{{EntityName}}CommandHandler(
+        I{{EntityName}}Repository repository,
+        IValidator<Create{{EntityName}}Command> validator,
+        ILogger<Create{{EntityName}}CommandHandler> logger)
+    {
+        _repository = repository;
+        _validator = validator;
+        _logger = logger;
+    }
+
+    public async ValueTask<{{EntityName}}Dto> Handle(
+        Create{{EntityName}}Command command, CancellationToken ct)
+    {
+        var validation = await _validator.ValidateAsync(command, ct);
+        if (!validation.IsValid)
+            throw new ValidationException(validation.Errors);
+
+        var entity = new {{EntityName}}
+        {
+            Nombre = command.Nombre,
+            Descripcion = command.Descripcion
+        };
+
+        await _repository.AddAsync(entity, ct);
+        await _repository.SaveChangesAsync(ct);
+
+        _logger.LogInformation("{{EntityName}} {Id} creado", entity.Id);
+
+        return entity.ToDto();
+    }
+}
+
+public sealed class Update{{EntityName}}CommandHandler
+    : ICommandHandler<Update{{EntityName}}Command, {{EntityName}}Dto>
+{
+    private readonly I{{EntityName}}Repository _repository;
+    private readonly ILogger<Update{{EntityName}}CommandHandler> _logger;
+
+    public Update{{EntityName}}CommandHandler(
+        I{{EntityName}}Repository repository,
+        ILogger<Update{{EntityName}}CommandHandler> logger)
+    {
+        _repository = repository;
+        _logger = logger;
+    }
+
+    public async ValueTask<{{EntityName}}Dto> Handle(
+        Update{{EntityName}}Command command, CancellationToken ct)
+    {
+        var entity = await _repository.GetByIdAsync(command.Id, ct)
+            ?? throw new KeyNotFoundException($"{{EntityName}} {command.Id} no encontrado");
+
+        entity.Nombre = command.Nombre;
+        entity.Descripcion = command.Descripcion;
+
+        await _repository.SaveChangesAsync(ct);
+        _logger.LogInformation("{{EntityName}} {Id} actualizado", entity.Id);
+
+        return entity.ToDto();
+    }
+}
+
+public sealed class Delete{{EntityName}}CommandHandler
+    : ICommandHandler<Delete{{EntityName}}Command>
+{
+    private readonly I{{EntityName}}Repository _repository;
+    private readonly ILogger<Delete{{EntityName}}CommandHandler> _logger;
+
+    public Delete{{EntityName}}CommandHandler(
+        I{{EntityName}}Repository repository,
+        ILogger<Delete{{EntityName}}CommandHandler> logger)
+    {
+        _repository = repository;
+        _logger = logger;
+    }
+
+    public async ValueTask<Unit> Handle(
+        Delete{{EntityName}}Command command, CancellationToken ct)
+    {
+        var entity = await _repository.GetByIdAsync(command.Id, ct)
+            ?? throw new KeyNotFoundException($"{{EntityName}} {command.Id} no encontrado");
+
+        _repository.Remove(entity);
+        await _repository.SaveChangesAsync(ct);
+
+        _logger.LogInformation("{{EntityName}} {Id} eliminado", command.Id);
+        return Unit.Value;
+    }
+}

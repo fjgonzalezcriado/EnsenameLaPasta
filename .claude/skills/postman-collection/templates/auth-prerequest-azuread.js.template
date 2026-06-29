@@ -1,0 +1,79 @@
+// ============================================================================
+// PRE-REQUEST: Azure AD / Microsoft Entra ID - Client Credentials
+// Automatically obtains and caches token with expiry check (60s buffer)
+// ============================================================================
+// Required environment variables:
+//   azureAdTokenUrl  - https://login.microsoftonline.com/{{tenantId}}/oauth2/v2.0/token
+//   clientId         - Application (client) ID from App Registration
+//   clientSecret     - Client secret (type: secret)
+//   scope            - API scope, e.g. api://{{clientId}}/.default
+// ============================================================================
+
+const PREREQUEST_AZURE_AD_V2 = `
+// Azure AD Token - Client Credentials with expiry check
+const tokenUrl = pm.environment.get("azureAdTokenUrl");
+const clientId = pm.environment.get("clientId");
+const clientSecret = pm.environment.get("clientSecret");
+const scope = pm.environment.get("scope");
+
+if (!tokenUrl || !clientId || !clientSecret) {
+    console.error("❌ Azure AD variables not configured. Set: azureAdTokenUrl, clientId, clientSecret, scope");
+    return;
+}
+
+// Check if current token is still valid (60s buffer before expiry)
+const currentToken = pm.environment.get("token");
+const tokenExpiry = pm.environment.get("tokenExpiry");
+const bufferMs = 60000;
+
+if (currentToken && tokenExpiry && Date.now() < (parseInt(tokenExpiry) - bufferMs)) {
+    console.log("✅ Azure AD token still valid. Expires in " +
+        Math.round((parseInt(tokenExpiry) - Date.now()) / 1000) + "s");
+    return;
+}
+
+console.log("🔄 Requesting new Azure AD token...");
+
+pm.sendRequest({
+    url: tokenUrl,
+    method: "POST",
+    header: {
+        "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: {
+        mode: "urlencoded",
+        urlencoded: [
+            { key: "grant_type", value: "client_credentials" },
+            { key: "client_id", value: clientId },
+            { key: "client_secret", value: clientSecret },
+            { key: "scope", value: scope }
+        ]
+    }
+}, function (err, res) {
+    if (err) {
+        console.error("❌ Azure AD token request failed: " + err);
+        return;
+    }
+
+    if (res.code !== 200) {
+        console.error("❌ Azure AD token error (" + res.code + "): " + res.text());
+        return;
+    }
+
+    const jsonResponse = res.json();
+    const accessToken = jsonResponse.access_token;
+    const expiresIn = jsonResponse.expires_in || 3600;
+
+    pm.environment.set("token", accessToken);
+    pm.environment.set("tokenExpiry", String(Date.now() + (expiresIn * 1000)));
+
+    console.log("🔑 Azure AD token obtained. Expires in " + expiresIn + "s");
+});
+`;
+
+// ============================================================================
+// EXPORT
+// ============================================================================
+if (typeof module !== 'undefined') {
+    module.exports = { PREREQUEST_AZURE_AD_V2 };
+}

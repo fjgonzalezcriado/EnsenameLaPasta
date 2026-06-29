@@ -1,0 +1,45 @@
+@* =============================================
+   Footer - Estándares Comillas
+   Versión: 2.8.0
+
+   CARACTERÍSTICAS:
+   - Altura fija: 40px
+   - Fondo: Gris claro (#F5F5F5)
+   - Información de la universidad
+   - Versión de la aplicación
+   - Enlaces legales
+   ============================================= *@
+
+<footer role="contentinfo" class="footer">
+    <div class="footer-content">
+        <span class="footer-brand">
+            © @DateTime.Now.Year Universidad Pontificia Comillas
+        </span>
+
+        <span class="footer-separator" aria-hidden="true">|</span>
+
+        <span class="footer-version">
+            v@(ViewData["AppVersion"] ?? "1.0.0")
+        </span>
+
+        <span class="footer-separator" aria-hidden="true">|</span>
+
+        <nav class="footer-links" aria-label="Enlaces legales">
+            <a href="~/Legal/Privacidad" class="footer-link">
+                Política de Privacidad
+            </a>
+            <span class="footer-separator" aria-hidden="true">|</span>
+            <a href="~/Legal/Cookies" class="footer-link">
+                Cookies
+            </a>
+            <span class="footer-separator" aria-hidden="true">|</span>
+            <a href="~/Legal/Accesibilidad" class="footer-link">
+                Accesibilidad
+            </a>
+            <span class="footer-separator" aria-hidden="true">|</span>
+            <a href="~/Contacto" class="footer-link">
+                Contacto
+            </a>
+        </nav>
+    </div>
+</footer>

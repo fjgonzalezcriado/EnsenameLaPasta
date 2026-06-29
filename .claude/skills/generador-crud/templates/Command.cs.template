@@ -1,0 +1,46 @@
+// TEMPLATE: Command | Skill: generador-crud | Version: 3.1.0
+// CQRS Command record using Mediator (NOT MediatR)
+// Placeholders: {{EntityName}}, {{ProjectNamespace}}
+
+using System.ComponentModel.DataAnnotations;
+using Mediator;
+
+namespace {{ProjectNamespace}}.Application.{{EntityName}}.Commands;
+
+/// <summary>
+/// Comando para crear un nuevo {{EntityName}}.
+/// </summary>
+public sealed record Create{{EntityName}}Command : ICommand<{{EntityName}}Dto>
+{
+    [Required(ErrorMessage = "El nombre es obligatorio")]
+    [StringLength(200, MinimumLength = 1)]
+    public required string Nombre { get; init; }
+
+    public string? Descripcion { get; init; }
+}
+
+/// <summary>
+/// Comando para actualizar un {{EntityName}} existente.
+/// </summary>
+public sealed record Update{{EntityName}}Command : ICommand<{{EntityName}}Dto>
+{
+    [Required]
+    public required int Id { get; init; }
+
+    [Required]
+    [StringLength(200, MinimumLength = 1)]
+    public required string Nombre { get; init; }
+
+    public string? Descripcion { get; init; }
+}
+
+/// <summary>
+/// Comando para eliminar un {{EntityName}}.
+/// </summary>
+public sealed record Delete{{EntityName}}Command(int Id) : ICommand;
+
+// ============================================================================
+// EJEMPLO DE USO:
+// var command = new CreateBecaCommand { Nombre = "Beca Excelencia", Descripcion = "..." };
+// var result = await mediator.Send(command);
+// ============================================================================

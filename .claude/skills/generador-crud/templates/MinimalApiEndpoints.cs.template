@@ -1,0 +1,67 @@
+// TEMPLATE: MinimalApiEndpoints | Skill: generador-crud | Version: 3.1.0
+// .NET 10 Minimal API endpoints with TypedResults
+// Placeholders: {{EntityName}}, {{entityName}}, {{ProjectNamespace}}
+
+using Mediator;
+using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace {{ProjectNamespace}}.Web.Endpoints;
+
+public static class {{EntityName}}Endpoints
+{
+    public static void Map{{EntityName}}Endpoints(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/{{entityName}}")
+            .WithTags("{{EntityName}}")
+            .RequireAuthorization();
+
+        group.MapGet("/", GetAll).WithName("GetAll{{EntityName}}");
+        group.MapGet("/{id:int}", GetById).WithName("Get{{EntityName}}ById");
+        group.MapPost("/", Create).WithName("Create{{EntityName}}");
+        group.MapPut("/{id:int}", Update).WithName("Update{{EntityName}}");
+        group.MapDelete("/{id:int}", Delete).WithName("Delete{{EntityName}}");
+    }
+
+    private static async Task<Ok<PaginatedList<{{EntityName}}Dto>>> GetAll(
+        [AsParameters] GetAll{{EntityName}}Query query,
+        IMediator mediator, CancellationToken ct)
+    {
+        var result = await mediator.Send(query, ct);
+        return TypedResults.Ok(result);
+    }
+
+    private static async Task<Results<Ok<{{EntityName}}Dto>, NotFound>> GetById(
+        int id, IMediator mediator, CancellationToken ct)
+    {
+        var result = await mediator.Send(new Get{{EntityName}}ByIdQuery(id), ct);
+        return result is not null
+            ? TypedResults.Ok(result)
+            : TypedResults.NotFound();
+    }
+
+    private static async Task<Created<{{EntityName}}Dto>> Create(
+        Create{{EntityName}}Command command,
+        IMediator mediator, CancellationToken ct)
+    {
+        var result = await mediator.Send(command, ct);
+        return TypedResults.Created($"/api/{{entityName}}/{result.Id}", result);
+    }
+
+    private static async Task<Results<Ok<{{EntityName}}Dto>, NotFound>> Update(
+        int id, Update{{EntityName}}Command command,
+        IMediator mediator, CancellationToken ct)
+    {
+        var updated = command with { Id = id };
+        var result = await mediator.Send(updated, ct);
+        return TypedResults.Ok(result);
+    }
+
+    private static async Task<Results<NoContent, NotFound>> Delete(
+        int id, IMediator mediator, CancellationToken ct)
+    {
+        await mediator.Send(new Delete{{EntityName}}Command(id), ct);
+        return TypedResults.NoContent();
+    }
+}
+
+// EJEMPLO: app.Map{{EntityName}}Endpoints(); en Program.cs

@@ -1,0 +1,141 @@
+{
+	"id": "{{ENV_ID}}",
+	"name": "{{PROJECT_NAME}} - {{ENV_NAME}}",
+	"values": [
+		{
+			"key": "baseUrl",
+			"value": "{{BASE_URL}}",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "tokenExpiry",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"_comment_auth_blocks": "Include the appropriate block below based on detected auth mode",
+
+			"_AZURE_AD_BLOCK_START": "--- Azure AD / Microsoft Entra ID ---",
+			"key": "tenantId",
+			"value": "{{TENANT_ID}}",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "clientId",
+			"value": "{{CLIENT_ID}}",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "clientSecret",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "scope",
+			"value": "api://{{CLIENT_ID}}/.default",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "azureAdTokenUrl",
+			"value": "https://login.microsoftonline.com/{{TENANT_ID}}/oauth2/v2.0/token",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"_AZURE_AD_BLOCK_END": "--- End Azure AD ---",
+
+			"_API_KEY_BLOCK_START": "--- API Key ---",
+			"key": "apiKey",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "apiKeyHeader",
+			"value": "X-API-Key",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"_API_KEY_BLOCK_END": "--- End API Key ---",
+
+			"_BASIC_AUTH_BLOCK_START": "--- Basic Auth ---",
+			"key": "basicUsername",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "basicPassword",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"_BASIC_AUTH_BLOCK_END": "--- End Basic Auth ---",
+
+			"_HTTP_SIGNATURE_BLOCK_START": "--- HttpSignature ---",
+			"key": "httpSignaturePrivateKey",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "httpSignatureAlgorithm",
+			"value": "RSA-SHA256",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "apiVersion",
+			"value": "v1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "timeout",
+			"value": "30000",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "lastCreatedId",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "testUserId",
+			"value": "1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "testEmail",
+			"value": "test@comillas.edu",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "{{EXPORT_DATE}}",
+	"_postman_exported_using": "Claude Code STIC"
+}

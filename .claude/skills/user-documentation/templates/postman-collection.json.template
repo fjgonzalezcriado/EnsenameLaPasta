@@ -1,0 +1,75 @@
+{
+  "info": {
+    "name": "{{ProjectName}} API",
+    "description": "Coleccion Postman para {{ProjectName}}",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://localhost:7xxx/api" },
+    { "key": "bearerToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "{{Resource}}",
+      "item": [
+        {
+          "name": "Listar {{Resource}}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{Resource}}?page=1&pageSize=20" }
+          }
+        },
+        {
+          "name": "Obtener {{Resource}} por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/{{Resource}}/1" }
+          }
+        },
+        {
+          "name": "Crear {{Resource}}",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/{{Resource}}" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ejemplo\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Actualizar {{Resource}}",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/{{Resource}}/1" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Actualizado\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Eliminar {{Resource}}",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/{{Resource}}/1" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/health" },
+        "auth": { "type": "noauth" }
+      }
+    }
+  ]
+}

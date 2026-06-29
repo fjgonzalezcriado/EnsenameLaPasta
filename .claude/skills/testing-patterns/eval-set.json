@@ -1,0 +1,60 @@
+{
+  "skill": "testing-patterns",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for testing-patterns skill. 8 queries: 4 should trigger, 4 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Genera tests unitarios para el BecaService usando xUnit, Moq y FluentAssertions",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: generar unit tests con stack Comillas"
+    },
+    {
+      "query": "Create integration tests for the BecasController using WebApplicationFactory and Testcontainers",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: integration tests + Testcontainers"
+    },
+    {
+      "query": "Necesito tests para el repositorio de Estudiantes con datos de prueba y test data builders",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keyword: tests + test data builders"
+    },
+    {
+      "query": "Write bUnit component tests for the Blazor BecaList component",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: bUnit + Blazor component tests"
+    },
+    {
+      "query": "Revisa la seguridad de este Controller y busca vulnerabilidades de inyección SQL",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar security-audit. Auditar seguridad != crear tests"
+    },
+    {
+      "query": "Crea un CRUD para la entidad Profesor con todas las capas",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar generador-crud. Crear código != crear tests"
+    },
+    {
+      "query": "Genera una colección Postman para testear los endpoints de la API de Becas",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar postman-collection. Postman != unit/integration tests"
+    },
+    {
+      "query": "Analyze the project architecture and identify layer violations",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar analisis-arquitectura. Analizar capas != crear tests"
+    }
+  ],
+  "overlap_notes": {
+    "security-audit": "Tests de seguridad: testing-patterns GENERA tests, security-audit ANALIZA vulnerabilidades",
+    "postman-collection": "API testing: testing-patterns genera xUnit/integration tests en código, postman-collection genera colecciones Postman JSON"
+  }
+}

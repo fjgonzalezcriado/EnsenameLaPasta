@@ -1,0 +1,13 @@
+# Normaliza saltos de línea: el repo guarda LF, el checkout en Windows usa CRLF.
+* text=auto
+
+# Scripts específicos de plataforma
+*.ps1 text eol=crlf
+*.sh  text eol=lf
+
+# Binarios (sin conversión)
+*.png binary
+*.jpg binary
+*.zip binary
+*.pfx binary
+*.db  binary

@@ -1,0 +1,111 @@
+// ============================================================
+// TelemetryConfig.cs
+// Configuracion de OpenTelemetry para {{NombreProyecto}}
+// Generado por: /add-telemetry
+// ============================================================
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+
+namespace {{NombreProyecto}}.Infrastructure.Telemetry;
+
+/// <summary>
+/// Extension methods para configurar OpenTelemetry en Program.cs.
+/// </summary>
+public static class TelemetryConfig
+{
+    /// <summary>
+    /// Configura OpenTelemetry con trazas, metricas y exporters.
+    /// </summary>
+    public static IServiceCollection AddCustomTelemetry(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var serviceName = configuration["OpenTelemetry:ServiceName"] ?? "{{NombreProyecto}}";
+        var serviceVersion = configuration["OpenTelemetry:ServiceVersion"] ?? "1.0.0";
+
+        services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource
+                .AddService(
+                    serviceName: serviceName,
+                    serviceVersion: serviceVersion)
+                .AddAttributes(new Dictionary<string, object>
+                {
+                    ["deployment.environment"] = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
+                    ["service.namespace"] = "Comillas"
+                }))
+            .WithTracing(tracing => tracing
+                .AddAspNetCoreInstrumentation(options =>
+                {
+                    options.Filter = httpContext =>
+                        !httpContext.Request.Path.StartsWithSegments("/health") &&
+                        !httpContext.Request.Path.StartsWithSegments("/favicon");
+                })
+                .AddHttpClientInstrumentation(options =>
+                {
+                    options.FilterHttpRequestMessage = request =>
+                        request.RequestUri?.Host != "dc.services.visualstudio.com";
+                })
+                .AddSqlClientInstrumentation(options =>
+                {
+                    options.RecordException = true;
+                })
+                .AddSource($"{serviceName}.*"))
+            .WithMetrics(metrics => metrics
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddMeter($"{serviceName}.*"));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Configura Application Insights como exporter.
+    /// Requiere ConnectionString en configuracion o Azure Key Vault.
+    /// </summary>
+    public static IServiceCollection AddAppInsightsExporter(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var connectionString = configuration["ApplicationInsights:ConnectionString"];
+
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            services.AddOpenTelemetry()
+                .UseAzureMonitor(options =>
+                {
+                    options.ConnectionString = connectionString;
+                });
+        }
+
+        return services;
+    }
+}
+
+/// <summary>
+/// Activity Sources para trazas personalizadas del proyecto.
+/// Usar estos sources para crear Activities en servicios de negocio.
+/// </summary>
+public static class AppActivitySources
+{
+    public static readonly ActivitySource Main =
+        new("{{NombreProyecto}}", "1.0.0");
+}
+
+/// <summary>
+/// Meters para metricas personalizadas de negocio.
+/// </summary>
+public static class AppMeters
+{
+    private static readonly Meter MainMeter =
+        new("{{NombreProyecto}}", "1.0.0");
+
+    // Ejemplo: Contador de operaciones
+    // public static readonly Counter<long> OperacionesCompletadas =
+    //     MainMeter.CreateCounter<long>("operaciones.completadas", "ops",
+    //         "Numero total de operaciones completadas");
+}

@@ -1,0 +1,156 @@
+@* =============================================
+   Sidebar - Estándares Comillas
+   Versión: 2.8.0
+
+   CARACTERÍSTICAS:
+   - Ancho: 250px expandido / 60px colapsado
+   - Fondo: Gris claro (#F5F5F5)
+   - Navegación con iconos
+   - Submenús expandibles
+   - Colapsable en tablet
+   - Overlay en móvil
+
+   PERSONALIZACIÓN:
+   - Modificar los enlaces según módulos del proyecto
+   - Añadir/quitar secciones según necesidades
+   ============================================= *@
+
+<aside class="sidebar"
+       id="sidebar"
+       aria-label="Navegación principal">
+    <nav role="navigation">
+        <ul class="nav-menu">
+            @* ═══════════════════════════════════════════════════════════════
+               INICIO
+               ═══════════════════════════════════════════════════════════════ *@
+            <li class="nav-item">
+                <a href="~/"
+                   class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+                    <span class="nav-icon" aria-hidden="true">🏠</span>
+                    <span class="nav-text">Inicio</span>
+                </a>
+            </li>
+
+            @* ═══════════════════════════════════════════════════════════════
+               MÓDULO 1 - CON SUBMENÚ (Ejemplo)
+               ═══════════════════════════════════════════════════════════════ *@
+            <li class="nav-item has-submenu">
+                <button class="nav-link"
+                        aria-expanded="false"
+                        aria-controls="submenu-modulo1">
+                    <span class="nav-icon" aria-hidden="true">📋</span>
+                    <span class="nav-text">Gestión</span>
+                    <span class="nav-arrow" aria-hidden="true">▼</span>
+                </button>
+                <ul class="nav-submenu" id="submenu-modulo1">
+                    <li>
+                        <a href="~/Gestion/Listado" class="nav-sublink">
+                            Listado
+                        </a>
+                    </li>
+                    <li>
+                        <a href="~/Gestion/Nuevo" class="nav-sublink">
+                            Crear Nuevo
+                        </a>
+                    </li>
+                    <li>
+                        <a href="~/Gestion/Informes" class="nav-sublink">
+                            Informes
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            @* ═══════════════════════════════════════════════════════════════
+               MÓDULO 2 - SIN SUBMENÚ (Ejemplo)
+               ═══════════════════════════════════════════════════════════════ *@
+            <li class="nav-item">
+                <a href="~/Consultas" class="nav-link">
+                    <span class="nav-icon" aria-hidden="true">🔍</span>
+                    <span class="nav-text">Consultas</span>
+                </a>
+            </li>
+
+            @* ═══════════════════════════════════════════════════════════════
+               MÓDULO 3 - OTRO EJEMPLO CON SUBMENÚ
+               ═══════════════════════════════════════════════════════════════ *@
+            <li class="nav-item has-submenu">
+                <button class="nav-link"
+                        aria-expanded="false"
+                        aria-controls="submenu-modulo3">
+                    <span class="nav-icon" aria-hidden="true">📊</span>
+                    <span class="nav-text">Informes</span>
+                    <span class="nav-arrow" aria-hidden="true">▼</span>
+                </button>
+                <ul class="nav-submenu" id="submenu-modulo3">
+                    <li>
+                        <a href="~/Informes/Estadisticas" class="nav-sublink">
+                            Estadísticas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="~/Informes/Exportar" class="nav-sublink">
+                            Exportar Datos
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            @* ═══════════════════════════════════════════════════════════════
+               SEPARADOR
+               ═══════════════════════════════════════════════════════════════ *@
+            <li class="nav-separator" role="separator"></li>
+
+            @* ═══════════════════════════════════════════════════════════════
+               ADMINISTRACIÓN (Solo para admins)
+               ═══════════════════════════════════════════════════════════════ *@
+            @if (User.IsInRole("Admin") || User.IsInRole("Gestor"))
+            {
+                <li class="nav-item has-submenu">
+                    <button class="nav-link"
+                            aria-expanded="false"
+                            aria-controls="submenu-admin">
+                        <span class="nav-icon" aria-hidden="true">⚙️</span>
+                        <span class="nav-text">Administración</span>
+                        <span class="nav-arrow" aria-hidden="true">▼</span>
+                    </button>
+                    <ul class="nav-submenu" id="submenu-admin">
+                        <li>
+                            <a href="~/Admin/Usuarios" class="nav-sublink">
+                                Usuarios
+                            </a>
+                        </li>
+                        <li>
+                            <a href="~/Admin/Configuracion" class="nav-sublink">
+                                Configuración
+                            </a>
+                        </li>
+                        <li>
+                            <a href="~/Admin/Logs" class="nav-sublink">
+                                Logs
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            }
+
+            @* ═══════════════════════════════════════════════════════════════
+               AYUDA
+               ═══════════════════════════════════════════════════════════════ *@
+            <li class="nav-item">
+                <a href="~/Ayuda" class="nav-link">
+                    <span class="nav-icon" aria-hidden="true">❓</span>
+                    <span class="nav-text">Ayuda</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    @* Botón para colapsar sidebar (visible en tablet y desktop) *@
+    <button class="sidebar-toggle"
+            id="sidebarToggle"
+            aria-label="Colapsar menú lateral"
+            aria-expanded="true">
+        <span class="toggle-icon" aria-hidden="true">◀</span>
+    </button>
+</aside>

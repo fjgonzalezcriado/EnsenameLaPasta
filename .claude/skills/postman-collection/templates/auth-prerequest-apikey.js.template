@@ -1,0 +1,42 @@
+// ============================================================================
+// PRE-REQUEST: API Key Authentication
+// Injects API Key as header or query parameter
+// ============================================================================
+// Required environment variables:
+//   apiKey       - The API key value (type: secret)
+//   apiKeyHeader - Header name (default: X-API-Key)
+//   apiKeyMode   - "header" (default) or "query"
+// ============================================================================
+
+const PREREQUEST_API_KEY = `
+// API Key Authentication
+const apiKey = pm.environment.get("apiKey");
+const apiKeyHeader = pm.environment.get("apiKeyHeader") || "X-API-Key";
+const apiKeyMode = pm.environment.get("apiKeyMode") || "header";
+
+if (!apiKey) {
+    console.warn("⚠️ apiKey not configured. Set the 'apiKey' environment variable.");
+    return;
+}
+
+if (apiKeyMode === "query") {
+    // Query parameter mode: append to URL
+    const paramName = pm.environment.get("apiKeyParam") || "api_key";
+    pm.request.url.addQueryParams([{ key: paramName, value: apiKey }]);
+    console.log("🔑 API Key added as query parameter: " + paramName);
+} else {
+    // Header mode (default): inject as request header
+    pm.request.headers.add({
+        key: apiKeyHeader,
+        value: apiKey
+    });
+    console.log("🔑 API Key added as header: " + apiKeyHeader);
+}
+`;
+
+// ============================================================================
+// EXPORT
+// ============================================================================
+if (typeof module !== 'undefined') {
+    module.exports = { PREREQUEST_API_KEY };
+}

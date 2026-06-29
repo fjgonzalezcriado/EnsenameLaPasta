@@ -1,0 +1,10 @@
+{
+    "checkedAt":  "2026-06-15T08:45:59Z",
+    "localVersion":  "3.9.0",
+    "localZipSha256":  "8d5090b4cdb18e092e0c782faf92173a0c7b8e3fa3e42ffda4d46da9c1b41fc6",
+    "serverVersion":  "3.13.0",
+    "serverZipSha256":  "30a5fdfe1501a809c7a2c90fb517904302d6dc8bb3549f3c35e4a5f19b79ee7a",
+    "updateAvailable":  true,
+    "updateType":  "minor",
+    "serverUrl":  "https://demowww.comillas.edu/claude-stic"
+}

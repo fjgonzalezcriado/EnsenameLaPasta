@@ -1,0 +1,264 @@
+// ============================================================================
+// TEMPLATE: Configuration.cs - Configuración EF Core (Fluent API)
+// Skill: generador-crud
+// Versión: 2.8.0
+// ============================================================================
+// USO: Reemplazar {{Entidad}}, {{Entidades}}, {{Namespace}}, {{Schema}}
+// ============================================================================
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using {{Namespace}}.Domain.Entities;
+
+namespace {{Namespace}}.Infrastructure.Persistence.Configurations;
+
+/// <summary>
+/// Configuración de EF Core para {{Entidad}}
+/// </summary>
+public class {{Entidad}}Configuration : IEntityTypeConfiguration<{{Entidad}}>
+{
+    public void Configure(EntityTypeBuilder<{{Entidad}}> builder)
+    {
+        // ═══════════════════════════════════════════════════════════════════
+        // TABLA
+        // ═══════════════════════════════════════════════════════════════════
+
+        builder.ToTable("{{Entidades}}", "{{Schema}}");
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CLAVE PRIMARIA
+        // ═══════════════════════════════════════════════════════════════════
+
+        builder.HasKey(e => e.Id);
+
+        builder.Property(e => e.Id)
+            .ValueGeneratedOnAdd();
+
+        // ═══════════════════════════════════════════════════════════════════
+        // PROPIEDADES
+        // ═══════════════════════════════════════════════════════════════════
+
+        {{ConfiguracionPropiedades}}
+
+        // ═══════════════════════════════════════════════════════════════════
+        // PROPIEDADES DE AUDITORÍA
+        // ═══════════════════════════════════════════════════════════════════
+
+        builder.Property(e => e.CreatedAt)
+            .IsRequired();
+
+        builder.Property(e => e.CreatedBy)
+            .HasMaxLength(256);
+
+        builder.Property(e => e.ModifiedAt);
+
+        builder.Property(e => e.ModifiedBy)
+            .HasMaxLength(256);
+
+        // ═══════════════════════════════════════════════════════════════════
+        // SOFT DELETE
+        // ═══════════════════════════════════════════════════════════════════
+
+        builder.Property(e => e.IsDeleted)
+            .HasDefaultValue(false);
+
+        builder.Property(e => e.DeletedAt);
+
+        builder.Property(e => e.DeletedBy)
+            .HasMaxLength(256);
+
+        // Query filter para soft delete
+        builder.HasQueryFilter(e => !e.IsDeleted);
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ÍNDICES
+        // ═══════════════════════════════════════════════════════════════════
+
+        {{ConfiguracionIndices}}
+
+        // ═══════════════════════════════════════════════════════════════════
+        // RELACIONES
+        // ═══════════════════════════════════════════════════════════════════
+
+        {{ConfiguracionRelaciones}}
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PATRONES DE CONFIGURACIÓN COMUNES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/*
+// STRINGS
+builder.Property(e => e.Nombre)
+    .IsRequired()
+    .HasMaxLength(200);
+
+builder.Property(e => e.Descripcion)
+    .HasMaxLength(2000);
+
+builder.Property(e => e.Codigo)
+    .IsRequired()
+    .HasMaxLength(20)
+    .IsUnicode(false);  // VARCHAR en lugar de NVARCHAR
+
+// DECIMALES
+builder.Property(e => e.Importe)
+    .HasPrecision(18, 2);  // DECIMAL(18,2)
+
+builder.Property(e => e.Porcentaje)
+    .HasPrecision(5, 2);   // DECIMAL(5,2)
+
+// FECHAS
+builder.Property(e => e.FechaCreacion)
+    .HasColumnType("datetime2(3)");  // Precisión de milisegundos
+
+builder.Property(e => e.SoloFecha)
+    .HasColumnType("date");
+
+// ENUMS
+builder.Property(e => e.Estado)
+    .HasConversion<string>()  // Guardar como string
+    .HasMaxLength(50);
+
+builder.Property(e => e.Tipo)
+    .HasConversion<int>();    // Guardar como int (default)
+
+// VALUE OBJECTS (Complex Types .NET 10)
+builder.ComplexProperty(e => e.Periodo, p =>
+{
+    p.Property(x => x.FechaInicio).HasColumnName("FechaInicio");
+    p.Property(x => x.FechaFin).HasColumnName("FechaFin");
+});
+
+// O como Owned Type (versiones anteriores)
+builder.OwnsOne(e => e.Direccion, d =>
+{
+    d.Property(x => x.Calle).HasColumnName("Direccion_Calle").HasMaxLength(200);
+    d.Property(x => x.Ciudad).HasColumnName("Direccion_Ciudad").HasMaxLength(100);
+    d.Property(x => x.CodigoPostal).HasColumnName("Direccion_CP").HasMaxLength(10);
+});
+
+// ÍNDICES
+builder.HasIndex(e => e.Codigo)
+    .IsUnique()
+    .HasDatabaseName("IX_{{Entidades}}_Codigo");
+
+builder.HasIndex(e => e.Estado)
+    .HasDatabaseName("IX_{{Entidades}}_Estado");
+
+builder.HasIndex(e => new { e.Estado, e.FechaCreacion })
+    .HasDatabaseName("IX_{{Entidades}}_Estado_Fecha");
+
+// Índice filtrado (solo activos)
+builder.HasIndex(e => e.Email)
+    .IsUnique()
+    .HasFilter("[IsDeleted] = 0")
+    .HasDatabaseName("IX_{{Entidades}}_Email");
+
+// RELACIONES - Uno a Muchos
+builder.HasMany(e => e.Solicitudes)
+    .WithOne(s => s.Beca)
+    .HasForeignKey(s => s.BecaId)
+    .OnDelete(DeleteBehavior.Restrict);  // No cascade
+
+// RELACIONES - Muchos a Uno
+builder.HasOne(e => e.Categoria)
+    .WithMany(c => c.{{Entidades}})
+    .HasForeignKey(e => e.CategoriaId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+// RELACIONES - Muchos a Muchos (EF Core 5+)
+builder.HasMany(e => e.Tags)
+    .WithMany(t => t.{{Entidades}})
+    .UsingEntity<Dictionary<string, object>>(
+        "{{Entidad}}Tag",
+        j => j.HasOne<Tag>().WithMany().HasForeignKey("TagId"),
+        j => j.HasOne<{{Entidad}}>().WithMany().HasForeignKey("{{Entidad}}Id"));
+
+// CONVERSIONES PERSONALIZADAS
+builder.Property(e => e.Metadata)
+    .HasConversion(
+        v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+        v => JsonSerializer.Deserialize<Dictionary<string, string>>(v, (JsonSerializerOptions)null!)!
+    );
+
+// JSON COLUMN (.NET 10 / SQL Server 2022)
+builder.OwnsOne(e => e.Configuracion, c =>
+{
+    c.ToJson();
+});
+*/
+
+// ============================================================================
+// EJEMPLO GENERADO - BecaConfiguration
+// ============================================================================
+/*
+public class BecaConfiguration : IEntityTypeConfiguration<Beca>
+{
+    public void Configure(EntityTypeBuilder<Beca> builder)
+    {
+        builder.ToTable("Becas", "dbo");
+
+        builder.HasKey(b => b.Id);
+
+        builder.Property(b => b.Id)
+            .ValueGeneratedOnAdd();
+
+        // Propiedades
+        builder.Property(b => b.Codigo)
+            .IsRequired()
+            .HasMaxLength(20)
+            .IsUnicode(false);
+
+        builder.Property(b => b.Nombre)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.Property(b => b.Descripcion)
+            .HasMaxLength(2000);
+
+        builder.Property(b => b.Importe)
+            .HasPrecision(18, 2);
+
+        builder.Property(b => b.Estado)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
+        builder.Property(b => b.FechaInicio)
+            .HasColumnType("date");
+
+        builder.Property(b => b.FechaFin)
+            .HasColumnType("date");
+
+        // Auditoría
+        builder.Property(b => b.CreatedAt).IsRequired();
+        builder.Property(b => b.CreatedBy).HasMaxLength(256);
+        builder.Property(b => b.ModifiedAt);
+        builder.Property(b => b.ModifiedBy).HasMaxLength(256);
+
+        // Soft delete
+        builder.Property(b => b.IsDeleted).HasDefaultValue(false);
+        builder.Property(b => b.DeletedAt);
+        builder.Property(b => b.DeletedBy).HasMaxLength(256);
+        builder.HasQueryFilter(b => !b.IsDeleted);
+
+        // Índices
+        builder.HasIndex(b => b.Codigo)
+            .IsUnique()
+            .HasDatabaseName("IX_Becas_Codigo");
+
+        builder.HasIndex(b => b.Estado)
+            .HasDatabaseName("IX_Becas_Estado");
+
+        builder.HasIndex(b => new { b.Estado, b.FechaFin })
+            .HasDatabaseName("IX_Becas_Estado_FechaFin");
+
+        // Relaciones
+        builder.HasMany(b => b.Solicitudes)
+            .WithOne(s => s.Beca)
+            .HasForeignKey(s => s.BecaId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+*/

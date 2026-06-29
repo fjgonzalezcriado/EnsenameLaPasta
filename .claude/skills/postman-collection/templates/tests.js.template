@@ -1,0 +1,430 @@
+// ============================================================================
+// PLANTILLAS DE TESTS POSTMAN
+// Usar como referencia al generar tests para cada tipo de endpoint
+// ============================================================================
+
+// ============================================================================
+// TEST: GET Lista (con paginación)
+// ============================================================================
+const TEST_GET_LIST = `
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response time is acceptable", function () {
+    pm.expect(pm.response.responseTime).to.be.below(1000);
+});
+
+pm.test("Response has pagination info", function () {
+    const jsonData = pm.response.json();
+    // Ajustar según estructura: items/data/results
+    if (jsonData.items) {
+        pm.expect(jsonData).to.have.property('totalCount');
+        pm.expect(jsonData).to.have.property('page');
+        pm.expect(jsonData).to.have.property('pageSize');
+    } else if (Array.isArray(jsonData)) {
+        pm.expect(jsonData).to.be.an('array');
+    }
+});
+
+pm.test("Content-Type is JSON", function () {
+    pm.response.to.have.header("Content-Type");
+    pm.expect(pm.response.headers.get("Content-Type")).to.include("application/json");
+});
+`;
+
+// ============================================================================
+// TEST: GET Por ID
+// ============================================================================
+const TEST_GET_BY_ID = `
+pm.test("Status code is 200 or 404", function () {
+    pm.expect(pm.response.code).to.be.oneOf([200, 404]);
+});
+
+pm.test("Response time is acceptable", function () {
+    pm.expect(pm.response.responseTime).to.be.below(500);
+});
+
+if (pm.response.code === 200) {
+    pm.test("Response has required fields", function () {
+        const jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property('id');
+        // Añadir más campos obligatorios según la entidad
+    });
+}
+
+if (pm.response.code === 404) {
+    pm.test("404 response has correct format", function () {
+        const jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property('title');
+        pm.expect(jsonData).to.have.property('status', 404);
+    });
+}
+`;
+
+// ============================================================================
+// TEST: POST Crear
+// ============================================================================
+const TEST_POST_CREATE = `
+pm.test("Status code is 201 Created", function () {
+    pm.response.to.have.status(201);
+});
+
+pm.test("Response has Location header", function () {
+    pm.response.to.have.header("Location");
+});
+
+pm.test("Response contains created entity with ID", function () {
+    const jsonData = pm.response.json();
+    pm.expect(jsonData).to.have.property('id');
+
+    // Guardar ID para tests posteriores
+    pm.environment.set("lastCreatedId", jsonData.id);
+    console.log("✅ Creado con ID: " + jsonData.id);
+});
+
+pm.test("Response time is acceptable", function () {
+    pm.expect(pm.response.responseTime).to.be.below(1000);
+});
+`;
+
+// ============================================================================
+// TEST: POST Crear - Validación de errores
+// ============================================================================
+const TEST_POST_VALIDATION = `
+pm.test("Status code is 400 Bad Request", function () {
+    pm.response.to.have.status(400);
+});
+
+pm.test("Response has validation errors", function () {
+    const jsonData = pm.response.json();
+    pm.expect(jsonData).to.have.property('errors');
+    // O según formato ProblemDetails
+    pm.expect(jsonData).to.have.property('title');
+    pm.expect(jsonData).to.have.property('status', 400);
+});
+`;
+
+// ============================================================================
+// TEST: PUT Actualizar
+// ============================================================================
+const TEST_PUT_UPDATE = `
+pm.test("Status code is 200 or 204", function () {
+    pm.expect(pm.response.code).to.be.oneOf([200, 204]);
+});
+
+pm.test("Response time is acceptable", function () {
+    pm.expect(pm.response.responseTime).to.be.below(1000);
+});
+
+if (pm.response.code === 200) {
+    pm.test("Response reflects updates", function () {
+        const jsonData = pm.response.json();
+        // Verificar campos actualizados
+        pm.expect(jsonData).to.have.property('id');
+    });
+}
+`;
+
+// ============================================================================
+// TEST: PATCH Actualización parcial
+// ============================================================================
+const TEST_PATCH_UPDATE = `
+pm.test("Status code is 200 or 204", function () {
+    pm.expect(pm.response.code).to.be.oneOf([200, 204]);
+});
+
+pm.test("Response time is acceptable", function () {
+    pm.expect(pm.response.responseTime).to.be.below(500);
+});
+`;
+
+// ============================================================================
+// TEST: DELETE Eliminar
+// ============================================================================
+const TEST_DELETE = `
+pm.test("Status code is 204 No Content", function () {
+    pm.response.to.have.status(204);
+});
+
+pm.test("Response body is empty", function () {
+    pm.expect(pm.response.text()).to.be.empty;
+});
+
+pm.test("Response time is acceptable", function () {
+    pm.expect(pm.response.responseTime).to.be.below(500);
+});
+
+// Limpiar variable de ID si existía
+if (pm.environment.get("lastCreatedId")) {
+    console.log("🗑️ Eliminado ID: " + pm.environment.get("lastCreatedId"));
+    pm.environment.unset("lastCreatedId");
+}
+`;
+
+// ============================================================================
+// TEST: Autenticación - Login
+// ============================================================================
+const TEST_AUTH_LOGIN = `
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response contains token", function () {
+    const jsonData = pm.response.json();
+    pm.expect(jsonData).to.have.property('token');
+    // o 'accessToken', 'access_token' según el formato
+
+    // Guardar token para requests posteriores
+    const token = jsonData.token || jsonData.accessToken || jsonData.access_token;
+    pm.environment.set("token", token);
+    console.log("🔑 Token guardado correctamente");
+});
+
+pm.test("Response contains refresh token", function () {
+    const jsonData = pm.response.json();
+    if (jsonData.refreshToken) {
+        pm.environment.set("refreshToken", jsonData.refreshToken);
+    }
+});
+`;
+
+// ============================================================================
+// TEST: Autenticación - Refresh Token
+// ============================================================================
+const TEST_AUTH_REFRESH = `
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response contains new token", function () {
+    const jsonData = pm.response.json();
+    const token = jsonData.token || jsonData.accessToken || jsonData.access_token;
+    pm.expect(token).to.not.be.empty;
+
+    pm.environment.set("token", token);
+    console.log("🔄 Token renovado correctamente");
+});
+`;
+
+// ============================================================================
+// TEST: Unauthorized (401)
+// ============================================================================
+const TEST_UNAUTHORIZED = `
+pm.test("Status code is 401 Unauthorized", function () {
+    pm.response.to.have.status(401);
+});
+
+pm.test("Response has WWW-Authenticate header", function () {
+    pm.response.to.have.header("WWW-Authenticate");
+});
+`;
+
+// ============================================================================
+// TEST: Forbidden (403)
+// ============================================================================
+const TEST_FORBIDDEN = `
+pm.test("Status code is 403 Forbidden", function () {
+    pm.response.to.have.status(403);
+});
+
+pm.test("Response indicates permission denied", function () {
+    const jsonData = pm.response.json();
+    pm.expect(jsonData.status).to.equal(403);
+});
+`;
+
+// ============================================================================
+// TEST: Health Check
+// ============================================================================
+const TEST_HEALTH = `
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Health status is Healthy", function () {
+    const jsonData = pm.response.json();
+    pm.expect(jsonData.status).to.equal("Healthy");
+});
+
+pm.test("Response time is under 100ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(100);
+});
+`;
+
+// ============================================================================
+// TEST: Schema Validation (genérico)
+// ============================================================================
+const TEST_SCHEMA_VALIDATION = `
+// Definir schema esperado (ajustar según entidad)
+const schema = {
+    "type": "object",
+    "required": ["id", "nombre"],
+    "properties": {
+        "id": { "type": "integer" },
+        "nombre": { "type": "string" },
+        "fechaCreacion": { "type": "string", "format": "date-time" }
+    }
+};
+
+pm.test("Response matches schema", function () {
+    const jsonData = pm.response.json();
+    pm.expect(tv4.validate(jsonData, schema)).to.be.true;
+});
+`;
+
+// ============================================================================
+// PRE-REQUEST: Basic Auth
+// ============================================================================
+const PREREQUEST_BASIC_AUTH = `
+// Basic Authentication
+const username = pm.environment.get("basicUsername");
+const password = pm.environment.get("basicPassword");
+
+if (!username || !password) {
+    console.warn("⚠️ Basic Auth credentials not configured.");
+    return;
+}
+
+const encoded = btoa(username + ":" + password);
+pm.request.headers.add({
+    key: "Authorization",
+    value: "Basic " + encoded
+});
+console.log("🔑 Basic Auth header added for user: " + username);
+`;
+
+// ============================================================================
+// PRE-REQUEST: API Key
+// ============================================================================
+const PREREQUEST_API_KEY = `
+// API Key Authentication
+const apiKey = pm.environment.get("apiKey");
+const apiKeyHeader = pm.environment.get("apiKeyHeader") || "X-API-Key";
+
+if (!apiKey) {
+    console.warn("⚠️ apiKey not configured.");
+    return;
+}
+
+pm.request.headers.add({
+    key: apiKeyHeader,
+    value: apiKey
+});
+console.log("🔑 API Key added as header: " + apiKeyHeader);
+`;
+
+// ============================================================================
+// PRE-REQUEST: HttpSignature
+// ============================================================================
+const PREREQUEST_HTTP_SIGNATURE = `
+// HttpSignature Authentication (informational)
+// NOTE: Postman does not natively support RSA signing.
+// For HttpSignature auth, use Newman with a custom pre-request script
+// or an external signing service.
+const privateKey = pm.environment.get("httpSignaturePrivateKey");
+const algorithm = pm.environment.get("httpSignatureAlgorithm") || "RSA-SHA256";
+
+if (!privateKey) {
+    console.warn("⚠️ httpSignaturePrivateKey not configured.");
+    console.warn("   HttpSignature requires external signing. See http-signature-mtls.md");
+    return;
+}
+
+console.log("ℹ️ HttpSignature configured with algorithm: " + algorithm);
+console.log("   Use Newman + crypto script for actual request signing.");
+`;
+
+// ============================================================================
+// TEST: Auth Token Lifecycle
+// ============================================================================
+const TEST_AUTH_TOKEN_LIFECYCLE = `
+pm.test("Token is present in environment", function () {
+    const token = pm.environment.get("token");
+    pm.expect(token).to.not.be.empty;
+});
+
+pm.test("Token expiry is set and in the future", function () {
+    const tokenExpiry = pm.environment.get("tokenExpiry");
+    if (tokenExpiry) {
+        pm.expect(parseInt(tokenExpiry)).to.be.above(Date.now());
+    }
+});
+
+pm.test("Token has valid JWT format", function () {
+    const token = pm.environment.get("token");
+    if (token) {
+        const parts = token.split(".");
+        pm.expect(parts.length).to.equal(3, "JWT should have 3 parts");
+    }
+});
+`;
+
+// ============================================================================
+// PRE-REQUEST: Azure AD Token
+// ============================================================================
+const PREREQUEST_AZURE_AD = `
+// Obtener token de Azure AD automáticamente
+const tokenUrl = pm.environment.get("azureAdTokenUrl");
+const clientId = pm.environment.get("clientId");
+const clientSecret = pm.environment.get("clientSecret");
+const scope = pm.environment.get("scope");
+
+// Solo obtener si no hay token o está próximo a expirar
+const currentToken = pm.environment.get("token");
+const tokenExpiry = pm.environment.get("tokenExpiry");
+
+if (!currentToken || (tokenExpiry && Date.now() > parseInt(tokenExpiry) - 60000)) {
+    pm.sendRequest({
+        url: tokenUrl,
+        method: 'POST',
+        header: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: {
+            mode: 'urlencoded',
+            urlencoded: [
+                { key: 'grant_type', value: 'client_credentials' },
+                { key: 'client_id', value: clientId },
+                { key: 'client_secret', value: clientSecret },
+                { key: 'scope', value: scope }
+            ]
+        }
+    }, function (err, res) {
+        if (!err && res.code === 200) {
+            const jsonResponse = res.json();
+            pm.environment.set("token", jsonResponse.access_token);
+            pm.environment.set("tokenExpiry", Date.now() + (jsonResponse.expires_in * 1000));
+            console.log("🔑 Token de Azure AD obtenido");
+        } else {
+            console.error("❌ Error obteniendo token: " + (err || res.status));
+        }
+    });
+}
+`;
+
+// ============================================================================
+// EXPORTAR (para uso en Node.js si se necesita)
+// ============================================================================
+if (typeof module !== 'undefined') {
+    module.exports = {
+        TEST_GET_LIST,
+        TEST_GET_BY_ID,
+        TEST_POST_CREATE,
+        TEST_POST_VALIDATION,
+        TEST_PUT_UPDATE,
+        TEST_PATCH_UPDATE,
+        TEST_DELETE,
+        TEST_AUTH_LOGIN,
+        TEST_AUTH_REFRESH,
+        TEST_UNAUTHORIZED,
+        TEST_FORBIDDEN,
+        TEST_HEALTH,
+        TEST_SCHEMA_VALIDATION,
+        TEST_AUTH_TOKEN_LIFECYCLE,
+        PREREQUEST_AZURE_AD,
+        PREREQUEST_BASIC_AUTH,
+        PREREQUEST_API_KEY,
+        PREREQUEST_HTTP_SIGNATURE
+    };
+}

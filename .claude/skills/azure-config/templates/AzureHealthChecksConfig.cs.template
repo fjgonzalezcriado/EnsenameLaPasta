@@ -1,0 +1,42 @@
+// TEMPLATE: AzureHealthChecksConfig | Skill: azure-config | Version: 3.1.0
+// Azure-specific health checks registration
+// Placeholders: {{ProjectNamespace}}
+
+namespace {{ProjectNamespace}}.Web.Configuration;
+
+public static class AzureHealthChecksExtensions
+{
+    public static IServiceCollection AddAzureHealthChecks(
+        this IServiceCollection services, IConfiguration config)
+    {
+        var hc = services.AddHealthChecks();
+
+        // SQL Server
+        var sqlConn = config.GetConnectionString("Default");
+        if (!string.IsNullOrEmpty(sqlConn))
+            hc.AddSqlServer(sqlConn, name: "sqlserver", tags: ["db", "ready"]);
+
+        // Blob Storage
+        var blobConn = config.GetConnectionString("BlobStorage");
+        if (!string.IsNullOrEmpty(blobConn))
+            hc.AddAzureBlobStorage(blobConn, name: "blob-storage", tags: ["storage", "ready"]);
+
+        // Service Bus
+        var sbConn = config.GetConnectionString("ServiceBus");
+        if (!string.IsNullOrEmpty(sbConn))
+            hc.AddAzureServiceBusTopic(sbConn, "default", name: "service-bus", tags: ["messaging", "ready"]);
+
+        // Key Vault
+        var kvUrl = config["KeyVault:Url"];
+        if (!string.IsNullOrEmpty(kvUrl))
+            hc.AddAzureKeyVault(new Uri(kvUrl), new Azure.Identity.DefaultAzureCredential(),
+                _ => { }, name: "key-vault", tags: ["secrets", "ready"]);
+
+        return services;
+    }
+}
+
+// En Program.cs:
+// builder.Services.AddAzureHealthChecks(builder.Configuration);
+// app.MapHealthChecks("/health/ready", new() { Predicate = r => r.Tags.Contains("ready") });
+// app.MapHealthChecks("/health/live", new() { Predicate = _ => false });

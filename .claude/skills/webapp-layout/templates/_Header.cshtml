@@ -1,0 +1,135 @@
+@* =============================================
+   Header - Estándares Comillas
+   Versión: 2.8.0
+
+   CARACTERÍSTICAS:
+   - Altura fija: 60px
+   - Fondo: Azul Comillas (#003366)
+   - Logo + Nombre de aplicación
+   - Menú de usuario con dropdown
+   - Hamburger menu para móvil
+   ============================================= *@
+
+<header role="banner" class="header">
+    @* Logo y nombre de aplicación *@
+    <div class="header-brand">
+        <button class="hamburger"
+                id="hamburgerBtn"
+                aria-label="Abrir menú de navegación"
+                aria-expanded="false"
+                aria-controls="sidebar">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+
+        <a href="~/" class="header-logo">
+            <img src="~/images/logo-comillas-blanco.svg"
+                 alt="Universidad Pontificia Comillas"
+                 width="40"
+                 height="40">
+        </a>
+
+        <span class="header-app-name">
+            @(ViewData["AppName"] ?? "Aplicación Comillas")
+        </span>
+    </div>
+
+    @* Navegación de usuario *@
+    <nav class="header-nav" aria-label="Usuario">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="user-menu">
+                <button class="user-menu-toggle"
+                        id="userMenuToggle"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        aria-controls="userMenuDropdown">
+                    <span class="user-avatar" aria-hidden="true">
+                        @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
+                    </span>
+                    <span class="user-name">
+                        @User.Identity.Name
+                    </span>
+                    <span class="user-menu-arrow" aria-hidden="true">▼</span>
+                </button>
+
+                <ul class="user-menu-dropdown"
+                    id="userMenuDropdown"
+                    role="menu"
+                    aria-labelledby="userMenuToggle"
+                    hidden>
+                    <li role="none">
+                        <a href="~/Account/Profile"
+                           role="menuitem"
+                           class="user-menu-item">
+                            <span class="menu-icon" aria-hidden="true">👤</span>
+                            Mi Perfil
+                        </a>
+                    </li>
+                    <li role="none">
+                        <a href="~/Account/Settings"
+                           role="menuitem"
+                           class="user-menu-item">
+                            <span class="menu-icon" aria-hidden="true">⚙️</span>
+                            Configuración
+                        </a>
+                    </li>
+                    <li role="separator" class="menu-separator"></li>
+                    <li role="none">
+                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                            <button type="submit"
+                                    role="menuitem"
+                                    class="user-menu-item user-menu-logout">
+                                <span class="menu-icon" aria-hidden="true">🚪</span>
+                                Cerrar Sesión
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        }
+        else
+        {
+            <a href="~/Account/Login" class="header-login-btn">
+                Iniciar Sesión
+            </a>
+        }
+    </nav>
+</header>
+
+@* Script para menú de usuario *@
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('userMenuToggle');
+        const dropdown = document.getElementById('userMenuDropdown');
+
+        if (toggle && dropdown) {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+                toggle.setAttribute('aria-expanded', !isExpanded);
+                dropdown.hidden = isExpanded;
+
+                if (!isExpanded) {
+                    dropdown.querySelector('a, button')?.focus();
+                }
+            });
+
+            // Cerrar al hacer clic fuera
+            document.addEventListener('click', function() {
+                toggle.setAttribute('aria-expanded', 'false');
+                dropdown.hidden = true;
+            });
+
+            // Cerrar con Escape
+            dropdown.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    toggle.setAttribute('aria-expanded', 'false');
+                    dropdown.hidden = true;
+                    toggle.focus();
+                }
+            });
+        }
+    });
+</script>

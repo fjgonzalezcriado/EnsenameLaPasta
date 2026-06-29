@@ -1,0 +1,380 @@
+# Historial de Cambios (Changelog)
+
+> **INSTRUCCIONES PARA CLAUDE**: Este archivo se actualiza automaticamente con /commit y /prepara-entrega.
+> Documenta todos los cambios significativos del proyecto.
+
+---
+
+## Formato de Entradas
+
+Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
+
+- **Added**: Nuevas funcionalidades
+- **Changed**: Cambios en funcionalidades existentes
+- **Deprecated**: Funcionalidades que seran eliminadas
+- **Removed**: Funcionalidades eliminadas
+- **Fixed**: Correcciones de bugs
+- **Security**: Correcciones de seguridad
+
+---
+
+## [1.8.0-currency] - 2026-06-29
+
+### Added
+- ✅ **HV-019** **Divisa por instrumento**. `TrackedSymbol.Currency` + `SetCurrency` + migración `AddTrackedSymbolCurrency`. El proveedor devuelve `MarketQuote(Tick, Currency)` (Yahoo `meta.currency`) y el `MarketTickGeneratorService` sella la divisa de cada símbolo seguido cada ciclo. `Currency` en `TrackedSymbolDto`/`OpenTradeDto`/`ClosedTradeDto`. UI: columna "Div" + formateo monetario por fila en su divisa.
+
+### Changed
+- `IMarketDataProvider.GetLatestAsync` ahora devuelve `MarketQuote` en vez de `MarketTick` (contiene el tick + la divisa).
+
+### Limitaciones conocidas
+- Los **totales de cuenta** (valor de cuenta, efectivo, PnL) siguen sumándose en € y **mezclan divisas**. La conversión FX a una divisa base es el siguiente paso.
+
+### Métricas
+- 123 tests verdes (120 + 3). Smoke real: watchlist `HY9H.F→EUR`, `^GSPC→USD`; posición HY9H.F con divisa EUR.
+
+---
+
+## [1.7.0-csv-import] - 2026-06-29
+
+### Added
+- ✅ **HV-018** **Importar histórico de compras (CSV)**. `IPositionService.ImportCsvAsync` (reutiliza `OpenAsync`): parser con cabecera opcional, delimitador autodetectado `;`/`,` (con `;` admite coma decimal), fechas `yyyy-MM-dd`/`dd/MM/yyyy`/ISO (UTC); las filas con error se reportan por línea sin abortar el resto. `ImportResultDto`/`ImportErrorDto` + endpoint `POST /api/positions/import`. UI: modal "📥 Importar CSV" (subir fichero o pegar) con resultados.
+
+### Métricas
+- 120 tests verdes (116 + 4). Smoke real: endpoint responde con reporte de error por línea (fila inválida, sin escribir en BD).
+
+---
+
+## [1.6.0-account-history] - 2026-06-29
+
+### Added
+- ✅ **HV-017** **Histórico del valor de cuenta**. `PortfolioSnapshotService : BackgroundService` toma un snapshot del valor de cuenta al arrancar y cada `IntervalSeconds` (config `Snapshot`), persistiendo en la entidad `PortfolioSnapshot` (ya existente → **sin migración**). `AccountHistoryPointDto` + `IDashboardService.GetAccountHistoryAsync` (deriva `NetDeposits`/`ReturnPct`) + endpoint `GET /api/account/history?points=`. UI: tarjeta "📊 Evolución del valor de cuenta" con gráfico Chart.js (valor de cuenta + aportado neto), refresco propio cada 60 s.
+
+### Métricas
+- 116 tests verdes (113 + 5). Smoke real: arranque sin errores DI; `/api/account/history` → punto coherente (28.306,65 € / aportado 30.000 / −5,64 %).
+
+---
+
+## [1.5.0-pos-return] - 2026-06-29
+
+### Added
+- ✅ **HV-016** **Rentabilidad por posición**. `OpenTradeDto.ReturnPct` y `ClosedTradeDto.ReturnPct` calculados en `DashboardService` (`(precio−entry)/entry×100`, 0 % si entry=0). UI: nueva columna **"%"** tras PnL en las tablas de posiciones abiertas y trades cerrados, con signo y color. Métrica derivada, sin migración.
+
+### Métricas
+- 113 tests verdes (111 + 2: % abierta +10 %, % cerrada −10 %). Smoke real manual pendiente.
+
+---
+
+## [1.4.0-return] - 2026-06-29
+
+### Added
+- ✅ **HV-015** **Rentabilidad porcentual de la cuenta**. `DashboardDto.ReturnPct` + cálculo en `DashboardService`: `ReturnPct = TotalPnL / NetDeposits × 100` (0 % si `NetDeposits = 0`; equivale a `(AccountValue − NetDeposits) / NetDeposits × 100` por el invariante de HV-014). Métrica derivada, sin migración ni cambios de dominio/BD.
+- UI: el subtítulo de la tarjeta **Valor de cuenta** muestra el **% con signo y color** (verde/rojo) + "sobre aportado", reutilizando `pctSigned`/`setSigned`. Se mantienen 6 tarjetas.
+
+### Métricas
+- 111 tests verdes (108 + 3: ganancia +0,5 %, pérdida −10 %, sin aportaciones → 0 %). Smoke real manual pendiente.
+
+---
+
+## [1.3.0-cash] - 2026-06-16
+
+### Added
+- ✅ **HV-014** Concepto de **caja/efectivo** y **valor de cuenta**. Entidad `CashMovement` (ingresos/retiradas) + migración `AddCashMovement` + `CashService` + endpoints `GET/POST/DELETE /api/cash`. `DashboardService` deriva `NetDeposits`, `Cash` (= aportado − invertido + realizado) y `AccountValue` (= efectivo + cartera). Invariante: valor de cuenta = aportado + PnL total.
+- UI: métricas reorganizadas a **6 tarjetas** (Valor de cuenta · Efectivo · Valor de cartera · PnL total · Posiciones · Winrate) + **modal "💰 Caja"** (alta Ingreso/Retirada + lista con borrado).
+
+### Métricas
+- 108 tests verdes. Smoke real: aporta 10 000 € + HY9H.F 1360×5 → efectivo 3 200 €, valor de cuenta 10 150 € (= 10 000 + PnL 150).
+
+---
+
+## [1.2.0-portfolio] - 2026-06-16
+
+### Added
+- ✅ **HV-013** Tracker de **cartera real**: alta manual de posiciones (objetivo: dejar TradingView). `IPositionService`/`PositionService` (open/close/delete por Id, varias posiciones por símbolo, auto-añade el símbolo a la watchlist) + endpoints `POST /api/positions`, `POST /api/positions/{id}/close`, `DELETE /api/positions/{id}`.
+- **Modal "➕ Nueva posición"** (símbolo con datalist de la watchlist, precio de entrada, cantidad, fecha) y columna **Acciones** (Cerrar / eliminar) en la tabla de posiciones abiertas. PnL no realizado en vivo contra el precio real.
+- El **buscador** pasó a ser una **modal** (botón "🔎 Buscar / añadir instrumento"; se cierra al añadir).
+
+### Changed
+- **Capital derivado de las posiciones reales**: se elimina el `CapitalInicial` fijo (10 000 €) y su `PortfolioOptions`/config. `DashboardDto` expone `Invested` (coste base de abiertas) y `MarketValue` (valor a precio real); la tarjeta principal muestra "Valor de cartera" + "Invertido". `TotalPnL` = realizado + no realizado.
+
+### Métricas
+- 103 tests verdes. Smoke real: HY9H.F 1360×5 → Invertido 6800 €, Valor de cartera ~6975 € (precio real ~1395), PnL +175 €.
+
+---
+
+## [1.1.0-tracker] - 2026-06-16
+
+Pivote de **simulador** a **tracker de precios reales**.
+
+### Added
+- ✅ **HV-010** Buscador de instrumentos por descripción / ISIN / ticker. `IInstrumentSearchProvider` + `YahooInstrumentSearchProvider` (`/v1/finance/search`), endpoint `GET /api/instruments/search`, tarjeta de búsqueda + tabla en el dashboard. (WKN no soportado por Yahoo → fuera de alcance.)
+- ✅ **HV-011** Watchlist persistida y editable en runtime. Entidad `TrackedSymbol` + migración `AddTrackedSymbol` + `IWatchlistService`. El generador lee los símbolos de BD en cada ciclo. Endpoints `GET/POST/DELETE /api/instruments/track[ed]`. Botones "+ Añadir" (resultados) y "✕" (quitar) en el panel. Seed inicial `HY9H.F` (SK hynix Inc., Frankfurt).
+
+### Changed
+- Feed en vivo 100% **datos reales** de Yahoo; intervalo de sondeo a 30 s. `MarketDataOptions`/`appsettings` reducidos (sin `Symbols`/`Volatility`/`Drift`/`Volume`/`Seed`; los símbolos viven en `TrackedSymbol`).
+
+### Removed
+- ✅ **HV-012** Retirada la simulación `RandomWalkTickGenerator` (+ su test). Estrategia automática **MA Crossover desactivada** (panel solo-visor; código conservado para reactivar).
+
+### Métricas
+- 96 tests verdes (build con `TreatWarningsAsErrors`).
+- Smoke test real: arranque OK, `provider=YahooFinance`, tick real `HY9H.F`=1390 €; alta/baja de símbolos verificada por endpoints.
+
+### Incidencias
+- ⚠️ `ESTADO_PROYECTO.json` apareció a **0 bytes** durante la sesión (causa externa, no edición de Claude). Reconstruido desde el import de `CLAUDE.md` con los 3 evolutivos nuevos.
+
+---
+
+## [1.0.0-MVP] - 2026-05-26
+
+### Completado
+
+**MVP del AI Trading Simulator** entregado en una sesión:
+
+- ✅ HV-001 Scaffold Clean Architecture (5 proyectos .NET 10)
+- ✅ HV-002 Modelo de dominio (Trade, MarketTick, PortfolioSnapshot, TradeStatus, TradeSignal)
+- ✅ HV-003 Persistencia EF Core + SQLite + migrations
+- ✅ HV-004 BackgroundService generador random-walk de ticks
+- ✅ HV-005 Estrategia MA Crossover automática + ChannelTickBus + OrderService
+- ✅ HV-006 Dashboard con métricas y gráfico Chart.js
+
+**Métricas finales:**
+- 78 tests unitarios e integración verdes
+- 6 evolutivos cerrados
+- App funcional: `dotnet run` → `https://localhost:5099/`
+- Smoke test runtime: dashboard muestra PnL no realizado en vivo, trades, gráfico
+
+## [Unreleased] - 2026-06-15
+
+### Fixed
+
+- **HV-008** Fix `YahooFinanceProvider` — el endpoint `/v7/finance/quote` empezó a devolver **401** (Yahoo exige cookie+crumb). Detectado en smoke test real (pendiente desde HV-007; los tests mockeados no lo cubrían).
+  - Migrado a `GET /v8/finance/chart/{symbol}?interval=1d&range=1d`, que sirve precio + volumen sin auth. Parseo de `chart.result[0].meta`.
+  - User-Agent de navegador en el HttpClient `YahooFinance` (`TryAddWithoutValidation`).
+  - `YahooFinanceProviderTests` reescritos al shape `/v8/chart` (mismos casos, 11 tests verdes).
+  - **Smoke test real ✅**: AAPL=291,13 (vol 37.905.580), GOOG=358,16 (vol 17.657.657). `BTCUSD` → 404 capturado per-símbolo (usar `BTC-USD` para Yahoo).
+  - **89 tests verdes**. Build verde con `TreatWarningsAsErrors=true`.
+
+- **Dashboard (Chart.js)** — corregido crash JS en `PointElement.inRange` al hacer hover sobre el gráfico (detectado en smoke test).
+  - `wwwroot/js/dashboard.js`: `priceChart.update('none')` → `priceChart.update()` + `animation: false` (el modo `'none'` dejaba los `PointElement` nuevos con `options=undefined`).
+  - Blindaje defensivo de puntos: `x` como epoch numérico + `.filter(Number.isFinite)` en `x`/`y`.
+  - Lección registrada como **L-001** en `_duran/LECCIONES.md`.
+
+### Changed (UI dashboard)
+
+- **Layout a ancho completo**: `_Layout.cshtml` usa `container-fluid` (nav, main, footer). `lang="es"`, título y brand → "🤖 AI Trading Simulator" enlazando al Dashboard.
+- **Modo oscuro** (Bootstrap 5.3 `data-bs-theme`): toggle en navbar + persistencia en `localStorage` + script anti-parpadeo en `<head>`. Navbar adaptable (`bg-body-tertiary`).
+- **Gráfico de precios en valor real con eje a la derecha** (estilo trading): eje Y `position: 'right'` con formato de precio, margen derecho (~12% extra en el `max` del eje X) para que la línea no quede pegada al borde, y plugin `currentValueLabels` que dibuja el último valor de cada serie como etiqueta coloreada **sobre el propio eje derecho** (estilo TradingView), con una flechita que apunta al nivel del precio. (Sustituye la normalización a % de cambio previa.)
+- **Selector de símbolo del gráfico**: `<select>` que se autopobla con las series disponibles (+ "Todos"), persistido en `localStorage` (`chartSymbol`). Por defecto muestra un único símbolo (escala legible); evita el aplastamiento por mezclar magnitudes (BTC vs acciones). Cambiarlo re-renderiza y reescala al instante.
+- **Barra de rango temporal con histórico real (HV-009)**: botones `En vivo · 1D · 5D · 1M · 3M · 6M · YTD · 1A · 3A · 5A` bajo el gráfico (`#rangeBar`). Al elegir un rango se cargan **OHLC reales de Yahoo** vía `GET /api/history?symbol&range` (`IMarketHistoryProvider`/`YahooHistoryProvider` sobre `/v8/chart` con `range`/`interval`, normaliza `BTCUSD→BTC-USD`); "En vivo" vuelve a la simulación. Eje X con unidad temporal adaptativa (segundos…años). El HttpClient Yahoo se registra siempre. Modo histórico pausa el redibujado en vivo del gráfico (métricas/tablas siguen en vivo).
+- **Cuenta atrás al próximo refresco del gráfico**: overlay (`#tickCountdown`) sobre el gráfico, justo debajo de la etiqueta de valor de la serie activa (`⏱ X.Xs`). Es **relativa al selector "Gráfico cada"** (`chartIntervalMs`): cuenta `lastChartAt + chartIntervalMs - now`, así que se reinicia exactamente en cada redibujo y refleja el intervalo elegido (3 s…5 min). Solo en modo "En vivo"; se actualiza cada 150 ms vía overlay HTML (sin repintar el canvas); posición con `scales.y.getPixelForValue`.
+- **Rejilla del gráfico visible en ambos temas**: `grid.color` y `ticks.color` como funciones scriptables que leen `data-bs-theme` → la cuadrícula y los números del eje se adaptan a claro/oscuro (antes la rejilla negra translúcida era invisible en modo oscuro).
+- **Selector de histórico**: `<select>` (50 / 250 / 1.000 / Máx 5.000 puntos) persistido en `localStorage` (`historyPoints`). El endpoint `/api/dashboard/data` acepta `?points=N` (acotado 10–5.000) → `DashboardService.GetSnapshotAsync(priceSeriesPoints)`. Los ticks ya se persistían en `App_Data/trading.db` (no se borran al arrancar); esto hace **visible** el histórico acumulado entre sesiones en vez de la ventana corta de 50 puntos.
+- **Formato es-ES**: capital/PnL como moneda (`Intl.NumberFormat` EUR), precios con 2-4 decimales, PnL coloreado verde/rojo.
+- **Estado del feed** en la cabecera: badge del proveedor activo (RandomWalk/Yahoo), nº de ticks y hora del último tick ("en vivo" con punto pulsante). Backend: `DashboardDto` + `DashboardService` exponen `ProviderType`, `TotalTicks`, `LastTickUtc` (nuevo campo `ProviderType` en `MarketDataOptions`).
+- **Cards y tablas**: cards de métricas con acento Comillas (`#0066cc`) + hover, tablas con scroll y cabecera fija, paleta corporativa en `site.css`.
+- **Refresco desacoplado**: métricas, estado y tablas siempre en vivo (3 s); el **gráfico** se refresca según un selector propio en la cabecera (Tiempo real 3 s / 30 s / 1 min / 2 min / 5 min), persistido en `localStorage` (`chartRefreshMs`). Implementado con una sola petición por ciclo + compuerta temporal (`lastChartAt`); cambiar el selector fuerza un redibujado inmediato del gráfico.
+
+### Removed
+
+- Código muerto de la plantilla por defecto: `HomeController.cs`, `Views/Home/Index.cshtml`, `Views/Home/Privacy.cshtml` y los enlaces Home/Privacy de navbar y footer.
+
+### Added
+
+- **Retención de la BD por tamaño** (`DatabaseRetentionService : BackgroundService`): cuando el fichero supera `Retention:MaxDatabaseSizeMb` (default **1024 MB = 1 GB**), purga los `MarketTick` más antiguos hasta `LowWaterMarkFraction` del límite (default 0,8) y ejecuta `VACUUM` para reclamar espacio. Configurable: `Enabled`, `MaxDatabaseSizeMb`, `CheckIntervalSeconds` (default 300), `LowWaterMarkFraction`. Opciones en `RetentionOptions` + sección `Retention` de `appsettings.json`. Tamaño medido con `PRAGMA page_count × page_size` (excluye WAL transitorio, refleja el VACUUM), expuesto vía `ITradingDbContext.GetDatabaseSizeBytesAsync` (reutilizado por el servicio de retención y el dashboard). Verificado end-to-end forzando el límite a 1 MB con ticks rápidos. **89 tests verdes**.
+- **Indicador de tamaño de BD en el dashboard**: `DashboardDto.DatabaseSizeBytes` + elemento "BD:" en la cabecera (junto a "Ticks"), formateado (KB/MB) — permite ver de un vistazo cuánto pesa y cómo actúa la retención.
+
+## [Unreleased] - 2026-05-26
+
+### Added (Fase 2 iniciada)
+
+- **HV-007** Provider real Yahoo Finance + abstracción intercambiable
+  - `Application/Common/Options/YahooFinanceOptions.cs` (BaseUrl + TimeoutSeconds)
+  - `Infrastructure/MarketData/YahooFinanceProvider.cs` (HttpClient + JSON parsing + validación defensiva)
+  - Helpers de test reutilizables en `Tests/Helpers/`: `MockHttpMessageHandler`, `TestHttpClientFactory`
+  - 11 tests nuevos `YahooFinanceProviderTests` (success, sin result, precio cero/null, HTTP 4xx/5xx, JSON malformado, volume null, endpoint, símbolos especiales)
+  - Paquete `Microsoft.Extensions.Http` 10.0.8 añadido a Infrastructure
+  - `Web/appsettings.json` con `MarketData.ProviderType` (default "RandomWalk") y subsección `MarketData.YahooFinance`
+  - **89 tests verdes total**
+
+### Changed (refactor para Fase 2)
+
+- `IMarketDataProvider` ahora es async: `Task<MarketTick> GetLatestAsync(symbol, t, ct)`
+- `RandomWalkTickGenerator` adaptado a la nueva firma con `Task.FromResult(tick)`
+- `MarketTickGeneratorService.GenerateAndPersistAsync` ahora await + try/catch por símbolo individual (resiliente a fallos de providers externos)
+- `Infrastructure/DependencyInjection.cs`: extraído `RegisterMarketDataProvider` con switch por `MarketData:ProviderType` (RandomWalk default, YahooFinance opcional)
+- 8 tests `RandomWalkTickGeneratorTests` migrados a `async Task` con `await GetLatestAsync(...)`
+
+### Arquitectura
+
+- **Patrón "switch en DI por config"**: para añadir AlphaVantage o Binance mañana, basta 1 archivo nuevo (provider) + 1 case en el switch. Cero cambios en `MarketTickGeneratorService`, estrategia, dashboard o tests del bus.
+
+- **HV-006** Dashboard con métricas y gráfico Chart.js
+  - `Application/Common/Options/PortfolioOptions.cs` (CapitalInicial 10000)
+  - `Application/Common/Dtos/DashboardDto.cs` + 4 records (OpenTradeDto, ClosedTradeDto, PriceSeriesDto, PricePoint)
+  - `Application/Common/Interfaces/IDashboardService.cs` + `Application/Services/DashboardService.cs`
+  - `Web/Controllers/DashboardController.cs` con `Index()` + `/api/dashboard/data`
+  - `Web/Views/Dashboard/Index.cshtml` (Bootstrap 5 cards + tablas + canvas)
+  - `Web/wwwroot/js/dashboard.js` (polling 3s + Chart.js)
+  - `Web/Program.cs`: default route → Dashboard + `AddJsonOptions(CamelCase)` explícito
+  - `Web/appsettings.json`: sección `Portfolio`
+  - Chart.js 4.4.0 + chartjs-adapter-date-fns 3.0.0 via CDN
+  - 7 tests `DashboardServiceTests` con SQLite `:memory:`
+  - **Smoke test runtime ✅**: `/api/dashboard/data` devuelve JSON correcto con `unrealizedPnL` calculado en vivo
+
+### Changed
+
+- `Infrastructure/DependencyInjection.cs`: + `PortfolioOptions` Options + `IDashboardService` Scoped
+- `DashboardService` calcula agregados en memoria (no en SQL) para evitar bug de SQLite+decimal-TEXT
+
+### Fixed
+
+- Detectado y mitigado: queries LINQ con aritmética sobre `decimal` mapeado como TEXT en SQLite devuelven 0. Workaround: `ToListAsync()` + agregar en C#. Documentado como DT-PERF-001 para futura migración.
+
+- **HV-005** Estrategia MA Crossover automática (cerebro del simulador)
+  - `Domain/Enums/TradeSignal.cs` (Buy=0, Sell=1)
+  - `Application/Common/Interfaces/ITickBus.cs` + `Application/Common/Interfaces/IOrderService.cs`
+  - `Application/Common/Options/StrategyOptions.cs` (ShortWindow=5, LongWindow=20, Quantity=1.0, validación constructor Short<Long)
+  - `Application/Strategies/IStrategy.cs` + `MovingAverageCrossoverStrategy.cs` (rolling windows por símbolo, detección de cruce por cambio de estado booleano)
+  - `Application/Services/OrderService.cs` (regla 1 posición abierta por símbolo)
+  - `Infrastructure/MarketData/ChannelTickBus.cs` (Channel<MarketTick> bounded 1000, DropOldest, SingleReader)
+  - `Infrastructure/Strategy/StrategyExecutionService.cs` (BackgroundService que consume bus y delega en IOrderService)
+  - Refactor `MarketTickGeneratorService`: batch atómica → persist → publish al bus
+  - 21 tests nuevos: 11 estrategia + 6 OrderService + 3 ChannelTickBus + 1 boundary case
+  - **Smoke test runtime ✅**: 147 MarketTicks + 1 Trade BUY abierto en 95s ejecutándose
+  - **71 tests verdes en total**
+
+### Changed
+
+- `Infrastructure/MarketData/MarketTickGeneratorService.cs` ahora inyecta `ITickBus` y publica cada tick tras persistir exitosamente
+- `Infrastructure/DependencyInjection.cs`: añadidos 5 registros (StrategyOptions + OrderService Scoped + ChannelTickBus Singleton + MovingAverageCrossoverStrategy Singleton + StrategyExecutionService HostedService)
+- `Web/appsettings.json`: sección `Strategy`
+
+### Added (previo)
+
+- **HV-004** BackgroundService generador de ticks de mercado
+  - `Application/Common/Interfaces/IMarketDataProvider.cs` — contrato de generación de ticks
+  - `Application/Common/Options/MarketDataOptions.cs` — config (símbolos+precio inicial, intervalo, volatilidad, drift, volumen, seed)
+  - `Infrastructure/MarketData/RandomWalkTickGenerator.cs` — random walk geométrico con Box-Muller para muestreo Normal(0,1), thread-safe via `lock` sobre `Random`, seedable para tests
+  - `Infrastructure/MarketData/MarketTickGeneratorService.cs` — `BackgroundService` con `PeriodicTimer(TimeProvider)` + `IServiceScopeFactory` para crear scope por ciclo
+  - `appsettings.json` con sección `MarketData` (3 símbolos: AAPL=175, GOOG=140, BTCUSD=65000; intervalo 2s; volatilidad 0.3%)
+  - Paquetes NuGet añadidos: `Microsoft.Extensions.Hosting.Abstractions` 10.0.8, `Microsoft.Extensions.Options.ConfigurationExtensions` 10.0.8
+  - Logging: `Microsoft.EntityFrameworkCore` bajado a `Warning` para no spammear con cada INSERT
+  - 8 tests del generador (`RandomWalkTickGeneratorTests`): determinismo con seed, no-negatividad bajo volatilidad extrema, símbolos configurados, normalización, volumen en rango, independencia entre símbolos
+  - **Smoke test runtime ✅**: app ejecutándose 12s genera 12 ticks (4 por símbolo × 3 símbolos), precios coherentes con iniciales, volúmenes en rango
+  - **50 tests verdes** (42 + 8 nuevos)
+
+- **HV-003** Persistencia EF Core 10.0.8 + SQLite
+  - Paquetes EF Core añadidos: `EntityFrameworkCore` (Application), `EntityFrameworkCore.Sqlite` (Infrastructure, Tests), `EntityFrameworkCore.Design` (Web)
+  - `Application/Common/Interfaces/ITradingDbContext.cs` — contrato con 3 DbSets + SaveChangesAsync
+  - `Infrastructure/Persistence/TradingDbContext.cs` (sealed)
+  - 3 entity configurations: `Trade`, `MarketTick`, `PortfolioSnapshot` con `decimal` mapeado a `TEXT` (precisión preservada en SQLite)
+  - `Infrastructure/DependencyInjection.cs` con extension `AddInfrastructure(IConfiguration)`
+  - `Web/Program.cs` invoca `AddInfrastructure` y aplica migrations al arrancar (`MigrateAsync`)
+  - `Web/appsettings.json` con `ConnectionStrings:Default = Data Source=App_Data/trading.db`
+  - Migration inicial `20260526135749_InitialCreate` con CREATE TABLE para 3 tablas + 4 índices
+  - Tool global `dotnet-ef` 10.0.8 instalada
+  - 6 tests de integración (`Tests/Infrastructure/TradingDbContextTests.cs`) con SQLite `:memory:`: round trip por entidad + preservación de precisión decimal (caso cripto 8 decimales) + filtrado indexado + estado Open tras reload
+  - Smoke test runtime: `dotnet run` aplica migration y crea `App_Data/trading.db` (+ WAL files) sin errores
+  - **42 tests verdes** (36 Domain + 6 Infrastructure)
+
+- **HV-002** Modelo de dominio puro (Clean Architecture - Domain layer)
+  - `Domain/Enums/TradeStatus.cs` (Open=0, Closed=1)
+  - `Domain/Entities/Trade.cs` (factory `Open`, método `Close`, `RealizedPnL`, invariantes en factories)
+  - `Domain/Entities/MarketTick.cs` (inmutable, factory `Create`, invariantes Price/Volume)
+  - `Domain/Entities/PortfolioSnapshot.cs` (factory `Create`, `TotalPnL`, contadores no-negativos)
+  - Suite de tests: `TradeTests` (12 métodos / ~22 casos con [Theory]), `MarketTickTests` (6 / ~10), `PortfolioSnapshotTests` (7)
+  - **36 tests verdes**, 0 fallos
+  - Domain sigue **sin paquetes NuGet** (solo BCL)
+  - Eliminados placeholders `Domain/Class1.cs` y `Tests/UnitTest1.cs`
+
+- **HV-001** Scaffold inicial Clean Architecture (.NET 10)
+  - Solución `Comillas.AITradingSimulator.slnx` (formato XML slnx por defecto en SDK 10.0.300)
+  - 5 proyectos: `Domain` (classlib), `Application` (classlib), `Infrastructure` (classlib), `Web` (mvc), `Tests` (xunit)
+  - Referencias entre proyectos respetando Clean Architecture (Domain sin deps, Application → Domain, Infrastructure → Application+Domain, Web → Application+Infrastructure, Tests → todos)
+  - `TreatWarningsAsErrors=true` en los 5 csproj (build verde con 0 warnings)
+  - `App_Data/.gitkeep` en Web (placeholder para futura `trading.db`)
+  - `.gitignore` raíz cubriendo `bin/`, `obj/`, `*.db`, `App_Data/*.db*`, `.vs/`, secrets, STIC.IA download, MCP credentials
+  - Visual Studio Solution Folders configuradas vía `integracion-vs.ps1` (89 carpetas, 306 archivos)
+- Onboarding completado con DURAN configurado para "AI Trading Simulator" (proyecto personal, .NET 10, MVC + Clean Architecture + SQLite)
+- Spec `_duran/specs/HV-001.md`
+
+### Verificación
+
+- `dotnet build`: 0 errores, 0 warnings (con `TreatWarningsAsErrors=true`)
+- `dotnet test`: 1 test placeholder verde (xunit default)
+- SDK utilizado: .NET 10.0.300
+
+## [Unreleased]
+
+### Added
+-
+
+### Changed
+-
+
+### Fixed
+-
+
+---
+
+## [X.Y.Z] - YYYY-MM-DD
+
+### Resumen
+[Breve descripcion de esta version]
+
+### Added
+- [Funcionalidad nueva] (#issue) - @desarrollador
+
+### Changed
+- [Cambio realizado] (#issue) - @desarrollador
+
+### Fixed
+- [Bug corregido] (#issue) - @desarrollador
+
+### Notas de la Version
+- [Cualquier nota relevante para esta version]
+- [Instrucciones especiales de migracion si aplica]
+
+---
+
+## Plantilla para Nueva Version
+
+```markdown
+## [X.Y.Z] - YYYY-MM-DD
+
+### Resumen
+[Descripcion breve]
+
+### Added
+-
+
+### Changed
+-
+
+### Deprecated
+-
+
+### Removed
+-
+
+### Fixed
+-
+
+### Security
+-
+
+### Notas de la Version
+-
+```
+
+---
+
+## Historial de Versiones
+
+| Version | Fecha | Tipo | Descripcion |
+|---------|-------|------|-------------|
+| X.Y.Z | YYYY-MM-DD | [Major/Minor/Patch] | [Descripcion breve] |
+
+---
+
+**Ultima actualizacion**: [YYYY-MM-DD]

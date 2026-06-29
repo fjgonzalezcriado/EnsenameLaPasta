@@ -1,0 +1,75 @@
+// TEMPLATE: AuditableEntity | Skill: generador-crud | Version: 3.1.0
+// Entity with full audit trail and SaveChangesInterceptor
+// Placeholders: {{EntityName}}, {{ProjectNamespace}}
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+
+namespace {{ProjectNamespace}}.Domain.Entities;
+
+public interface IAuditable
+{
+    DateTimeOffset CreatedAt { get; set; }
+    string? CreatedBy { get; set; }
+    DateTimeOffset? ModifiedAt { get; set; }
+    string? ModifiedBy { get; set; }
+}
+
+public abstract class AuditableEntity : IAuditable
+{
+    public int Id { get; protected set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset? ModifiedAt { get; set; }
+    public string? ModifiedBy { get; set; }
+}
+
+public interface ICurrentUserService
+{
+    string? UserName { get; }
+}
+
+public sealed class AuditableInterceptor : SaveChangesInterceptor
+{
+    private readonly ICurrentUserService _userService;
+    private readonly TimeProvider _timeProvider;
+
+    public AuditableInterceptor(ICurrentUserService userService, TimeProvider timeProvider)
+    {
+        _userService = userService;
+        _timeProvider = timeProvider;
+    }
+
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData, InterceptionResult<int> result,
+        CancellationToken ct = default)
+    {
+        if (eventData.Context is null) return base.SavingChangesAsync(eventData, result, ct);
+
+        var now = _timeProvider.GetUtcNow();
+        var user = _userService.UserName ?? "System";
+
+        foreach (var entry in eventData.Context.ChangeTracker.Entries<IAuditable>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entry.Entity.CreatedAt = now;
+                    entry.Entity.CreatedBy = user;
+                    break;
+                case EntityState.Modified:
+                    entry.Entity.ModifiedAt = now;
+                    entry.Entity.ModifiedBy = user;
+                    entry.Property(nameof(IAuditable.CreatedAt)).IsModified = false;
+                    entry.Property(nameof(IAuditable.CreatedBy)).IsModified = false;
+                    break;
+            }
+        }
+        return base.SavingChangesAsync(eventData, result, ct);
+    }
+}
+
+// Registro en Program.cs:
+// builder.Services.AddSingleton(TimeProvider.System);
+// builder.Services.AddScoped<ICurrentUserService, HttpContextUserService>();
+// options.AddInterceptors(sp.GetRequiredService<AuditableInterceptor>());

@@ -1,0 +1,86 @@
+// ============================================================
+// SerilogConfig.cs
+// Configuracion de Serilog para {{NombreProyecto}}
+// Generado por: /add-telemetry
+// ============================================================
+using Serilog;
+using Serilog.Events;
+
+namespace {{NombreProyecto}}.Infrastructure.Logging;
+
+/// <summary>
+/// Extension methods para configurar Serilog en Program.cs.
+/// </summary>
+public static class SerilogConfig
+{
+    /// <summary>
+    /// Configura Serilog con bootstrap logger (antes de builder).
+    /// Llamar al inicio de Program.cs.
+    /// </summary>
+    public static void ConfigureBootstrapLogger()
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateBootstrapLogger();
+    }
+
+    /// <summary>
+    /// Configura Serilog completo desde appsettings.json.
+    /// Llamar con builder.Host.UseSerilog().
+    /// </summary>
+    public static void ConfigureSerilog(
+        HostBuilderContext context,
+        LoggerConfiguration loggerConfiguration)
+    {
+        loggerConfiguration
+            .ReadFrom.Configuration(context.Configuration)
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithThreadId()
+            .Enrich.WithProperty("Application", "{{NombreProyecto}}");
+    }
+
+    /// <summary>
+    /// Configura el middleware de logging de requests HTTP.
+    /// Excluye health checks y ajusta niveles por duracion.
+    /// </summary>
+    public static void ConfigureRequestLogging(
+        Serilog.AspNetCore.RequestLoggingOptions options)
+    {
+        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+            diagnosticContext.Set("UserAgent",
+                httpContext.Request.Headers.UserAgent.ToString());
+            diagnosticContext.Set("UserId",
+                httpContext.User?.Identity?.Name ?? "anonymous");
+        };
+
+        // No loguear health checks, elevar nivel si request es lento
+        options.GetLevel = (httpContext, elapsed, ex) =>
+        {
+            if (httpContext.Request.Path.StartsWithSegments("/health"))
+                return LogEventLevel.Verbose;
+            if (ex != null)
+                return LogEventLevel.Error;
+            if (elapsed > 5000)
+                return LogEventLevel.Warning;
+            return LogEventLevel.Information;
+        };
+    }
+}
+
+// ============================================================
+// Uso en Program.cs:
+//
+// // 1. Bootstrap (antes de builder)
+// SerilogConfig.ConfigureBootstrapLogger();
+//
+// // 2. Configuracion completa
+// builder.Host.UseSerilog(SerilogConfig.ConfigureSerilog);
+//
+// // 3. Middleware de request logging
+// app.UseSerilogRequestLogging(SerilogConfig.ConfigureRequestLogging);
+// ============================================================

@@ -1,0 +1,225 @@
+// ============================================================================
+// TEMPLATE: Validator.cs - Validadores con FluentValidation
+// Skill: generador-crud
+// Versión: 2.8.0
+// ============================================================================
+// USO: Reemplazar {{Entidad}}, {{Namespace}}
+// ============================================================================
+
+using FluentValidation;
+using {{Namespace}}.Application.Common.Interfaces;
+using {{Namespace}}.Application.Features.{{Entidades}}.Commands;
+
+namespace {{Namespace}}.Application.Features.{{Entidades}}.Validators;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VALIDATOR PARA CREAR
+// ═══════════════════════════════════════════════════════════════════════════
+
+public class Create{{Entidad}}CommandValidator : AbstractValidator<Create{{Entidad}}Command>
+{
+    private readonly I{{Entidad}}Repository _repository;
+
+    public Create{{Entidad}}CommandValidator(I{{Entidad}}Repository repository)
+    {
+        _repository = repository;
+
+        // ═══════════════════════════════════════════════════════════════════
+        // REGLAS DE VALIDACIÓN
+        // ═══════════════════════════════════════════════════════════════════
+
+        {{ReglasValidacionCrear}}
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // VALIDACIONES ASÍNCRONAS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    {{MetodosValidacionAsync}}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VALIDATOR PARA ACTUALIZAR
+// ═══════════════════════════════════════════════════════════════════════════
+
+public class Update{{Entidad}}CommandValidator : AbstractValidator<Update{{Entidad}}Command>
+{
+    private readonly I{{Entidad}}Repository _repository;
+
+    public Update{{Entidad}}CommandValidator(I{{Entidad}}Repository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Id)
+            .NotEmpty().WithMessage("El ID es obligatorio")
+            .MustAsync(ExistirEntidad).WithMessage("{{Entidad}} no encontrado/a");
+
+        {{ReglasValidacionActualizar}}
+    }
+
+    private async Task<bool> ExistirEntidad(int id, CancellationToken ct)
+    {
+        return await _repository.ExistsAsync(id, ct);
+    }
+
+    {{MetodosValidacionAsyncActualizar}}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PATRONES DE VALIDACIÓN COMUNES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/*
+// STRINGS - Obligatorios
+RuleFor(x => x.Nombre)
+    .NotEmpty().WithMessage("El nombre es obligatorio")
+    .MaximumLength(200).WithMessage("El nombre no puede exceder {MaxLength} caracteres")
+    .MinimumLength(3).WithMessage("El nombre debe tener al menos {MinLength} caracteres");
+
+// STRINGS - Opcionales con formato
+RuleFor(x => x.Email)
+    .EmailAddress().WithMessage("El email no tiene formato válido")
+    .When(x => !string.IsNullOrEmpty(x.Email));
+
+// STRINGS - Regex
+RuleFor(x => x.Codigo)
+    .NotEmpty().WithMessage("El código es obligatorio")
+    .Matches(@"^[A-Z]{3}-\d{4}$").WithMessage("El código debe tener formato XXX-0000");
+
+// NÚMEROS - Rango
+RuleFor(x => x.Importe)
+    .GreaterThan(0).WithMessage("El importe debe ser positivo")
+    .LessThanOrEqualTo(100000).WithMessage("El importe máximo es {ComparisonValue}€");
+
+// NÚMEROS - Precisión decimal
+RuleFor(x => x.Porcentaje)
+    .InclusiveBetween(0, 100).WithMessage("El porcentaje debe estar entre 0 y 100")
+    .PrecisionScale(5, 2, false).WithMessage("Máximo 2 decimales");
+
+// FECHAS - Futuro
+RuleFor(x => x.FechaInicio)
+    .GreaterThanOrEqualTo(DateTime.Today).WithMessage("La fecha debe ser actual o futura");
+
+// FECHAS - Comparación
+RuleFor(x => x.FechaFin)
+    .GreaterThan(x => x.FechaInicio).WithMessage("La fecha fin debe ser posterior a la fecha inicio");
+
+// ENUMS
+RuleFor(x => x.Estado)
+    .IsInEnum().WithMessage("Estado no válido");
+
+// COLECCIONES
+RuleFor(x => x.Items)
+    .NotEmpty().WithMessage("Debe incluir al menos un item")
+    .Must(x => x.Count <= 100).WithMessage("Máximo 100 items");
+
+// VALIDACIÓN CONDICIONAL
+RuleFor(x => x.NumeroDocumento)
+    .NotEmpty().WithMessage("El número de documento es obligatorio")
+    .When(x => x.TipoDocumento == TipoDocumento.DNI);
+
+// VALIDACIÓN ASYNC - Unicidad
+RuleFor(x => x.Email)
+    .MustAsync(async (email, ct) => !await _repository.ExisteEmailAsync(email, ct))
+    .WithMessage("El email ya está registrado");
+
+// VALIDACIÓN ASYNC - Con contexto
+RuleFor(x => x.Email)
+    .MustAsync(async (command, email, ct) =>
+        !await _repository.ExisteEmailExceptoAsync(email, command.Id, ct))
+    .WithMessage("El email ya está registrado por otro usuario");
+
+// MENSAJES PERSONALIZADOS CON PLACEHOLDERS
+RuleFor(x => x.Nombre)
+    .MaximumLength(200)
+    .WithMessage("El campo {PropertyName} no puede exceder {MaxLength} caracteres. Ingresaste {TotalLength}.");
+
+// SEVERIDAD
+RuleFor(x => x.Observaciones)
+    .MaximumLength(2000)
+    .WithSeverity(Severity.Warning);
+
+// VALIDADOR ANIDADO
+RuleFor(x => x.Direccion)
+    .SetValidator(new DireccionValidator());
+
+// CADA ELEMENTO DE COLECCIÓN
+RuleForEach(x => x.Items)
+    .SetValidator(new ItemValidator());
+*/
+
+// ============================================================================
+// EJEMPLO GENERADO - BecaValidators
+// ============================================================================
+/*
+public class CreateBecaCommandValidator : AbstractValidator<CreateBecaCommand>
+{
+    private readonly IBecaRepository _repository;
+
+    public CreateBecaCommandValidator(IBecaRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Codigo)
+            .NotEmpty().WithMessage("El código es obligatorio")
+            .MaximumLength(20).WithMessage("El código no puede exceder {MaxLength} caracteres")
+            .Matches(@"^[A-Z0-9-]+$").WithMessage("El código solo puede contener letras mayúsculas, números y guiones")
+            .MustAsync(NoExistirCodigo).WithMessage("Ya existe una beca con este código");
+
+        RuleFor(x => x.Nombre)
+            .NotEmpty().WithMessage("El nombre es obligatorio")
+            .MaximumLength(200).WithMessage("El nombre no puede exceder {MaxLength} caracteres")
+            .MinimumLength(5).WithMessage("El nombre debe tener al menos {MinLength} caracteres");
+
+        RuleFor(x => x.Descripcion)
+            .MaximumLength(2000).WithMessage("La descripción no puede exceder {MaxLength} caracteres");
+
+        RuleFor(x => x.Importe)
+            .GreaterThan(0).WithMessage("El importe debe ser mayor que 0")
+            .LessThanOrEqualTo(50000).WithMessage("El importe máximo es {ComparisonValue}€");
+
+        RuleFor(x => x.FechaInicio)
+            .NotEmpty().WithMessage("La fecha de inicio es obligatoria")
+            .GreaterThanOrEqualTo(DateTime.Today).WithMessage("La fecha de inicio debe ser actual o futura");
+
+        RuleFor(x => x.FechaFin)
+            .NotEmpty().WithMessage("La fecha de fin es obligatoria")
+            .GreaterThan(x => x.FechaInicio).WithMessage("La fecha de fin debe ser posterior a la fecha de inicio");
+    }
+
+    private async Task<bool> NoExistirCodigo(string codigo, CancellationToken ct)
+    {
+        return !await _repository.ExisteCodigoAsync(codigo, ct);
+    }
+}
+
+public class UpdateBecaCommandValidator : AbstractValidator<UpdateBecaCommand>
+{
+    private readonly IBecaRepository _repository;
+
+    public UpdateBecaCommandValidator(IBecaRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Id)
+            .NotEmpty().WithMessage("El ID es obligatorio")
+            .MustAsync(ExistirBeca).WithMessage("Beca no encontrada");
+
+        RuleFor(x => x.Nombre)
+            .NotEmpty().WithMessage("El nombre es obligatorio")
+            .MaximumLength(200).WithMessage("El nombre no puede exceder {MaxLength} caracteres");
+
+        RuleFor(x => x.Descripcion)
+            .MaximumLength(2000).WithMessage("La descripción no puede exceder {MaxLength} caracteres");
+
+        RuleFor(x => x.Importe)
+            .GreaterThan(0).WithMessage("El importe debe ser mayor que 0")
+            .LessThanOrEqualTo(50000).WithMessage("El importe máximo es {ComparisonValue}€");
+    }
+
+    private async Task<bool> ExistirBeca(int id, CancellationToken ct)
+    {
+        return await _repository.ExistsAsync(id, ct);
+    }
+}
+*/

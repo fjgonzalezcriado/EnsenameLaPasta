@@ -1,0 +1,219 @@
+// TEMPLATE: Generic API Client Base Class
+// Version: 1.0.0
+// Uso: Clase base para clientes API HTTP
+
+using System.Net.Http.Json;
+using System.Text.Json;
+
+namespace Comillas.MiApp.Infrastructure.ApiClients;
+
+/// <summary>
+/// Cliente base genérico para APIs REST
+/// </summary>
+public abstract class ApiClientBase
+{
+    protected readonly HttpClient HttpClient;
+    protected readonly ILogger Logger;
+    protected readonly JsonSerializerOptions JsonOptions;
+
+    protected ApiClientBase(
+        HttpClient httpClient,
+        ILogger logger)
+    {
+        HttpClient = httpClient;
+        Logger = logger;
+        JsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        };
+    }
+
+    /// <summary>
+    /// GET request genérico
+    /// </summary>
+    protected async Task<TResponse?> GetAsync<TResponse>(
+        string endpoint,
+        CancellationToken ct = default)
+        where TResponse : class
+    {
+        Logger.LogInformation("GET {Endpoint}", endpoint);
+
+        try
+        {
+            var response = await HttpClient.GetAsync(endpoint, ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Logger.LogWarning("Recurso no encontrado: {Endpoint}", endpoint);
+                return null;
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions, ct);
+
+            Logger.LogInformation("GET {Endpoint} completado correctamente", endpoint);
+
+            return result;
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogError(ex, "Error HTTP en GET {Endpoint}: {Message}", endpoint, ex.Message);
+            throw;
+        }
+        catch (TaskCanceledException ex) when (ex.CancellationToken == ct)
+        {
+            Logger.LogWarning("GET {Endpoint} cancelado por el usuario", endpoint);
+            throw;
+        }
+        catch (TaskCanceledException ex)
+        {
+            Logger.LogError(ex, "Timeout en GET {Endpoint}", endpoint);
+            throw new TimeoutException($"Timeout al llamar {endpoint}", ex);
+        }
+    }
+
+    /// <summary>
+    /// POST request genérico
+    /// </summary>
+    protected async Task<TResponse?> PostAsync<TRequest, TResponse>(
+        string endpoint,
+        TRequest request,
+        CancellationToken ct = default)
+        where TResponse : class
+    {
+        Logger.LogInformation("POST {Endpoint}", endpoint);
+
+        try
+        {
+            var response = await HttpClient.PostAsJsonAsync(endpoint, request, JsonOptions, ct);
+
+            response.EnsureSuccessStatusCode();
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                Logger.LogInformation("POST {Endpoint} completado sin contenido", endpoint);
+                return null;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions, ct);
+
+            Logger.LogInformation("POST {Endpoint} completado correctamente", endpoint);
+
+            return result;
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogError(ex, "Error HTTP en POST {Endpoint}: {Message}", endpoint, ex.Message);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// PUT request genérico
+    /// </summary>
+    protected async Task PutAsync<TRequest>(
+        string endpoint,
+        TRequest request,
+        CancellationToken ct = default)
+    {
+        Logger.LogInformation("PUT {Endpoint}", endpoint);
+
+        try
+        {
+            var response = await HttpClient.PutAsJsonAsync(endpoint, request, JsonOptions, ct);
+
+            response.EnsureSuccessStatusCode();
+
+            Logger.LogInformation("PUT {Endpoint} completado correctamente", endpoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogError(ex, "Error HTTP en PUT {Endpoint}: {Message}", endpoint, ex.Message);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// DELETE request genérico
+    /// </summary>
+    protected async Task<bool> DeleteAsync(
+        string endpoint,
+        CancellationToken ct = default)
+    {
+        Logger.LogInformation("DELETE {Endpoint}", endpoint);
+
+        try
+        {
+            var response = await HttpClient.DeleteAsync(endpoint, ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Logger.LogWarning("Recurso no encontrado para eliminar: {Endpoint}", endpoint);
+                return false;
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            Logger.LogInformation("DELETE {Endpoint} completado correctamente", endpoint);
+
+            return true;
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogError(ex, "Error HTTP en DELETE {Endpoint}: {Message}", endpoint, ex.Message);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Manejo de respuestas paginadas
+    /// </summary>
+    protected async Task<PaginatedResponse<T>> GetPaginatedAsync<T>(
+        string endpoint,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+        where T : class
+    {
+        var url = $"{endpoint}?page={page}&pageSize={pageSize}";
+
+        Logger.LogInformation("GET paginado {Endpoint} (página {Page}, tamaño {PageSize})", endpoint, page, pageSize);
+
+        var response = await GetAsync<PaginatedResponse<T>>(url, ct);
+
+        return response ?? new PaginatedResponse<T>(new List<T>(), 0, page, pageSize);
+    }
+}
+
+/// <summary>
+/// Wrapper genérico para respuestas paginadas
+/// </summary>
+public record PaginatedResponse<T>(
+    List<T> Items,
+    int TotalCount,
+    int Page,
+    int PageSize)
+{
+    public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
+    public bool HasNextPage => Page < TotalPages;
+    public bool HasPreviousPage => Page > 1;
+}
+
+/// <summary>
+/// Wrapper genérico para respuestas de API
+/// </summary>
+public record ApiResponse<T>
+{
+    public bool Success { get; init; }
+    public T? Data { get; init; }
+    public string? ErrorMessage { get; init; }
+    public int StatusCode { get; init; }
+
+    public static ApiResponse<T> SuccessResponse(T data, int statusCode = 200)
+        => new() { Success = true, Data = data, StatusCode = statusCode };
+
+    public static ApiResponse<T> ErrorResponse(string errorMessage, int statusCode = 500)
+        => new() { Success = false, ErrorMessage = errorMessage, StatusCode = statusCode };
+}

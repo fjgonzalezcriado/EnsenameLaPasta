@@ -1,0 +1,79 @@
+// TEMPLATE: Oracle HCM Cloud API Client
+// Version: 1.0.0
+// Uso: Cliente para Oracle HCM Cloud (gestión RRHH)
+
+namespace Comillas.MiApp.Infrastructure.ApiClients;
+
+public interface IOracleHcmClient
+{
+    Task<IReadOnlyList<EmployeeDto>> GetEmployeesAsync(CancellationToken ct = default);
+    Task<EmployeeDto?> GetEmployeeByIdAsync(string employeeId, CancellationToken ct = default);
+    Task<IReadOnlyList<AbsenceDto>> GetAbsencesAsync(string employeeId, CancellationToken ct = default);
+}
+
+public class OracleHcmClient : ApiClientBase, IOracleHcmClient
+{
+    public OracleHcmClient(HttpClient httpClient, ILogger<OracleHcmClient> logger)
+        : base(httpClient, logger)
+    {
+    }
+
+    public async Task<IReadOnlyList<EmployeeDto>> GetEmployeesAsync(CancellationToken ct = default)
+    {
+        Logger.LogInformation("Obteniendo empleados desde Oracle HCM");
+
+        var response = await GetAsync<OracleHcmListResponse<EmployeeDto>>("employees", ct);
+
+        return response?.Items ?? new List<EmployeeDto>();
+    }
+
+    public async Task<EmployeeDto?> GetEmployeeByIdAsync(string employeeId, CancellationToken ct = default)
+    {
+        Logger.LogInformation("Obteniendo empleado {EmployeeId} desde Oracle HCM", employeeId);
+
+        return await GetAsync<EmployeeDto>($"employees/{employeeId}", ct);
+    }
+
+    public async Task<IReadOnlyList<AbsenceDto>> GetAbsencesAsync(
+        string employeeId,
+        CancellationToken ct = default)
+    {
+        Logger.LogInformation("Obteniendo ausencias del empleado {EmployeeId}", employeeId);
+
+        var response = await GetAsync<OracleHcmListResponse<AbsenceDto>>(
+            $"employees/{employeeId}/absences",
+            ct);
+
+        return response?.Items ?? new List<AbsenceDto>();
+    }
+}
+
+// ============================================================================
+// DTOs
+// ============================================================================
+
+public record EmployeeDto(
+    string EmployeeNumber,
+    string FirstName,
+    string LastName,
+    string Email,
+    string Department,
+    string JobTitle,
+    DateTime HireDate,
+    string Status);
+
+public record AbsenceDto(
+    string AbsenceId,
+    string EmployeeNumber,
+    string AbsenceType,
+    DateTime StartDate,
+    DateTime EndDate,
+    string Status);
+
+public record OracleHcmListResponse<T>(
+    List<T> Items,
+    int Count,
+    bool HasMore,
+    int Limit,
+    int Offset,
+    string? Links);

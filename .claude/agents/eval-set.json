@@ -1,0 +1,163 @@
+{
+  "version": "1.0.0",
+  "description": "Evaluation set for 16 STIC.IA agents - activation and non-activation queries",
+  "agents": [
+    {
+      "agent": "security-auditor",
+      "queries": [
+        {"query": "audita la seguridad del proyecto", "should_trigger": true, "language": "es"},
+        {"query": "review OWASP top 10 vulnerabilities in this code", "should_trigger": true, "language": "en"},
+        {"query": "hay secrets hardcoded en el codigo?", "should_trigger": true, "language": "es"},
+        {"query": "genera un CRUD de becas", "should_trigger": false, "language": "es"},
+        {"query": "crea tests unitarios", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "architecture-validator",
+      "queries": [
+        {"query": "valida que la arquitectura sigue Clean Architecture", "should_trigger": true, "language": "es"},
+        {"query": "las referencias entre proyectos estan bien?", "should_trigger": true, "language": "es"},
+        {"query": "check if namespaces follow Comillas convention", "should_trigger": true, "language": "en"},
+        {"query": "escribe un endpoint de API", "should_trigger": false, "language": "es"},
+        {"query": "ejecuta los tests", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "nuget-analyzer",
+      "queries": [
+        {"query": "analiza los paquetes NuGet del proyecto", "should_trigger": true, "language": "es"},
+        {"query": "hay paquetes vulnerables?", "should_trigger": true, "language": "es"},
+        {"query": "migra a Central Package Management", "should_trigger": true, "language": "es"},
+        {"query": "crea un controlador de API", "should_trigger": false, "language": "es"},
+        {"query": "configura Azure Key Vault", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "test-runner",
+      "queries": [
+        {"query": "ejecuta todos los tests del proyecto", "should_trigger": true, "language": "es"},
+        {"query": "por que fallan estos tests?", "should_trigger": true, "language": "es"},
+        {"query": "genera tests de integracion con Testcontainers", "should_trigger": true, "language": "es"},
+        {"query": "revisa la arquitectura del proyecto", "should_trigger": false, "language": "es"},
+        {"query": "configura OpenTelemetry", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "code-reviewer",
+      "queries": [
+        {"query": "haz code review de estos cambios", "should_trigger": true, "language": "es"},
+        {"query": "review this pull request for quality issues", "should_trigger": true, "language": "en"},
+        {"query": "que mejoras le harias a este codigo?", "should_trigger": true, "language": "es"},
+        {"query": "crea una nueva entidad Beca", "should_trigger": false, "language": "es"},
+        {"query": "despliega en produccion", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "migration-assistant",
+      "queries": [
+        {"query": "migra este proyecto de .NET 4.8 a .NET 10", "should_trigger": true, "language": "es"},
+        {"query": "actualiza de .NET 8 a .NET 10", "should_trigger": true, "language": "es"},
+        {"query": "migrate from EF6 to EF Core", "should_trigger": true, "language": "en"},
+        {"query": "crea un nuevo proyecto desde cero", "should_trigger": false, "language": "es"},
+        {"query": "audita la seguridad", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "threat-modeler",
+      "queries": [
+        {"query": "genera un modelo de amenazas STRIDE para esta aplicacion", "should_trigger": true, "language": "es"},
+        {"query": "identifica los trust boundaries del sistema", "should_trigger": true, "language": "es"},
+        {"query": "create a threat model with data flow diagrams", "should_trigger": true, "language": "en"},
+        {"query": "arregla este bug de compilacion", "should_trigger": false, "language": "es"},
+        {"query": "actualiza los NuGets", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "secret-rotation-advisor",
+      "queries": [
+        {"query": "migra los secrets hardcoded a Azure Key Vault", "should_trigger": true, "language": "es"},
+        {"query": "genera un plan de rotacion de secretos", "should_trigger": true, "language": "es"},
+        {"query": "configura DefaultAzureCredential", "should_trigger": true, "language": "es"},
+        {"query": "crea tests unitarios", "should_trigger": false, "language": "es"},
+        {"query": "revisa la arquitectura", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "identity-auditor",
+      "queries": [
+        {"query": "audita la configuracion de Azure AD", "should_trigger": true, "language": "es"},
+        {"query": "los TokenValidationParameters estan correctos?", "should_trigger": true, "language": "es"},
+        {"query": "review Entra ID token validation settings", "should_trigger": true, "language": "en"},
+        {"query": "genera documentacion de usuario", "should_trigger": false, "language": "es"},
+        {"query": "optimiza el rendimiento de queries", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "rbac-designer",
+      "queries": [
+        {"query": "diseña las politicas de autorizacion con Azure AD", "should_trigger": true, "language": "es"},
+        {"query": "mapea los grupos de Azure AD a roles de la aplicacion", "should_trigger": true, "language": "es"},
+        {"query": "configure AddAuthorization with claims-based policies", "should_trigger": true, "language": "en"},
+        {"query": "genera una coleccion Postman", "should_trigger": false, "language": "es"},
+        {"query": "ejecuta dotnet build", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "database-reviewer",
+      "queries": [
+        {"query": "revisa las queries de EF Core, hay N+1?", "should_trigger": true, "language": "es"},
+        {"query": "review this migration before applying", "should_trigger": true, "language": "en"},
+        {"query": "que indices faltan en la base de datos?", "should_trigger": true, "language": "es"},
+        {"query": "crea un layout web", "should_trigger": false, "language": "es"},
+        {"query": "configura CI/CD pipeline", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "api-contract-validator",
+      "queries": [
+        {"query": "valida que el contrato OpenAPI no tiene breaking changes", "should_trigger": true, "language": "es"},
+        {"query": "check if all endpoints have proper auth", "should_trigger": true, "language": "en"},
+        {"query": "genera la coleccion Postman desde el OpenAPI", "should_trigger": true, "language": "es"},
+        {"query": "escribe tests de dominio", "should_trigger": false, "language": "es"},
+        {"query": "configura Serilog", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "performance-profiler",
+      "queries": [
+        {"query": "hay anti-patrones de rendimiento en el codigo?", "should_trigger": true, "language": "es"},
+        {"query": "find async void and sync-over-async issues", "should_trigger": true, "language": "en"},
+        {"query": "que caching strategy deberia usar?", "should_trigger": true, "language": "es"},
+        {"query": "genera documentacion tecnica", "should_trigger": false, "language": "es"},
+        {"query": "crea una nueva entidad de dominio", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "build-fixer",
+      "queries": [
+        {"query": "el build falla, arreglalo", "should_trigger": true, "language": "es"},
+        {"query": "fix these compilation errors CS0246", "should_trigger": true, "language": "en"},
+        {"query": "hay errores de compilacion tras actualizar NuGets", "should_trigger": true, "language": "es"},
+        {"query": "haz code review", "should_trigger": false, "language": "es"},
+        {"query": "configura Azure Blob Storage", "should_trigger": false, "language": "es"}
+      ]
+    },
+    {
+      "agent": "refactor-cleaner",
+      "queries": [
+        {"query": "limpia el codigo muerto del proyecto", "should_trigger": true, "language": "es"},
+        {"query": "hay clases que deberian ser sealed?", "should_trigger": true, "language": "es"},
+        {"query": "run de-sloppify pipeline on this codebase", "should_trigger": true, "language": "en"},
+        {"query": "detecta slop generado por IA", "should_trigger": true, "language": "es"},
+        {"query": "crea un nuevo endpoint API", "should_trigger": false, "language": "es"}
+      ]
+    }
+  ],
+  "totals": {
+    "agents": 16,
+    "queries": 81,
+    "should_trigger_true": 49,
+    "should_trigger_false": 32,
+    "languages": {"es": 59, "en": 22}
+  }
+}

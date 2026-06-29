@@ -1,0 +1,98 @@
+{
+    "companyAnnouncements":  [
+                                 "STIC.IA v3.9.0 | AI Trading Simulator | modo: desarrollo\nMCPs: Roslyn, dotnet/skills | Falta: Context7\n/sos para ayuda rapida"
+                             ],
+    "hooks":  {
+                  "SessionStart":  [
+                                       {
+                                           "matcher":  "*",
+                                           "hooks":  [
+                                                         {
+                                                             "type":  "command",
+                                                             "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/banner.ps1\"",
+                                                             "timeout":  30
+                                                         }
+                                                     ]
+                                       }
+                                   ],
+                  "PreToolUse":  [
+                                     {
+                                         "matcher":  "Bash",
+                                         "hooks":  [
+                                                       {
+                                                           "type":  "command",
+                                                           "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/bash-guard.ps1\"",
+                                                           "timeout":  10
+                                                       },
+                                                       {
+                                                           "type":  "command",
+                                                           "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/antipattern-guard.ps1\"",
+                                                           "timeout":  15
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "matcher":  "Write|Edit",
+                                         "hooks":  [
+                                                       {
+                                                           "type":  "command",
+                                                           "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/protect-files.ps1\"",
+                                                           "timeout":  5
+                                                       },
+                                                       {
+                                                           "type":  "command",
+                                                           "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/secret-scanner.ps1\"",
+                                                           "timeout":  10
+                                                       },
+                                                       {
+                                                           "type":  "command",
+                                                           "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/auth-config-guard.ps1\"",
+                                                           "timeout":  10
+                                                       },
+                                                       {
+                                                           "type":  "command",
+                                                           "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/cert-expiry-reminder.ps1\"",
+                                                           "timeout":  5
+                                                       }
+                                                   ]
+                                     }
+                                 ],
+                  "PostToolUse":  [
+
+                                  ],
+                  "Stop":  [
+                               {
+                                   "matcher":  "*",
+                                   "hooks":  [
+                                                 {
+                                                     "type":  "command",
+                                                     "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-checkpoint.ps1\"",
+                                                     "timeout":  15
+                                                 },
+                                                 {
+                                                     "type":  "command",
+                                                     "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/duran-checkpoint.ps1\"",
+                                                     "timeout":  15
+                                                 }
+                                             ]
+                               }
+                           ],
+                  "UserPromptSubmit":  [
+                                           {
+                                               "matcher":  "*",
+                                               "hooks":  [
+                                                             {
+                                                                 "type":  "command",
+                                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/duran-freshness.ps1\"",
+                                                                 "timeout":  5
+                                                             }
+                                                         ]
+                                           }
+                                       ]
+              },
+    "statusLine":  {
+                       "type":  "command",
+                       "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/statusline.ps1\"",
+                       "padding":  0
+                   }
+}

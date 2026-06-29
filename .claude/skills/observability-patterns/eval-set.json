@@ -1,0 +1,48 @@
+{
+  "skill": "observability-patterns",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for observability-patterns skill. 6 queries: 3 should trigger, 3 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Configura OpenTelemetry con Serilog para logging estructurado y distributed tracing",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: OpenTelemetry + Serilog setup"
+    },
+    {
+      "query": "Add custom metrics and distributed tracing with Application Insights integration",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: metrics + tracing + App Insights"
+    },
+    {
+      "query": "Necesito añadir logging estructurado al proyecto con correlación de requests",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keyword: logging estructurado + correlación"
+    },
+    {
+      "query": "Configura Polly retry policies y circuit breaker para los HttpClients",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar resilience-patterns. Polly retry != observabilidad"
+    },
+    {
+      "query": "Set up Azure Key Vault and Managed Identity for the application",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar azure-config. Azure services != telemetría"
+    },
+    {
+      "query": "Revisa la seguridad de la configuración de logging para que no exponga datos sensibles",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar security-audit. Auditar seguridad del logging != configurar logging"
+    }
+  ],
+  "overlap_notes": {
+    "resilience-patterns": "Health checks: observability = telemetría/métricas, resilience = recovery/retry. Si 'monitorizar' → observability, si 'recuperar' → resilience",
+    "azure-config": "App Insights: observability configura INSTRUMENTACIÓN, azure-config configura el SERVICIO Azure"
+  }
+}

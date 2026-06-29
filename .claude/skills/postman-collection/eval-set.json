@@ -1,0 +1,76 @@
+{
+  "skill": "postman-collection",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "updated": "2026-03-12",
+  "description": "Trigger evaluation dataset for postman-collection skill. 10 queries: 5 should trigger, 5 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Genera una colección Postman para los endpoints de la API de Becas con environments de dev y producción",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: colección Postman + environments"
+    },
+    {
+      "query": "Create a Postman collection with pre-request scripts, test assertions, and folder organization",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: Postman + scripts + assertions"
+    },
+    {
+      "query": "Necesito actualizar la colección Postman con los nuevos endpoints y variables de entorno",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keywords: actualizar colección Postman + endpoints"
+    },
+    {
+      "query": "Detecta el modo de autenticacion del proyecto y configura la coleccion Postman con Azure AD y pre-request scripts",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "NEW: Auth detection + Azure AD + Postman configuration"
+    },
+    {
+      "query": "Generate Postman pre-request scripts for API Key authentication with environment variables per environment",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "NEW: API Key auth + pre-request scripts + Postman environments"
+    },
+    {
+      "query": "Genera tests unitarios con xUnit y Moq para el servicio de Becas",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar testing-patterns. Unit tests != Postman collections"
+    },
+    {
+      "query": "Create the CRUD endpoints for the Student entity with Controller and Service",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar generador-crud. Crear endpoints != colección Postman"
+    },
+    {
+      "query": "Genera documentación de la API con ADR y referencia de endpoints",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar documentacion-tecnica. API reference docs != Postman JSON"
+    },
+    {
+      "query": "Implementa autenticacion OAuth2 client credentials en el servicio .NET con HttpClient",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar api-integration-patterns. Implementar OAuth2 en C# != configurar Postman"
+    },
+    {
+      "query": "Audit the authentication configuration and check for security vulnerabilities in the login flow",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar security-audit. Auditar seguridad auth != configurar Postman auth"
+    }
+  ],
+  "overlap_notes": {
+    "testing-patterns": "API testing: postman-collection genera JSON collections para testing manual/CI, testing-patterns genera xUnit code tests",
+    "generador-crud": "Endpoints: postman-collection documenta endpoints EXISTENTES, generador-crud CREA los endpoints",
+    "api-integration-patterns": "Auth: postman-collection CONFIGURA auth en Postman; api-integration-patterns IMPLEMENTA OAuth2 en C#",
+    "security-audit": "Auth: postman-collection CONFIGURA auth para testing; security-audit AUDITA la implementacion de seguridad",
+    "azure-config": "Auth: postman-collection CONFIGURA variables Postman para Azure AD; azure-config CONFIGURA Azure AD en el proyecto .NET"
+  }
+}

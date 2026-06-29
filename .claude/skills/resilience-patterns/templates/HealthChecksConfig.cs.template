@@ -1,0 +1,74 @@
+﻿// =============================================
+// Configuracion de Health Checks - {{NombreProyecto}}
+// Generado por skill resilience-patterns v2.9.0
+// =============================================
+
+namespace {{NombreProyecto}}.Infrastructure.HealthChecks;
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using HealthChecks.UI.Client;
+
+/// <summary>
+/// Extension methods para configurar Health Checks en {{NombreProyecto}}.
+/// </summary>
+public static class HealthChecksConfig
+{
+    public static IServiceCollection AddHealthChecksComillas(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddHealthChecks()
+            // Obligatorio: Base de datos SQL Server
+            .AddSqlServer(
+                connectionString: configuration.GetConnectionString("DefaultConnection")!,
+                name: "sqlserver",
+                failureStatus: HealthStatus.Unhealthy,
+                tags: new[] { "ready", "db" })
+            // Obligatorio: Self check
+            .AddCheck("self", () => HealthCheckResult.Healthy("OK"),
+                tags: new[] { "live" });
+            // Opcional: Redis (descomentar si se usa)
+            // .AddRedis(
+            //     configuration.GetConnectionString("Redis")!,
+            //     name: "redis",
+            //     failureStatus: HealthStatus.Degraded,
+            //     tags: new[] { "ready", "cache" })
+            // Opcional: Azure Blob Storage (descomentar si se usa)
+            // .AddAzureBlobStorage(
+            //     configuration["AzureStorage:ConnectionString"]!,
+            //     name: "azure-blob",
+            //     failureStatus: HealthStatus.Degraded,
+            //     tags: new[] { "ready", "storage" });
+
+        return services;
+    }
+
+    public static WebApplication MapHealthChecksComillas(this WebApplication app)
+    {
+        // /health - Todos los checks
+        app.MapHealthChecks("/health", new HealthCheckOptions
+        {
+            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+        });
+
+        // /health/ready - Readiness (DB, cache, storage)
+        app.MapHealthChecks("/health/ready", new HealthCheckOptions
+        {
+            Predicate = check => check.Tags.Contains("ready"),
+            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+        });
+
+        // /health/live - Liveness (solo self)
+        app.MapHealthChecks("/health/live", new HealthCheckOptions
+        {
+            Predicate = check => check.Tags.Contains("live"),
+            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+        });
+
+        return app;
+    }
+}

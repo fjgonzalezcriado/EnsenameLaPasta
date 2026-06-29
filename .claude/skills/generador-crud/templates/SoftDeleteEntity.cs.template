@@ -1,0 +1,61 @@
+// TEMPLATE: SoftDeleteEntity | Skill: generador-crud | Version: 3.1.0
+// Entity with soft delete and EF Core query filter
+// Placeholders: {{EntityName}}, {{ProjectNamespace}}
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+
+namespace {{ProjectNamespace}}.Domain.Entities;
+
+public interface ISoftDelete
+{
+    bool IsDeleted { get; }
+    DateTimeOffset? DeletedAt { get; }
+    string? DeletedBy { get; }
+    void SoftDelete(string? deletedBy = null);
+    void Restore();
+}
+
+public abstract class SoftDeleteEntity : ISoftDelete
+{
+    public int Id { get; protected set; }
+    public bool IsDeleted { get; private set; }
+    public DateTimeOffset? DeletedAt { get; private set; }
+    public string? DeletedBy { get; private set; }
+
+    public virtual void SoftDelete(string? deletedBy = null)
+    {
+        IsDeleted = true;
+        DeletedAt = DateTimeOffset.UtcNow;
+        DeletedBy = deletedBy;
+    }
+
+    public virtual void Restore()
+    {
+        IsDeleted = false;
+        DeletedAt = null;
+        DeletedBy = null;
+    }
+}
+
+// Interceptor: convierte Delete en SoftDelete automaticamente
+public sealed class SoftDeleteInterceptor : SaveChangesInterceptor
+{
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData, InterceptionResult<int> result,
+        CancellationToken ct = default)
+    {
+        if (eventData.Context is null) return base.SavingChangesAsync(eventData, result, ct);
+
+        foreach (var entry in eventData.Context.ChangeTracker.Entries<ISoftDelete>()
+            .Where(e => e.State == EntityState.Deleted))
+        {
+            entry.State = EntityState.Modified;
+            entry.Entity.SoftDelete();
+        }
+        return base.SavingChangesAsync(eventData, result, ct);
+    }
+}
+
+// En OnModelCreating: builder.HasQueryFilter(e => !e.IsDeleted);
+// En Program.cs: options.AddInterceptors(new SoftDeleteInterceptor());

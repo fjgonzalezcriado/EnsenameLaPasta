@@ -1,0 +1,255 @@
+{
+    "_comment": "Plantilla de request individual para referencia",
+
+    "request_get_list": {
+        "name": "Obtener todas las {{ENTITY_PLURAL}}",
+        "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+                "raw": "{{baseUrl}}/api/{{CONTROLLER_ROUTE}}?page=1&pageSize=10",
+                "host": ["{{baseUrl}}"],
+                "path": ["api", "{{CONTROLLER_ROUTE}}"],
+                "query": [
+                    { "key": "page", "value": "1", "description": "Número de página" },
+                    { "key": "pageSize", "value": "10", "description": "Elementos por página" }
+                ]
+            },
+            "description": "Obtiene un listado paginado de {{ENTITY_PLURAL}}."
+        },
+        "response": [],
+        "event": [
+            {
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test('Status code is 200', function () {",
+                        "    pm.response.to.have.status(200);",
+                        "});",
+                        "",
+                        "pm.test('Response is array or paginated', function () {",
+                        "    const jsonData = pm.response.json();",
+                        "    pm.expect(jsonData).to.satisfy((data) => {",
+                        "        return Array.isArray(data) || data.items !== undefined;",
+                        "    });",
+                        "});",
+                        "",
+                        "pm.test('Response time < 500ms', function () {",
+                        "    pm.expect(pm.response.responseTime).to.be.below(500);",
+                        "});"
+                    ],
+                    "type": "text/javascript"
+                }
+            }
+        ]
+    },
+
+    "request_get_by_id": {
+        "name": "Obtener {{ENTITY}} por ID",
+        "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+                "raw": "{{baseUrl}}/api/{{CONTROLLER_ROUTE}}/{{id}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["api", "{{CONTROLLER_ROUTE}}", "{{id}}"],
+                "variable": [
+                    { "key": "id", "value": "1", "description": "ID de la {{ENTITY}}" }
+                ]
+            },
+            "description": "Obtiene una {{ENTITY}} por su identificador."
+        },
+        "response": [],
+        "event": [
+            {
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test('Status code is 200 or 404', function () {",
+                        "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                        "});",
+                        "",
+                        "if (pm.response.code === 200) {",
+                        "    pm.test('Response has id', function () {",
+                        "        pm.expect(pm.response.json()).to.have.property('id');",
+                        "    });",
+                        "}"
+                    ],
+                    "type": "text/javascript"
+                }
+            }
+        ]
+    },
+
+    "request_post_create": {
+        "name": "Crear {{ENTITY}}",
+        "request": {
+            "method": "POST",
+            "header": [
+                { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "mode": "raw",
+                "raw": "{{REQUEST_BODY_EXAMPLE}}",
+                "options": {
+                    "raw": { "language": "json" }
+                }
+            },
+            "url": {
+                "raw": "{{baseUrl}}/api/{{CONTROLLER_ROUTE}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["api", "{{CONTROLLER_ROUTE}}"]
+            },
+            "description": "Crea una nueva {{ENTITY}}."
+        },
+        "response": [],
+        "event": [
+            {
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test('Status code is 201', function () {",
+                        "    pm.response.to.have.status(201);",
+                        "});",
+                        "",
+                        "pm.test('Has Location header', function () {",
+                        "    pm.response.to.have.header('Location');",
+                        "});",
+                        "",
+                        "pm.test('Response has id', function () {",
+                        "    const jsonData = pm.response.json();",
+                        "    pm.expect(jsonData).to.have.property('id');",
+                        "    pm.environment.set('lastCreatedId', jsonData.id);",
+                        "});"
+                    ],
+                    "type": "text/javascript"
+                }
+            }
+        ]
+    },
+
+    "request_put_update": {
+        "name": "Actualizar {{ENTITY}}",
+        "request": {
+            "method": "PUT",
+            "header": [
+                { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "mode": "raw",
+                "raw": "{{REQUEST_BODY_EXAMPLE}}",
+                "options": {
+                    "raw": { "language": "json" }
+                }
+            },
+            "url": {
+                "raw": "{{baseUrl}}/api/{{CONTROLLER_ROUTE}}/{{id}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["api", "{{CONTROLLER_ROUTE}}", "{{id}}"],
+                "variable": [
+                    { "key": "id", "value": "{{lastCreatedId}}", "description": "ID de la {{ENTITY}}" }
+                ]
+            },
+            "description": "Actualiza una {{ENTITY}} existente."
+        },
+        "response": [],
+        "event": [
+            {
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test('Status code is 200 or 204', function () {",
+                        "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                        "});"
+                    ],
+                    "type": "text/javascript"
+                }
+            }
+        ]
+    },
+
+    "request_delete": {
+        "name": "Eliminar {{ENTITY}}",
+        "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+                "raw": "{{baseUrl}}/api/{{CONTROLLER_ROUTE}}/{{id}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["api", "{{CONTROLLER_ROUTE}}", "{{id}}"],
+                "variable": [
+                    { "key": "id", "value": "{{lastCreatedId}}", "description": "ID de la {{ENTITY}}" }
+                ]
+            },
+            "description": "Elimina una {{ENTITY}}."
+        },
+        "response": [],
+        "event": [
+            {
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test('Status code is 204', function () {",
+                        "    pm.response.to.have.status(204);",
+                        "});",
+                        "",
+                        "pm.environment.unset('lastCreatedId');"
+                    ],
+                    "type": "text/javascript"
+                }
+            }
+        ]
+    },
+
+    "request_auth_login": {
+        "name": "Login",
+        "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+                { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "mode": "raw",
+                "raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"{{testPassword}}\"\n}",
+                "options": {
+                    "raw": { "language": "json" }
+                }
+            },
+            "url": {
+                "raw": "{{baseUrl}}/api/auth/login",
+                "host": ["{{baseUrl}}"],
+                "path": ["api", "auth", "login"]
+            },
+            "description": "Autenticación de usuario. Guarda el token en el environment."
+        },
+        "response": [],
+        "event": [
+            {
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test('Status code is 200', function () {",
+                        "    pm.response.to.have.status(200);",
+                        "});",
+                        "",
+                        "pm.test('Response has token', function () {",
+                        "    const jsonData = pm.response.json();",
+                        "    const token = jsonData.token || jsonData.accessToken;",
+                        "    pm.expect(token).to.not.be.empty;",
+                        "    pm.environment.set('token', token);",
+                        "    console.log('🔑 Token guardado');",
+                        "});"
+                    ],
+                    "type": "text/javascript"
+                }
+            }
+        ]
+    },
+
+    "folder_template": {
+        "name": "{{CONTROLLER_NAME}}",
+        "description": "Endpoints de {{CONTROLLER_NAME}}",
+        "item": []
+    }
+}

@@ -1,0 +1,48 @@
+{
+  "skill": "resilience-patterns",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for resilience-patterns skill. 6 queries: 3 should trigger, 3 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Configura Polly v8 con retry policies y circuit breaker para los HttpClients del proyecto",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: Polly retry + circuit breaker"
+    },
+    {
+      "query": "Add health check endpoints (/health, /ready, /live) and graceful shutdown to the API",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: health checks + graceful shutdown"
+    },
+    {
+      "query": "Implementa bulkhead isolation y timeout policies para tolerancia a fallos",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keywords: bulkhead + timeout + tolerancia a fallos"
+    },
+    {
+      "query": "Configura Serilog y OpenTelemetry para logging y métricas distribuidas",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar observability-patterns. Logging/métricas != resiliencia"
+    },
+    {
+      "query": "Conecta con la API de Banner usando HttpClientFactory y OAuth2",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar api-integration-patterns. Integrar API != configurar resiliencia"
+    },
+    {
+      "query": "Review the security of the retry mechanism for potential DoS amplification",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar security-audit. Auditar seguridad del retry != configurar retry"
+    }
+  ],
+  "overlap_notes": {
+    "observability-patterns": "Health checks: resilience = recovery/fault tolerance, observability = monitoring/metrics",
+    "api-integration-patterns": "Polly: resilience configura PATRONES genéricos, api-integration incluye Polly como parte de integración API completa"
+  }
+}

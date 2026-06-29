@@ -1,0 +1,315 @@
+# Catalogo de Funcionalidades - AI Trading Simulator
+
+> Simulador de trading algoritmico personal. Fuente de verdad: `00_Gestion/Requerimientos/REQUERIMIENTOS.md`.
+
+---
+
+## 🟡 En Progreso
+
+_Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscador de instrumentos + watchlist editable + feed 100% Yahoo (sin simulación ni auto-trading). Próximos candidatos: AlphaVantage/Binance, P&L de holding real (posición vs entrada), dashboard "visor puro"._
+
+---
+
+## ✅ Completados
+
+#### HV-019 Divisa por instrumento ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-019.md`
+- **Resumen**: Captura y muestra la **divisa de cotización** de cada instrumento. `TrackedSymbol` gana `Currency` + `SetCurrency` (+ migración `AddTrackedSymbolCurrency`). El proveedor pasa a devolver `MarketQuote(Tick, Currency)` (Yahoo `/v8/chart` ya informa `meta.currency`) y el `MarketTickGeneratorService` **sella** la divisa en cada símbolo seguido cada ciclo (~30 s) → cubre altas por buscador, manuales e importadas. `Currency` propagado a `TrackedSymbolDto`/`OpenTradeDto`/`ClosedTradeDto` (mapa símbolo→divisa en `DashboardService`). UI: columna "Div" (badge) + formateo monetario por fila en su divisa (`money()`). Los **totales de cuenta siguen en €** (mezclan divisas hasta el paso FX — documentado). 3 tests nuevos. 123 verdes. Smoke real: `HY9H.F→EUR`, `^GSPC→USD`.
+
+#### HV-018 Importar histórico de compras (CSV) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-018.md`
+- **Resumen**: Alta masiva de posiciones desde CSV (`symbol, entry, qty[, date]`). `IPositionService.ImportCsvAsync` reutiliza `OpenAsync` por fila; parser con cabecera opcional, delimitador autodetectado (`;`/`,`; con `;` admite coma decimal), fechas múltiples (UTC). Las filas con error se reportan por línea y no abortan el resto. `ImportResultDto`/`ImportErrorDto` + endpoint `POST /api/positions/import`. UI: modal "📥 Importar CSV" (subir fichero vía FileReader o pegar texto) con resultados (importadas/fallidas + errores). 4 tests. 120 verdes. Smoke real: endpoint responde con reporte de error correcto (fila inválida, sin escribir en BD).
+
+#### HV-017 Histórico del valor de cuenta ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-017.md`
+- **Resumen**: Gráfico de **evolución del valor de cuenta** en el tiempo. Reutiliza la entidad `PortfolioSnapshot` (tabla ya existente en InitialCreate, sin uso hasta ahora → **sin migración**). Nuevo `PortfolioSnapshotService : BackgroundService` que toma un snapshot al arrancar (tras 15 s) y cada `IntervalSeconds` (300, config `Snapshot`), reutilizando `IDashboardService` para computar el valor de cuenta. `AccountHistoryPointDto` + `IDashboardService.GetAccountHistoryAsync` (ordena ascendente; deriva `NetDeposits = Capital − TotalPnL` y `ReturnPct`) + endpoint `GET /api/account/history?points=`. UI: tarjeta "📊 Evolución del valor de cuenta" con gráfico Chart.js (valor de cuenta + línea de aportado neto), refresco propio cada 60 s. 5 tests nuevos (2 de `GetAccountHistoryAsync`, 3 del servicio incl. persistencia end-to-end). 116 tests verdes. Smoke real: `/api/account/history` → 1 punto coherente (28.306,65 € / aportado 30.000 / −5,64 %).
+
+#### HV-016 Rentabilidad por posición ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-016.md`
+- **Resumen**: % de rendimiento por fila en las tablas de posiciones. `OpenTradeDto.ReturnPct` (`(current−entry)/entry×100`) y `ClosedTradeDto.ReturnPct` (`(exit−entry)/entry×100`) calculados en `DashboardService` (0 % si entry=0). UI: nueva columna **"%"** tras PnL en abiertas y cerradas, con signo y color (reusa `pctSigned`/`signClass`). Sin migración ni cambios de dominio/BD. 2 tests (abierta +10 %, cerrada −10 %). 113 tests verdes.
+
+#### HV-015 Rentabilidad porcentual de la cuenta ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-015.md`
+- **Resumen**: Métrica derivada del rendimiento de la cuenta sobre el aportado neto. `DashboardDto.ReturnPct` + cálculo en `DashboardService` (`ReturnPct = TotalPnL / NetDeposits × 100`, 0 % si `NetDeposits = 0`; equivale a `(AccountValue − NetDeposits) / NetDeposits × 100` por el invariante de HV-014). UI: el subtítulo de la tarjeta **Valor de cuenta** muestra el % con signo y color (verde/rojo) + "sobre aportado", reutilizando `pctSigned`/`setSigned`. Sin migración ni cambios de dominio/BD. 3 tests (ganancia +0,5 %, pérdida −10 %, sin aportaciones → 0 %). 111 tests verdes.
+
+#### HV-014 Caja / efectivo y valor de cuenta ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-16 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-014.md`
+- **Resumen**: Visión de **cuenta completa**. Entidad `CashMovement` (ingreso/retirada) + migración + `CashService` + endpoints `GET/POST/DELETE /api/cash`. `DashboardService` deriva **Efectivo** (`= aportado − invertido + realizado`) y **Valor de cuenta** (`= efectivo + valor de cartera`); invariante `valor de cuenta = aportado + PnL total`. UI: 6 tarjetas (Valor de cuenta · Efectivo · Valor de cartera · PnL total · Posiciones · Winrate) + modal "💰 Caja" (alta Ingreso/Retirada + lista). 5 tests. Smoke real: aporta 10000 € + HY9H.F 1360×5 → efectivo 3200 €, valor de cuenta 10150 €.
+
+#### HV-013 Posiciones reales del usuario (tracker de cartera) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-16 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-013.md`
+- **Resumen**: Alta manual de posiciones reales para seguimiento (objetivo: dejar TradingView). `IPositionService`/`PositionService` (open/close/delete **por Id**, varias posiciones por símbolo, auto-añade a watchlist) sobre la entidad `Trade`. Endpoints `POST /api/positions`, `POST /api/positions/{id}/close`, `DELETE /api/positions/{id}`. **Modal** "➕ Nueva posición" (símbolo con datalist de la watchlist, precio entrada, cantidad, fecha) + columna **Acciones** (Cerrar/✕) en la tabla. PnL en vivo contra el precio real. 7 tests. Smoke real: HY9H.F 1360×5 → PnL +150 € (actual 1390); cierre a 1400 → +200 €.
+
+#### HV-012 Eliminar simulación — feed 100% real (panel solo-visor) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-16 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-012.md`
+- **Resumen**: Se retira RandomWalk (borrado `RandomWalkTickGenerator` + test). `IMarketDataProvider`=`YahooFinanceProvider` siempre; intervalo de sondeo 30 s. Estrategia MA Crossover **desactivada** (no se registra `StrategyExecutionService`) → panel solo-visor. `MarketDataOptions`/`appsettings` reducidos (sin `Symbols`/`Volatility`/`Drift`/`Volume`/`Seed`). Smoke real: `provider=YahooFinance`, tick real HY9H.F=1390€. 96 tests verdes.
+
+#### HV-011 Alta dinámica de símbolos (watchlist persistida) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-16 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-011.md`
+- **Resumen**: Entidad `TrackedSymbol` + migración EF + `DbSet`. `IWatchlistService`/`WatchlistService` (add/remove/list; al quitar borra los `MarketTick` del símbolo). El generador lee la watchlist de BD **cada ciclo**. Endpoints `GET/POST/DELETE /api/instruments/track[ed]`. Seed `HY9H.F` al arrancar. UI: "+ Añadir" en resultados y "✕" junto al selector. 7 tests de `WatchlistService`.
+
+#### HV-010 Buscador de instrumentos (descripción / ISIN / ticker) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-16 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-010.md`
+- **Resumen**: `IInstrumentSearchProvider` + `YahooInstrumentSearchProvider` (`/v1/finance/search`) → `GET /api/instruments/search?q=`. Busca por nombre, ISIN y ticker; **WKN no soportado por Yahoo** (fuera de alcance). UI: tarjeta de búsqueda + tabla de resultados con botón "+ Añadir". 8 tests del provider.
+
+#### HV-009 Histórico real de Yahoo en la barra de rangos (Fase 2) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-06-15 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-009.md`
+- **Resumen**: `IMarketHistoryProvider` + `YahooHistoryProvider` (`/v8/chart` con `range`/`interval`, normaliza `BTCUSD→BTC-USD`, parsea arrays). Endpoint `GET /api/history?symbol&range`. HttpClient Yahoo registrado siempre. Frontend: barra `1D…5A` carga OHLC reales (modo histórico), "En vivo" vuelve a la simulación, eje X con unidad temporal adaptativa. Smoke real OK (AAPL 1M=22pts, BTCUSD 5A=262pts). 89 tests verdes.
+
+#### HV-008 Fix YahooFinanceProvider → endpoint /v8/chart (Fase 2) ✅
+- **Estado**: ✅ Completado
+- **Período**: 2026-06-15 → 2026-06-15
+- **Duración**: <1 día (sesión única)
+- **Resultado**: ✅ Cumplido
+- **Tipo**: Bugfix
+- **Spec**: `_duran/specs/HV-008.md`
+- **Resumen**: El smoke test real (pendiente desde HV-007) reveló que `/v7/finance/quote` devuelve **401** (Yahoo exige cookie+crumb). Migrado `YahooFinanceProvider` a `GET /v8/finance/chart/{symbol}` (precio+volumen sin auth, parseo de `meta`) + User-Agent de navegador. 11 tests reescritos al nuevo shape. **Smoke test real ✅**: AAPL=291,13 / GOOG=358,16 reales; `BTCUSD`→404 capturado per-símbolo (Yahoo usa `BTC-USD`). **89 tests verdes**.
+
+#### HV-007 Provider real Yahoo Finance + abstracción intercambiable (Fase 2) ✅
+- **Estado**: ✅ Completado
+- **Período**: 2026-05-26 → 2026-05-26
+- **Duración**: <1 día (sesión única)
+- **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-007.md`
+- **Resumen**: `IMarketDataProvider` refactorizado a async. `RandomWalkTickGenerator` adaptado (Task.FromResult). `YahooFinanceProvider` nuevo con HttpClientFactory + parsing JSON + validación defensiva. DI selector switch por `MarketData:ProviderType`. Helpers de test reutilizables. 11 tests YahooFinance + 8 RandomWalk migrados a async. **89 tests verdes total. Patrón listo para AlphaVantage/Binance: 1 archivo + 1 case.**
+
+#### HV-006 Dashboard con métricas y gráfico Chart.js ✅
+- **Estado**: ✅ Completado
+- **Período**: 2026-05-26 → 2026-05-26
+- **Duración**: <1 día (sesión única)
+- **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-006.md`
+- **Resumen**: `DashboardService` con cálculo on-the-fly (in-memory por bug SQLite+decimal-TEXT) + DashboardController + Vista Razor + Bootstrap 5 + Chart.js + polling 3s. 7 tests + smoke test runtime ✅: `/api/dashboard/data` devuelve JSON con PnL no realizado calculado en vivo. **78 tests verdes total. MVP completo.**
+
+#### HV-005 Estrategia MA Crossover automática ✅
+- **Estado**: ✅ Completado
+- **Período**: 2026-05-26 → 2026-05-26
+- **Duración**: <1 día (sesión única)
+- **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-005.md`
+- **Resumen**: `ChannelTickBus` pub-sub in-process + `MovingAverageCrossoverStrategy` con rolling windows + `IOrderService` (1 posición/símbolo) + `StrategyExecutionService` BackgroundService. Refactor del generator para publicar al bus tras persistir. 21 tests nuevos. Smoke test: 1 Trade BUY abierto en 95s. **71 tests verdes en total**.
+
+#### HV-004 BackgroundService generador de ticks de mercado ✅
+- **Estado**: ✅ Completado
+- **Período**: 2026-05-26 → 2026-05-26
+- **Duración**: <1 día (sesión única)
+- **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-004.md`
+- **Resumen**: `RandomWalkTickGenerator` (Box-Muller, seedable, thread-safe) + `MarketTickGeneratorService : BackgroundService` (PeriodicTimer + ScopeFactory). 3 símbolos configurables. 8 tests verdes + smoke test runtime: 12 ticks persistidos en BD en 12s con precios coherentes.
+
+#### HV-003 Persistencia SQLite + EF Core Migrations ✅
+- **Estado**: ✅ Completado
+- **Período**: 2026-05-26 → 2026-05-26
+- **Duración**: <1 día (sesión única)
+- **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-003.md`
+- **Resumen**: EF Core 10.0.8 + SQLite + 3 entity configurations (decimal→TEXT), DI extension, auto-migrate al arrancar, 6 tests integración con SQLite `:memory:`, smoke test runtime con `App_Data/trading.db` creado. Total tests: 42 verdes.
+
+#### HV-002 Modelo de dominio (Trade, MarketTick, PortfolioSnapshot, TradeStatus) ✅
+- **Estado**: ✅ Completado
+- **Período**: 2026-05-26 → 2026-05-26
+- **Duración**: <1 día (sesión única)
+- **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-002.md`
+- **Resumen**: 4 tipos en Domain (3 entidades + 1 enum) con factories, invariantes y propiedades calculadas (`RealizedPnL`, `TotalPnL`). 36 tests verdes. Domain sin NuGet.
+
+#### HV-001 Scaffold inicial de la solución (Clean Architecture) ✅
+- **Estado**: ✅ Completado
+- **Período**: 2026-05-26 → 2026-05-26
+- **Duración**: <1 día (sesión única)
+- **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-001.md`
+- **Resumen**: `.slnx` + 5 proyectos Clean Architecture (Domain/Application/Infrastructure/Web/Tests) con referencias correctas, `TreatWarningsAsErrors=true`, `.gitignore` raíz, `App_Data/.gitkeep`, Solution Folders STIC.IA. `dotnet build` y `dotnet test` verdes.
+
+---
+
+## Indice de Modulos
+
+| Modulo | Descripcion | Estado | Criticidad |
+|--------|-------------|--------|------------|
+| Dashboard | Vista principal con balance, pnl, operaciones y grafico de evolucion | Planificado (MVP) | Alta |
+| Simulacion de Mercado | Generacion de ticks fake (symbol/price/volume/timestamp) | Planificado (MVP) | Alta |
+| Estrategia MA Crossover | Compra/venta automatica segun cruce de medias moviles corta/larga | Planificado (MVP) | Alta |
+| Simulador de Ordenes | Buy / Sell / Close Position con persistencia | Planificado (MVP) | Alta |
+| Portfolio | Tracking de capital, pnl, drawdown, winrate | Planificado (MVP) | Alta |
+| Metricas | Operaciones ganadas/perdidas, profit factor, drawdown, pnl acumulado | Planificado (MVP) | Media |
+
+---
+
+## Detalle de Funcionalidades
+
+### Modulo: Dashboard
+
+#### DASH-001: Pagina principal con metricas en tiempo real
+
+**Descripcion**: Vista de aterrizaje que muestra el estado actual del simulador en una pantalla. Combina datos de Portfolio + Trades + grafico.
+
+**Usuario objetivo**: Yo (uso personal).
+
+**Componentes UI**:
+- Card balance virtual (capital actual + variacion %)
+- Card pnl total
+- Tabla operaciones abiertas
+- Tabla operaciones cerradas (ultimas N)
+- Grafico Chart.js de evolucion del portfolio en el tiempo
+
+**Archivos principales (a crear)**:
+```
+Web/Controllers/DashboardController.cs
+Web/Views/Dashboard/Index.cshtml
+Web/ViewModels/DashboardViewModel.cs
+Application/Services/IDashboardService.cs
+Application/Services/DashboardService.cs
+```
+
+**Dependencias**: Portfolio, Trades, MarketTicks ya persistidos.
+
+---
+
+### Modulo: Simulacion de Mercado
+
+#### MKT-001: Generador de ticks aleatorios controlados
+
+**Descripcion**: BackgroundService que cada N milisegundos emite un tick (symbol, price, volume, timestamp). Precio sigue un random walk con parametros configurables (volatilidad, drift).
+
+**Reglas de negocio**:
+- Inicialmente sin conexion a APIs reales
+- Datos aleatorios controlados (no caos puro, random walk realista)
+- Frecuencia configurable en appsettings.json
+- Lista de simbolos configurable en appsettings.json
+
+**Roadmap (Fase 2)**: Sustituir generador fake por integraciones reales (Yahoo Finance, Binance, AlphaVantage).
+
+**Archivos principales**:
+```
+Infrastructure/MarketData/MarketTickGeneratorService.cs (BackgroundService)
+Domain/Entities/MarketTick.cs
+Application/Interfaces/IMarketDataProvider.cs
+```
+
+---
+
+### Modulo: Estrategia MA Crossover
+
+#### STRAT-001: Moving Average Crossover
+
+**Descripcion**: Estrategia automatica que abre/cierra trades segun cruce de medias moviles.
+
+**Reglas de negocio**:
+- COMPRAR cuando MA corta > MA larga (cruce alcista)
+- VENDER cuando MA corta < MA larga (cruce bajista)
+- Ventanas (corta/larga) configurables en appsettings.json
+- Ejecucion en BackgroundService que escucha nuevos ticks
+
+**Archivos principales**:
+```
+Application/Strategies/IStrategy.cs
+Application/Strategies/MovingAverageCrossoverStrategy.cs
+Infrastructure/Background/StrategyExecutionService.cs
+```
+
+**Roadmap (Fase 3)**: Mas estrategias + IA predictiva con ML.NET/ONNX.
+
+---
+
+### Modulo: Simulador de Ordenes
+
+#### ORD-001: Operaciones Buy / Sell / Close Position
+
+**Descripcion**: Logica de apertura, cierre y consulta de trades. Toda operacion se persiste en SQLite.
+
+**Reglas de negocio**:
+- Buy crea Trade con Status=Open
+- Sell/Close completa el Trade con ExitPrice y ClosedAt, calculando pnl
+- Quantity y EntryPrice fijados al abrir; ExitPrice solo se asigna al cerrar
+- Validar que no se cierra un trade ya cerrado
+
+**Archivos principales**:
+```
+Application/Services/IOrderService.cs
+Application/Services/OrderService.cs
+Domain/Entities/Trade.cs
+Domain/Enums/TradeStatus.cs (Open, Closed)
+Infrastructure/Repositories/TradeRepository.cs
+```
+
+---
+
+### Modulo: Portfolio
+
+#### PORT-001: Estado y evolucion del portfolio
+
+**Descripcion**: Calculo en tiempo real del estado financiero del simulador.
+
+**Metricas**:
+- Capital inicial (configuracion)
+- Capital actual (capital inicial + pnl realizado + valoracion abiertos)
+- PnL total y por trade
+- Drawdown (caida maxima desde pico)
+- Winrate (% trades ganadores)
+- Profit Factor (suma ganancias / suma perdidas)
+
+**Archivos principales**:
+```
+Application/Services/IPortfolioService.cs
+Application/Services/PortfolioService.cs
+Domain/Entities/PortfolioSnapshot.cs (opcional, para grafico evolucion)
+Infrastructure/Background/PortfolioUpdaterService.cs
+```
+
+---
+
+## Funcionalidades Planificadas (Backlog Roadmap)
+
+| Fase | Codigo | Nombre | Descripcion |
+|------|--------|--------|-------------|
+| 2 | API-001 | Conexion Yahoo Finance | Sustituir generador fake por feed real |
+| 2 | API-002 | Conexion Binance | Datos cripto en tiempo real |
+| 2 | API-003 | Conexion AlphaVantage | Datos historicos para backtesting riguroso |
+| 3 | ML-001 | Modelo predictivo ML.NET | Senales con clasificador entrenado |
+| 3 | ML-002 | ONNX runtime | Cargar modelos entrenados externos |
+| 4 | LIVE-001 | Paper trading real | Ejecucion automatica en cuenta demo |
+
+---
+
+## Restricciones (no implementar inicialmente)
+
+- Autenticacion / login
+- Microservicios
+- Docker / Kubernetes
+- Mensajeria distribuida (RabbitMQ, Kafka)
+- Trading con dinero real
+
+---
+
+## Glosario rapido (ver tambien CLAUDE.md)
+
+- **Trade**: operacion completa (apertura + cierre)
+- **MarketTick**: snapshot de precio en un instante (symbol/price/volume/timestamp)
+- **Portfolio**: estado financiero acumulado del simulador
+- **MA Crossover**: estrategia de cruce de medias moviles
+- **PnL**: Profit and Loss
+- **Drawdown**: caida desde pico maximo de capital
+- **Winrate**: porcentaje de trades cerrados con ganancia
+- **Backtesting**: ejecutar estrategia sobre datos historicos
+- **Profit Factor**: suma de ganancias / suma de perdidas
+- **Sharpe Ratio**: rentabilidad ajustada por volatilidad
+- **Position**: trade actualmente abierto
+- **Slippage**: diferencia entre precio esperado y precio real ejecutado
+- **Spread**: diferencia entre bid y ask
+
+---
+
+**Ultima actualizacion**: 2026-05-26
+**Actualizado por**: stic.claude3 (via /onboarding)

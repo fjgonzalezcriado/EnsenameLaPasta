@@ -1,0 +1,36 @@
+// ============================================================================
+// PRE-REQUEST: Basic Authentication
+// Computes Base64-encoded Authorization header from username and password
+// ============================================================================
+// Required environment variables:
+//   basicUsername - Username for Basic Auth
+//   basicPassword - Password for Basic Auth (type: secret)
+// ============================================================================
+
+const PREREQUEST_BASIC_AUTH = `
+// Basic Authentication
+const username = pm.environment.get("basicUsername");
+const password = pm.environment.get("basicPassword");
+
+if (!username || !password) {
+    console.warn("⚠️ Basic Auth credentials not configured. Set 'basicUsername' and 'basicPassword'.");
+    return;
+}
+
+// Compute Base64 encoding
+const encoded = btoa(username + ":" + password);
+
+pm.request.headers.add({
+    key: "Authorization",
+    value: "Basic " + encoded
+});
+
+console.log("🔑 Basic Auth header added for user: " + username);
+`;
+
+// ============================================================================
+// EXPORT
+// ============================================================================
+if (typeof module !== 'undefined') {
+    module.exports = { PREREQUEST_BASIC_AUTH };
+}

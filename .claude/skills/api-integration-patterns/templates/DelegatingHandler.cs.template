@@ -1,0 +1,307 @@
+// TEMPLATE: HTTP Delegating Handlers
+// Version: 1.0.0
+// Uso: Handlers para logging, autenticación, correlación, retry
+
+using System.Diagnostics;
+using System.Net.Http.Headers;
+
+namespace Comillas.MiApp.Infrastructure.ApiClients.Handlers;
+
+// ============================================================================
+// 1. LOGGING HANDLER - Loguea requests/responses
+// ============================================================================
+
+public class LoggingHandler : DelegatingHandler
+{
+    private readonly ILogger<LoggingHandler> _logger;
+
+    public LoggingHandler(ILogger<LoggingHandler> logger)
+    {
+        _logger = logger;
+    }
+
+    protected override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        var stopwatch = Stopwatch.StartNew();
+
+        // Log request
+        _logger.LogInformation(
+            "HTTP {Method} {Uri}",
+            request.Method,
+            request.RequestUri);
+
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogDebug("Request Headers: {@Headers}", request.Headers);
+
+            if (request.Content is not null)
+            {
+                var content = await request.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogDebug("Request Body: {Body}", content);
+            }
+        }
+
+        // Send request
+        var response = await base.SendAsync(request, cancellationToken);
+
+        stopwatch.Stop();
+
+        // Log response
+        _logger.LogInformation(
+            "HTTP {Method} {Uri} responded {StatusCode} in {ElapsedMs}ms",
+            request.Method,
+            request.RequestUri,
+            (int)response.StatusCode,
+            stopwatch.ElapsedMilliseconds);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            _logger.LogWarning(
+                "HTTP {StatusCode} Error: {Error}",
+                (int)response.StatusCode,
+                errorContent);
+        }
+
+        return response;
+    }
+}
+
+// ============================================================================
+// 2. BEARER TOKEN HANDLER - Inyecta token OAuth2
+// ============================================================================
+
+public class BearerTokenHandler : DelegatingHandler
+{
+    private readonly ITokenService _tokenService;
+    private readonly ILogger<BearerTokenHandler> _logger;
+
+    public BearerTokenHandler(
+        ITokenService tokenService,
+        ILogger<BearerTokenHandler> logger)
+    {
+        _tokenService = tokenService;
+        _logger = logger;
+    }
+
+    protected override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        // 1. Obtener token (desde caché o renovar)
+        var token = await _tokenService.GetAccessTokenAsync(cancellationToken);
+
+        // 2. Inyectar en Authorization header
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        _logger.LogDebug("Bearer token inyectado en request");
+
+        // 3. Enviar request
+        var response = await base.SendAsync(request, cancellationToken);
+
+        // 4. Si 401, invalidar caché y reintentar UNA vez
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            _logger.LogWarning("Token rechazado (401), renovando e reintentando");
+
+            // Forzar renovación de token
+            await _tokenService.InvalidateCacheAsync();
+            token = await _tokenService.GetAccessTokenAsync(cancellationToken);
+
+            // Reintentar con nuevo token
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            response = await base.SendAsync(request, cancellationToken);
+        }
+
+        return response;
+    }
+}
+
+// Interfaz del Token Service (implementar según oauth2-client-credentials.md)
+public interface ITokenService
+{
+    Task<string> GetAccessTokenAsync(CancellationToken ct = default);
+    Task InvalidateCacheAsync();
+}
+
+// ============================================================================
+// 3. CORRELATION ID HANDLER - Añade X-Correlation-ID
+// ============================================================================
+
+public class CorrelationIdHandler : DelegatingHandler
+{
+    private readonly ILogger<CorrelationIdHandler> _logger;
+
+    public CorrelationIdHandler(ILogger<CorrelationIdHandler> logger)
+    {
+        _logger = logger;
+    }
+
+    protected override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        // Generar o usar Correlation ID existente
+        var correlationId = Activity.Current?.Id ?? Guid.NewGuid().ToString();
+
+        request.Headers.Add("X-Correlation-ID", correlationId);
+        request.Headers.Add("X-Request-ID", Guid.NewGuid().ToString());
+
+        _logger.LogDebug("Correlation ID: {CorrelationId}", correlationId);
+
+        var response = await base.SendAsync(request, cancellationToken);
+
+        // Loguear Correlation ID de respuesta si existe
+        if (response.Headers.TryGetValues("X-Correlation-ID", out var values))
+        {
+            _logger.LogDebug("Response Correlation ID: {CorrelationId}", values.FirstOrDefault());
+        }
+
+        return response;
+    }
+}
+
+// ============================================================================
+// 4. API KEY HANDLER - Añade API Key en header
+// ============================================================================
+
+public class ApiKeyHandler : DelegatingHandler
+{
+    private readonly string _apiKey;
+    private readonly string _headerName;
+
+    public ApiKeyHandler(IConfiguration configuration, string apiKeySectionName, string headerName = "X-API-Key")
+    {
+        _apiKey = configuration[apiKeySectionName]
+                  ?? throw new InvalidOperationException($"API Key no configurado: {apiKeySectionName}");
+        _headerName = headerName;
+    }
+
+    protected override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        request.Headers.Add(_headerName, _apiKey);
+
+        return await base.SendAsync(request, cancellationToken);
+    }
+}
+
+// ============================================================================
+// 5. RETRY HANDLER - Reintentos con backoff exponencial
+// ============================================================================
+
+public class RetryHandler : DelegatingHandler
+{
+    private readonly int _maxRetries;
+    private readonly ILogger<RetryHandler> _logger;
+
+    public RetryHandler(ILogger<RetryHandler> logger, int maxRetries = 3)
+    {
+        _logger = logger;
+        _maxRetries = maxRetries;
+    }
+
+    protected override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        for (int attempt = 1; attempt <= _maxRetries; attempt++)
+        {
+            try
+            {
+                var response = await base.SendAsync(request, cancellationToken);
+
+                // Reintentar solo en errores transitorios
+                if (response.IsSuccessStatusCode ||
+                    !IsTransientError(response.StatusCode))
+                {
+                    return response;
+                }
+
+                if (attempt < _maxRetries)
+                {
+                    var delay = TimeSpan.FromSeconds(Math.Pow(2, attempt)); // Backoff exponencial
+                    _logger.LogWarning(
+                        "Reintento {Attempt}/{MaxRetries} tras {StatusCode}. Esperando {Delay}ms",
+                        attempt,
+                        _maxRetries,
+                        (int)response.StatusCode,
+                        delay.TotalMilliseconds);
+
+                    await Task.Delay(delay, cancellationToken);
+                }
+                else
+                {
+                    return response; // Último intento, retornar respuesta
+                }
+            }
+            catch (HttpRequestException ex) when (attempt < _maxRetries)
+            {
+                var delay = TimeSpan.FromSeconds(Math.Pow(2, attempt));
+                _logger.LogWarning(
+                    ex,
+                    "Reintento {Attempt}/{MaxRetries} tras error HTTP. Esperando {Delay}ms",
+                    attempt,
+                    _maxRetries,
+                    delay.TotalMilliseconds);
+
+                await Task.Delay(delay, cancellationToken);
+            }
+        }
+
+        throw new InvalidOperationException("Retry logic failed unexpectedly");
+    }
+
+    private static bool IsTransientError(System.Net.HttpStatusCode statusCode)
+    {
+        return statusCode is System.Net.HttpStatusCode.RequestTimeout // 408
+            or System.Net.HttpStatusCode.TooManyRequests // 429
+            or System.Net.HttpStatusCode.InternalServerError // 500
+            or System.Net.HttpStatusCode.BadGateway // 502
+            or System.Net.HttpStatusCode.ServiceUnavailable // 503
+            or System.Net.HttpStatusCode.GatewayTimeout; // 504
+    }
+}
+
+// ============================================================================
+// EXTENSION METHODS PARA REGISTRO EN DI
+// ============================================================================
+
+public static class HttpClientHandlerExtensions
+{
+    /// <summary>
+    /// Añade todos los handlers comunes
+    /// </summary>
+    public static IHttpClientBuilder AddCommonHandlers(this IHttpClientBuilder builder)
+    {
+        return builder
+            .AddHttpMessageHandler<CorrelationIdHandler>()
+            .AddHttpMessageHandler<LoggingHandler>();
+    }
+
+    /// <summary>
+    /// Añade handler de autenticación Bearer Token
+    /// </summary>
+    public static IHttpClientBuilder AddBearerTokenHandler(this IHttpClientBuilder builder)
+    {
+        return builder.AddHttpMessageHandler<BearerTokenHandler>();
+    }
+
+    /// <summary>
+    /// Añade handler de API Key
+    /// </summary>
+    public static IHttpClientBuilder AddApiKeyHandler(
+        this IHttpClientBuilder builder,
+        string apiKeySectionName,
+        string headerName = "X-API-Key")
+    {
+        return builder.AddHttpMessageHandler(sp =>
+        {
+            var configuration = sp.GetRequiredService<IConfiguration>();
+            return new ApiKeyHandler(configuration, apiKeySectionName, headerName);
+        });
+    }
+}

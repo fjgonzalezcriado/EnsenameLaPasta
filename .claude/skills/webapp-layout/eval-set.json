@@ -1,0 +1,45 @@
+{
+  "skill": "webapp-layout",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for webapp-layout skill. 6 queries: 3 should trigger, 3 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Aplica los colores corporativos de Comillas (#003366) y el diseño responsive al layout de la aplicación",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: diseño corporativo Comillas + responsive"
+    },
+    {
+      "query": "Create a Blazor layout with header, sidebar, footer and ensure WCAG 2.1 AA accessibility compliance",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: Blazor layout + accessibility"
+    },
+    {
+      "query": "Necesito implementar dark mode y estilos de impresión para la interfaz web",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keywords: dark mode + print styles"
+    },
+    {
+      "query": "Crea un endpoint API REST para gestionar las becas del sistema",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar generador-crud. Backend API != diseño web"
+    },
+    {
+      "query": "Generate unit tests for the Blazor components using bUnit",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar testing-patterns. Tests de componentes != diseño layout"
+    },
+    {
+      "query": "Genera la guía de uso para el usuario final con capturas de pantalla",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar user-documentation. Guía de usuario != crear layout"
+    }
+  ],
+  "overlap_notes": {}
+}

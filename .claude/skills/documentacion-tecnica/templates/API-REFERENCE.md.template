@@ -1,0 +1,363 @@
+# Referencia de API
+
+> Template para documentación de API REST
+> Skill: documentacion-tecnica
+> Versión: 2.8.0
+
+## Información General
+
+| Campo | Valor |
+|-------|-------|
+| **Base URL** | `https://api.comillas.edu/v1` |
+| **Autenticación** | Bearer Token (Azure AD) |
+| **Formato** | JSON |
+| **Encoding** | UTF-8 |
+
+---
+
+## Autenticación
+
+Todas las peticiones requieren un token Bearer en el header `Authorization`:
+
+```http
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOi...
+```
+
+### Obtener Token
+
+```http
+POST https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id={client_id}
+&scope=api://{api_client_id}/.default
+&client_secret={client_secret}
+&grant_type=client_credentials
+```
+
+---
+
+## Respuestas
+
+### Códigos HTTP
+
+| Código | Descripción |
+|--------|-------------|
+| `200` | OK - Petición exitosa |
+| `201` | Created - Recurso creado |
+| `204` | No Content - Operación exitosa sin contenido |
+| `400` | Bad Request - Error de validación |
+| `401` | Unauthorized - Token inválido o ausente |
+| `403` | Forbidden - Sin permisos |
+| `404` | Not Found - Recurso no encontrado |
+| `409` | Conflict - Conflicto de estado |
+| `500` | Internal Server Error |
+
+### Formato de Error
+
+```json
+{
+  "type": "https://comillas.edu/errors/validation",
+  "title": "Error de validación",
+  "status": 400,
+  "detail": "El nombre es obligatorio",
+  "instance": "/api/becas",
+  "errors": {
+    "Nombre": ["El nombre es obligatorio"],
+    "Importe": ["El importe debe ser mayor que 0"]
+  }
+}
+```
+
+---
+
+## Paginación
+
+Los endpoints de listado soportan paginación:
+
+```http
+GET /api/becas?page=1&size=10
+```
+
+### Respuesta Paginada
+
+```json
+{
+  "items": [...],
+  "totalCount": 100,
+  "page": 1,
+  "size": 10,
+  "totalPages": 10,
+  "hasNextPage": true,
+  "hasPreviousPage": false
+}
+```
+
+---
+
+## Endpoints
+
+### Becas
+
+#### Listar Becas
+
+```http
+GET /api/becas
+```
+
+**Query Parameters:**
+
+| Parámetro | Tipo | Descripción | Default |
+|-----------|------|-------------|---------|
+| `page` | int | Número de página | 1 |
+| `size` | int | Elementos por página | 10 |
+| `estado` | string | Filtrar por estado | - |
+| `orderBy` | string | Campo para ordenar | createdAt |
+| `orderDesc` | bool | Orden descendente | true |
+
+**Response:** `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "codigo": "BECA-001",
+      "nombre": "Beca de Excelencia",
+      "importe": 5000.00,
+      "estado": "Publicada",
+      "fechaInicio": "2025-01-01",
+      "fechaFin": "2025-12-31"
+    }
+  ],
+  "totalCount": 50,
+  "page": 1,
+  "size": 10
+}
+```
+
+---
+
+#### Obtener Beca
+
+```http
+GET /api/becas/{id}
+```
+
+**Path Parameters:**
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `id` | int | ID de la beca |
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "codigo": "BECA-001",
+  "nombre": "Beca de Excelencia",
+  "descripcion": "Beca para estudiantes con expediente académico destacado",
+  "importe": 5000.00,
+  "estado": "Publicada",
+  "fechaInicio": "2025-01-01",
+  "fechaFin": "2025-12-31",
+  "createdAt": "2025-01-01T10:00:00Z",
+  "createdBy": "admin@comillas.edu"
+}
+```
+
+**Error Response:** `404 Not Found`
+
+```json
+{
+  "type": "https://comillas.edu/errors/not-found",
+  "title": "Recurso no encontrado",
+  "status": 404,
+  "detail": "No existe una beca con ID 999"
+}
+```
+
+---
+
+#### Crear Beca
+
+```http
+POST /api/becas
+```
+
+**Request Body:**
+
+```json
+{
+  "codigo": "BECA-002",
+  "nombre": "Nueva Beca",
+  "descripcion": "Descripción opcional",
+  "importe": 3000.00,
+  "fechaInicio": "2025-06-01",
+  "fechaFin": "2025-12-31"
+}
+```
+
+**Validaciones:**
+
+| Campo | Reglas |
+|-------|--------|
+| `codigo` | Requerido, único, max 20 chars |
+| `nombre` | Requerido, max 200 chars |
+| `descripcion` | Opcional, max 2000 chars |
+| `importe` | Requerido, > 0, <= 100000 |
+| `fechaInicio` | Requerido |
+| `fechaFin` | Requerido, > fechaInicio |
+
+**Response:** `201 Created`
+
+```http
+Location: /api/becas/2
+```
+
+```json
+{
+  "id": 2,
+  "codigo": "BECA-002",
+  "nombre": "Nueva Beca",
+  "estado": "Borrador"
+}
+```
+
+**Error Response:** `400 Bad Request`
+
+```json
+{
+  "type": "https://comillas.edu/errors/validation",
+  "title": "Error de validación",
+  "status": 400,
+  "errors": {
+    "Nombre": ["El nombre es obligatorio"],
+    "Importe": ["El importe debe ser mayor que 0"]
+  }
+}
+```
+
+---
+
+#### Actualizar Beca
+
+```http
+PUT /api/becas/{id}
+```
+
+**Request Body:**
+
+```json
+{
+  "nombre": "Nombre Actualizado",
+  "descripcion": "Nueva descripción",
+  "importe": 4000.00
+}
+```
+
+**Response:** `204 No Content`
+
+---
+
+#### Eliminar Beca
+
+```http
+DELETE /api/becas/{id}
+```
+
+**Response:** `204 No Content`
+
+**Error Response:** `409 Conflict`
+
+```json
+{
+  "type": "https://comillas.edu/errors/conflict",
+  "title": "Conflicto",
+  "status": 409,
+  "detail": "No se puede eliminar una beca con solicitudes activas"
+}
+```
+
+---
+
+### Solicitudes
+
+#### Listar Solicitudes de una Beca
+
+```http
+GET /api/becas/{becaId}/solicitudes
+```
+
+#### Crear Solicitud
+
+```http
+POST /api/becas/{becaId}/solicitudes
+```
+
+**Request Body:**
+
+```json
+{
+  "estudianteId": 123,
+  "motivacion": "Texto de motivación..."
+}
+```
+
+---
+
+## Ejemplos con cURL
+
+### Listar Becas
+
+```bash
+curl -X GET "https://api.comillas.edu/v1/becas?page=1&size=10" \
+  -H "Authorization: Bearer eyJ0eXAi..." \
+  -H "Accept: application/json"
+```
+
+### Crear Beca
+
+```bash
+curl -X POST "https://api.comillas.edu/v1/becas" \
+  -H "Authorization: Bearer eyJ0eXAi..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "codigo": "BECA-003",
+    "nombre": "Nueva Beca",
+    "importe": 2500.00,
+    "fechaInicio": "2025-01-01",
+    "fechaFin": "2025-06-30"
+  }'
+```
+
+---
+
+## Rate Limiting
+
+| Límite | Valor |
+|--------|-------|
+| Peticiones por minuto | 100 |
+| Peticiones por hora | 1000 |
+
+Headers de respuesta:
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1640000000
+```
+
+---
+
+## Versionado
+
+La API está versionada en la URL: `/v1/`, `/v2/`, etc.
+
+Cambios menores se documentan en el changelog sin cambiar versión.
+Cambios breaking requieren nueva versión.
+
+---
+
+*Generado con documentacion-tecnica skill v2.8.0*

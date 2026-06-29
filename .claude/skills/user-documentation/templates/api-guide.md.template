@@ -1,0 +1,61 @@
+# Guia de Uso - API {{ProjectName}}
+
+> Documentacion para consumidores de la API
+> Version: {{Version}}
+
+---
+
+## Autenticacion
+
+**Tipo:** Bearer Token (Azure AD)
+
+Incluir en todas las peticiones:
+`Authorization: Bearer {access_token}`
+
+---
+
+## URL Base
+
+| Entorno | URL |
+|---------|-----|
+| Desarrollo | `https://dev-api.comillas.edu/{{ProjectName}}/api` |
+| Produccion | `{{BaseUrl}}/api` |
+
+---
+
+## Endpoints
+
+| Metodo | Endpoint | Descripcion |
+|--------|----------|-------------|
+| GET | /api/{{Resource}} | Listar (paginado) |
+| GET | /api/{{Resource}}/{id} | Obtener por ID |
+| POST | /api/{{Resource}} | Crear |
+| PUT | /api/{{Resource}}/{id} | Actualizar |
+| DELETE | /api/{{Resource}}/{id} | Eliminar |
+
+---
+
+## Paginacion
+
+`GET /api/{{Resource}}?page=1&pageSize=20`
+
+## Codigos de Error
+
+| Codigo | Significado |
+|--------|-------------|
+| 400 | Datos invalidos |
+| 401 | Token invalido o expirado |
+| 403 | Sin permisos |
+| 404 | Recurso no encontrado |
+| 429 | Rate limit excedido |
+| 500 | Error interno |
+
+---
+
+## Contacto
+
+soporte.stic@comillas.edu
+
+---
+
+*Template api-guide v3.1.0*

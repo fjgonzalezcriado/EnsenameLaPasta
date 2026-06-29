@@ -1,0 +1,62 @@
+// TEMPLATE: BlobStorageService | Skill: azure-config | Version: 3.1.0
+// Servicio completo de Azure Blob Storage
+// Placeholders: {{ProjectNamespace}}
+
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Azure.Storage.Sas;
+
+namespace {{ProjectNamespace}}.Infrastructure.Storage;
+
+public interface IBlobStorageService
+{
+    Task<string> UploadAsync(string container, string blobName, Stream content, string contentType, CancellationToken ct = default);
+    Task<Stream> DownloadAsync(string container, string blobName, CancellationToken ct = default);
+    Task DeleteAsync(string container, string blobName, CancellationToken ct = default);
+    Task<IReadOnlyList<string>> ListAsync(string container, string? prefix = null, CancellationToken ct = default);
+    string GenerateSasUrl(string container, string blobName, TimeSpan expiry);
+}
+
+public sealed class BlobStorageService : IBlobStorageService
+{
+    private readonly BlobServiceClient _client;
+    public BlobStorageService(BlobServiceClient client) => _client = client;
+
+    public async Task<string> UploadAsync(string container, string blobName, Stream content, string contentType, CancellationToken ct = default)
+    {
+        var containerClient = _client.GetBlobContainerClient(container);
+        await containerClient.CreateIfNotExistsAsync(cancellationToken: ct);
+        var blobClient = containerClient.GetBlobClient(blobName);
+        await blobClient.UploadAsync(content, new BlobHttpHeaders { ContentType = contentType }, cancellationToken: ct);
+        return blobClient.Uri.ToString();
+    }
+
+    public async Task<Stream> DownloadAsync(string container, string blobName, CancellationToken ct = default)
+    {
+        var blobClient = _client.GetBlobContainerClient(container).GetBlobClient(blobName);
+        var response = await blobClient.DownloadStreamingAsync(cancellationToken: ct);
+        return response.Value.Content;
+    }
+
+    public async Task DeleteAsync(string container, string blobName, CancellationToken ct = default)
+    {
+        var blobClient = _client.GetBlobContainerClient(container).GetBlobClient(blobName);
+        await blobClient.DeleteIfExistsAsync(cancellationToken: ct);
+    }
+
+    public async Task<IReadOnlyList<string>> ListAsync(string container, string? prefix = null, CancellationToken ct = default)
+    {
+        var containerClient = _client.GetBlobContainerClient(container);
+        var blobs = new List<string>();
+        await foreach (var blob in containerClient.GetBlobsAsync(prefix: prefix, cancellationToken: ct))
+            blobs.Add(blob.Name);
+        return blobs;
+    }
+
+    public string GenerateSasUrl(string container, string blobName, TimeSpan expiry)
+    {
+        var blobClient = _client.GetBlobContainerClient(container).GetBlobClient(blobName);
+        var sasUri = blobClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.Add(expiry));
+        return sasUri.ToString();
+    }
+}

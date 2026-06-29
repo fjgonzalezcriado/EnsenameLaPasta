@@ -1,0 +1,38 @@
+// TEMPLATE: Query | Skill: generador-crud | Version: 3.1.0
+// CQRS Query records using Mediator
+// Placeholders: {{EntityName}}, {{ProjectNamespace}}
+
+using Mediator;
+
+namespace {{ProjectNamespace}}.Application.{{EntityName}}.Queries;
+
+/// <summary>
+/// Query para obtener un {{EntityName}} por su ID.
+/// </summary>
+public sealed record Get{{EntityName}}ByIdQuery(int Id) : IQuery<{{EntityName}}Dto?>;
+
+/// <summary>
+/// Query para obtener todos los {{EntityName}} con paginacion.
+/// </summary>
+public sealed record GetAll{{EntityName}}Query : IQuery<PaginatedList<{{EntityName}}Dto>>
+{
+    public int PageNumber { get; init; } = 1;
+    public int PageSize { get; init; } = 20;
+    public string? Search { get; init; }
+    public string? OrderBy { get; init; }
+    public bool Descending { get; init; }
+}
+
+/// <summary>
+/// Resultado paginado generico.
+/// </summary>
+public sealed record PaginatedList<T>(
+    IReadOnlyList<T> Items,
+    int TotalItems,
+    int Page,
+    int PageSize)
+{
+    public int TotalPages => (int)Math.Ceiling(TotalItems / (double)PageSize);
+    public bool HasPreviousPage => Page > 1;
+    public bool HasNextPage => Page < TotalPages;
+}

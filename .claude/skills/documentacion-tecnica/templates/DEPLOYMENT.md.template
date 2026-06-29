@@ -1,0 +1,57 @@
+# Guia de Despliegue - {{ProjectName}}
+
+> Skill: documentacion-tecnica | Version: 3.1.0
+
+---
+
+## Prerequisitos
+
+- .NET 10 SDK
+- SQL Server (local o Azure SQL)
+- Acceso a Azure (si aplica)
+- Permisos de deploy en {{ServerUrl}}
+
+---
+
+## Configuracion por Entorno
+
+| Entorno | Servidor | Base de Datos | Key Vault |
+|---------|----------|---------------|-----------|
+| Desarrollo | localhost:7xxx | LocalDB | N/A |
+| Preproduccion | {{PreServerUrl}} | {{PreDbServer}} | {{PreKeyVault}} |
+| Produccion | {{ServerUrl}} | {{ProdDbServer}} | {{ProdKeyVault}} |
+
+---
+
+## Build y Publicacion
+
+```bash
+dotnet publish -c Release -o ./publish
+```
+
+## Despliegue IIS
+
+1. Copiar contenido de `./publish` a `\\{{IISServer}}\{{SitePath}}`
+2. Verificar web.config (App Pool: .NET CLR version = No Managed Code)
+3. Verificar appsettings.Production.json (connection strings via Key Vault)
+
+## Migraciones BD
+
+```bash
+dotnet ef database update --project {{ProjectName}}.Infrastructure
+```
+
+## Rollback
+
+1. Restaurar backup del directorio anterior
+2. Revertir migracion: `dotnet ef database update {{PreviousMigration}}`
+
+## Verificacion
+
+- [ ] Health check: `{{ServerUrl}}/health`
+- [ ] Login funciona
+- [ ] Operaciones CRUD basicas OK
+
+---
+
+*Template deployment v3.1.0*

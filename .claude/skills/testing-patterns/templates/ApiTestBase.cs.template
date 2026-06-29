@@ -1,0 +1,38 @@
+// TEMPLATE: ApiTestBase | Skill: testing-patterns | Version: 3.1.0
+// Base for API tests with WebApplicationFactory
+// Placeholders: {{ProjectNamespace}}
+
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Xunit;
+
+namespace {{ProjectNamespace}}.Tests.Api;
+
+public abstract class ApiTestBase : IClassFixture<WebApplicationFactory<Program>>
+{
+    protected readonly HttpClient Client;
+
+    protected ApiTestBase(WebApplicationFactory<Program> factory)
+    {
+        Client = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                // Override DB, auth, etc. para tests
+            });
+        }).CreateClient();
+
+        Client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", GenerateTestToken());
+    }
+
+    private static string GenerateTestToken() => "test-token";
+
+    protected async Task<T?> GetAsync<T>(string url)
+        => await Client.GetFromJsonAsync<T>(url);
+
+    protected async Task<HttpResponseMessage> PostAsync<T>(string url, T body)
+        => await Client.PostAsJsonAsync(url, body);
+}

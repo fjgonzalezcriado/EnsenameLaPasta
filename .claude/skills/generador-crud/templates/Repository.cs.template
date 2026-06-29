@@ -1,0 +1,200 @@
+// ============================================================================
+// TEMPLATE: Repository.cs - Repositorio con EF Core
+// Skill: generador-crud
+// Versión: 2.8.0
+// ============================================================================
+// USO: Reemplazar {{Entidad}}, {{Entidades}}, {{Namespace}}
+// ============================================================================
+
+using Microsoft.EntityFrameworkCore;
+using {{Namespace}}.Application.Common.Interfaces;
+using {{Namespace}}.Application.Common.Models;
+using {{Namespace}}.Domain.Entities;
+
+namespace {{Namespace}}.Infrastructure.Persistence.Repositories;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INTERFAZ (en Application/Common/Interfaces/)
+// ═══════════════════════════════════════════════════════════════════════════
+
+public interface I{{Entidad}}Repository
+{
+    Task<{{Entidad}}?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<PaginatedResult<{{Entidad}}>> GetPaginatedAsync(int page, int size, CancellationToken ct = default);
+    Task<IReadOnlyList<{{Entidad}}>> GetAllAsync(CancellationToken ct = default);
+    Task<{{Entidad}}> AddAsync({{Entidad}} entity, CancellationToken ct = default);
+    Task UpdateAsync({{Entidad}} entity, CancellationToken ct = default);
+    Task<bool> ExistsAsync(int id, CancellationToken ct = default);
+
+    // Métodos específicos de la entidad
+    {{MetodosEspecificos}}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// IMPLEMENTACIÓN (en Infrastructure/Persistence/Repositories/)
+// ═══════════════════════════════════════════════════════════════════════════
+
+public class {{Entidad}}Repository : I{{Entidad}}Repository
+{
+    private readonly ApplicationDbContext _context;
+
+    public {{Entidad}}Repository(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<{{Entidad}}?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        return await _context.{{Entidades}}
+            .FirstOrDefaultAsync(e => e.Id == id, ct);
+    }
+
+    public async Task<PaginatedResult<{{Entidad}}>> GetPaginatedAsync(
+        int page,
+        int size,
+        CancellationToken ct = default)
+    {
+        var query = _context.{{Entidades}}.AsNoTracking();
+
+        var totalCount = await query.CountAsync(ct);
+
+        var items = await query
+            .OrderByDescending(e => e.CreatedAt)
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync(ct);
+
+        return new PaginatedResult<{{Entidad}}>(items, totalCount, page, size);
+    }
+
+    public async Task<IReadOnlyList<{{Entidad}}>> GetAllAsync(CancellationToken ct = default)
+    {
+        return await _context.{{Entidades}}
+            .AsNoTracking()
+            .OrderByDescending(e => e.CreatedAt)
+            .ToListAsync(ct);
+    }
+
+    public async Task<{{Entidad}}> AddAsync({{Entidad}} entity, CancellationToken ct = default)
+    {
+        await _context.{{Entidades}}.AddAsync(entity, ct);
+        return entity;
+    }
+
+    public Task UpdateAsync({{Entidad}} entity, CancellationToken ct = default)
+    {
+        _context.{{Entidades}}.Update(entity);
+        return Task.CompletedTask;
+    }
+
+    public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)
+    {
+        return await _context.{{Entidades}}
+            .AnyAsync(e => e.Id == id, ct);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // MÉTODOS ESPECÍFICOS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    {{ImplementacionMetodosEspecificos}}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REGISTRO EN DI (en Infrastructure/DependencyInjection.cs)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/*
+// En AddInfrastructure():
+services.AddScoped<I{{Entidad}}Repository, {{Entidad}}Repository>();
+*/
+
+// ============================================================================
+// EJEMPLO GENERADO - BecaRepository
+// ============================================================================
+/*
+public interface IBecaRepository
+{
+    Task<Beca?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<Beca?> GetByCodigoAsync(string codigo, CancellationToken ct = default);
+    Task<PaginatedResult<Beca>> GetPaginatedAsync(int page, int size, CancellationToken ct = default);
+    Task<IReadOnlyList<Beca>> GetActivasAsync(CancellationToken ct = default);
+    Task<Beca> AddAsync(Beca entity, CancellationToken ct = default);
+    Task UpdateAsync(Beca entity, CancellationToken ct = default);
+    Task<bool> ExistsAsync(int id, CancellationToken ct = default);
+    Task<bool> ExisteCodigoAsync(string codigo, CancellationToken ct = default);
+}
+
+public class BecaRepository : IBecaRepository
+{
+    private readonly ApplicationDbContext _context;
+
+    public BecaRepository(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<Beca?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        return await _context.Becas
+            .Include(b => b.Solicitudes)
+            .FirstOrDefaultAsync(b => b.Id == id, ct);
+    }
+
+    public async Task<Beca?> GetByCodigoAsync(string codigo, CancellationToken ct = default)
+    {
+        return await _context.Becas
+            .FirstOrDefaultAsync(b => b.Codigo == codigo, ct);
+    }
+
+    public async Task<PaginatedResult<Beca>> GetPaginatedAsync(
+        int page,
+        int size,
+        CancellationToken ct = default)
+    {
+        var query = _context.Becas.AsNoTracking();
+
+        var totalCount = await query.CountAsync(ct);
+
+        var items = await query
+            .OrderByDescending(b => b.CreatedAt)
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync(ct);
+
+        return new PaginatedResult<Beca>(items, totalCount, page, size);
+    }
+
+    public async Task<IReadOnlyList<Beca>> GetActivasAsync(CancellationToken ct = default)
+    {
+        return await _context.Becas
+            .AsNoTracking()
+            .Where(b => b.Estado == EstadoBeca.Publicada)
+            .Where(b => b.FechaFin >= DateTime.Today)
+            .OrderBy(b => b.FechaFin)
+            .ToListAsync(ct);
+    }
+
+    public async Task<Beca> AddAsync(Beca entity, CancellationToken ct = default)
+    {
+        await _context.Becas.AddAsync(entity, ct);
+        return entity;
+    }
+
+    public Task UpdateAsync(Beca entity, CancellationToken ct = default)
+    {
+        _context.Becas.Update(entity);
+        return Task.CompletedTask;
+    }
+
+    public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)
+    {
+        return await _context.Becas.AnyAsync(b => b.Id == id, ct);
+    }
+
+    public async Task<bool> ExisteCodigoAsync(string codigo, CancellationToken ct = default)
+    {
+        return await _context.Becas.AnyAsync(b => b.Codigo == codigo, ct);
+    }
+}
+*/

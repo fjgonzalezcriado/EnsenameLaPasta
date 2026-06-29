@@ -1,0 +1,62 @@
+// TEMPLATE: QueryHandler | Skill: generador-crud | Version: 3.1.0
+// CQRS Query Handler with projection using Mediator
+// Placeholders: {{EntityName}}, {{ProjectNamespace}}
+
+using Mediator;
+using Microsoft.EntityFrameworkCore;
+
+namespace {{ProjectNamespace}}.Application.{{EntityName}}.Queries;
+
+public sealed class Get{{EntityName}}ByIdQueryHandler
+    : IQueryHandler<Get{{EntityName}}ByIdQuery, {{EntityName}}Dto?>
+{
+    private readonly IReadOnly{{EntityName}}Repository _repository;
+
+    public Get{{EntityName}}ByIdQueryHandler(IReadOnly{{EntityName}}Repository repository)
+        => _repository = repository;
+
+    public async ValueTask<{{EntityName}}Dto?> Handle(
+        Get{{EntityName}}ByIdQuery query, CancellationToken ct)
+    {
+        var entity = await _repository.GetByIdAsync(query.Id, ct);
+        return entity?.ToDto();
+    }
+}
+
+public sealed class GetAll{{EntityName}}QueryHandler
+    : IQueryHandler<GetAll{{EntityName}}Query, PaginatedList<{{EntityName}}Dto>>
+{
+    private readonly IReadOnly{{EntityName}}Repository _repository;
+
+    public GetAll{{EntityName}}QueryHandler(IReadOnly{{EntityName}}Repository repository)
+        => _repository = repository;
+
+    public async ValueTask<PaginatedList<{{EntityName}}Dto>> Handle(
+        GetAll{{EntityName}}Query query, CancellationToken ct)
+    {
+        var queryable = _repository.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+            queryable = queryable.Where(e =>
+                e.Nombre.Contains(query.Search));
+
+        var totalItems = await queryable.CountAsync(ct);
+
+        queryable = query.OrderBy?.ToLowerInvariant() switch
+        {
+            "nombre" => query.Descending
+                ? queryable.OrderByDescending(e => e.Nombre)
+                : queryable.OrderBy(e => e.Nombre),
+            _ => queryable.OrderBy(e => e.Id)
+        };
+
+        var items = await queryable
+            .Skip((query.PageNumber - 1) * query.PageSize)
+            .Take(query.PageSize)
+            .Select(e => e.ToDto())
+            .ToListAsync(ct);
+
+        return new PaginatedList<{{EntityName}}Dto>(
+            items, totalItems, query.PageNumber, query.PageSize);
+    }
+}

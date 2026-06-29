@@ -1,0 +1,47 @@
+{
+  "skill": "user-documentation",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for user-documentation skill. 6 queries: 3 should trigger, 3 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Crea una guía de uso para el usuario final del módulo de becas con capturas y flujos",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: guía de usuario + flujos"
+    },
+    {
+      "query": "Generate an FAQ page and user walkthrough with annotated screenshots for the application",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: FAQ + screenshots + walkthrough"
+    },
+    {
+      "query": "Necesito documentación funcional para el Product Owner explicando los flujos del sistema",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keywords: documentación funcional + Product Owner + flujos"
+    },
+    {
+      "query": "Genera un ADR y un README técnico con diagramas Mermaid para el equipo de desarrollo",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar documentacion-tecnica. Docs técnicas != docs usuario"
+    },
+    {
+      "query": "Create a deployment guide for the DevOps team with CI/CD pipeline documentation",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar documentacion-tecnica. Deployment guide != user guide"
+    },
+    {
+      "query": "Genera una colección Postman con environments para que los consumidores testen la API",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar postman-collection. Postman != documentación de usuario"
+    }
+  ],
+  "overlap_notes": {
+    "documentacion-tecnica": "Audience: user-documentation para USUARIOS finales (FAQ, guías), documentacion-tecnica para DESARROLLADORES (ADR, API ref, deployment)"
+  }
+}

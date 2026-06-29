@@ -1,0 +1,124 @@
+// TEMPLATE: Banner API Client
+// Version: 1.0.0
+// Uso: Cliente específico para Banner API (sistema académico Ellucian)
+
+using System.Net.Http.Json;
+
+namespace Comillas.MiApp.Infrastructure.ApiClients;
+
+public interface IBannerClient
+{
+    Task<StudentDto?> GetStudentAsync(string studentId, CancellationToken ct = default);
+    Task<IReadOnlyList<CourseDto>> GetCoursesAsync(string term, CancellationToken ct = default);
+    Task<EnrollmentResponseDto> EnrollStudentAsync(EnrollmentRequestDto request, CancellationToken ct = default);
+    Task<IReadOnlyList<UniversityDto>> GetUniversitiesAsync(CancellationToken ct = default);
+}
+
+public class BannerClient : ApiClientBase, IBannerClient
+{
+    public BannerClient(HttpClient httpClient, ILogger<BannerClient> logger)
+        : base(httpClient, logger)
+    {
+    }
+
+    public async Task<StudentDto?> GetStudentAsync(string studentId, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(studentId))
+            throw new ArgumentException("Student ID es requerido", nameof(studentId));
+
+        Logger.LogInformation("Obteniendo estudiante {StudentId} desde Banner", studentId);
+
+        var response = await GetAsync<StudentDto>($"students/{studentId}", ct);
+
+        if (response is null)
+            Logger.LogWarning("Estudiante {StudentId} no encontrado en Banner", studentId);
+
+        return response;
+    }
+
+    public async Task<IReadOnlyList<CourseDto>> GetCoursesAsync(string term, CancellationToken ct = default)
+    {
+        Logger.LogInformation("Obteniendo cursos del término {Term} desde Banner", term);
+
+        var response = await GetAsync<CoursesResponseDto>($"courses?term={term}", ct);
+
+        return response?.Courses ?? new List<CourseDto>();
+    }
+
+    public async Task<EnrollmentResponseDto> EnrollStudentAsync(
+        EnrollmentRequestDto request,
+        CancellationToken ct = default)
+    {
+        if (request is null)
+            throw new ArgumentNullException(nameof(request));
+
+        Logger.LogInformation(
+            "Matriculando estudiante {StudentId} en curso {CourseId}",
+            request.StudentId,
+            request.CourseId);
+
+        var response = await PostAsync<EnrollmentRequestDto, EnrollmentResponseDto>(
+            "enrollments",
+            request,
+            ct);
+
+        if (response is null)
+            throw new InvalidOperationException("Banner no retornó respuesta para la matrícula");
+
+        Logger.LogInformation(
+            "Estudiante {StudentId} matriculado correctamente. Enrollment ID: {EnrollmentId}",
+            request.StudentId,
+            response.EnrollmentId);
+
+        return response;
+    }
+
+    public async Task<IReadOnlyList<UniversityDto>> GetUniversitiesAsync(CancellationToken ct = default)
+    {
+        Logger.LogInformation("Obteniendo universidades desde Banner");
+
+        var response = await GetAsync<UniversitiesResponseDto>("universities", ct);
+
+        return response?.Universities ?? new List<UniversityDto>();
+    }
+}
+
+// ============================================================================
+// DTOs
+// ============================================================================
+
+public record StudentDto(
+    string Id,
+    string FirstName,
+    string LastName,
+    string Email,
+    string Status);
+
+public record CourseDto(
+    string Id,
+    string Code,
+    string Name,
+    int Credits,
+    string Term);
+
+public record CoursesResponseDto(List<CourseDto> Courses);
+
+public record EnrollmentRequestDto(
+    string StudentId,
+    string CourseId,
+    string Term);
+
+public record EnrollmentResponseDto(
+    string EnrollmentId,
+    string StudentId,
+    string CourseId,
+    DateTime EnrollmentDate,
+    string Status);
+
+public record UniversityDto(
+    string Id,
+    string Name,
+    string Country,
+    string City);
+
+public record UniversitiesResponseDto(List<UniversityDto> Universities);

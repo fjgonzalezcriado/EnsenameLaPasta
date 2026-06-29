@@ -1,0 +1,39 @@
+// TEMPLATE: TestBase | Skill: testing-patterns | Version: 3.1.0
+// Base class for unit tests with Moq + FluentAssertions
+// Placeholders: {{ProjectNamespace}}
+
+using FluentAssertions;
+using Moq;
+using Moq.AutoMock;
+using Xunit;
+
+namespace {{ProjectNamespace}}.Tests.Unit;
+
+public abstract class TestBase<TSut> where TSut : class
+{
+    protected readonly AutoMocker Mocker = new();
+    protected TSut Sut => Mocker.CreateInstance<TSut>();
+
+    protected Mock<T> GetMock<T>() where T : class => Mocker.GetMock<T>();
+
+    protected void SetupReturn<T, TResult>(
+        System.Linq.Expressions.Expression<Func<T, Task<TResult>>> expression,
+        TResult result) where T : class
+    {
+        Mocker.GetMock<T>().Setup(expression).ReturnsAsync(result);
+    }
+}
+
+// EJEMPLO:
+// public class BecaServiceTests : TestBase<BecaService>
+// {
+//     [Fact]
+//     public async Task GetById_ReturnsBeca()
+//     {
+//         var beca = new Beca { Id = 1, Nombre = "Test" };
+//         SetupReturn<IBecaRepository, Beca?>(r => r.GetByIdAsync(1, default), beca);
+//         var result = await Sut.GetByIdAsync(1);
+//         result.Should().NotBeNull();
+//         result!.Nombre.Should().Be("Test");
+//     }
+// }

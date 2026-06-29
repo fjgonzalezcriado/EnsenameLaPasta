@@ -1,0 +1,90 @@
+# =============================================================================
+# AI Trading Simulator - .gitignore
+# =============================================================================
+
+# .NET build outputs
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.userosscache
+*.sln.docstates
+*.swp
+*.swo
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+ARM/
+ARM64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# SQLite local DB del simulador (no se commitea, se regenera por migrations)
+**/App_Data/*.db
+**/App_Data/*.db-journal
+**/App_Data/*.db-shm
+**/App_Data/*.db-wal
+
+# Secrets locales
+*.pfx
+*.key
+**/appsettings.*.json
+!**/appsettings.json
+!**/appsettings.Development.json
+!**/appsettings.Production.json
+secrets.json
+
+# Test results / coverage
+[Tt]est[Rr]esult*/
+coverage/
+*.coverage
+*.coveragexml
+TestResults/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backups
+*.bak
+*.swp
+*~
+
+# STIC.IA descarga (no debería viajar con el repo)
+03_Desarrollo/STIC.IA_v3.9.0/
+03_Desarrollo/STIC.IA_v3.9.0.zip
+03_Desarrollo/arranque.ps1
+
+# Credenciales MCP locales
+_duran/.mcp-credentials.json
+
+# SQLite CLI/DLL descargado manualmente (binarios; EF Core trae su nativo via NuGet)
+sqlite-dll-win-x64-*/
+sqlite-dll-win-x64-*.zip

@@ -1,0 +1,130 @@
+// TEMPLATE: analisis-arquitectura | Version: 3.7.0
+// Uso: Claude rellena los placeholders {{...}} con datos reales del analisis.
+// El comando /analisis-arquitectura genera este archivo automaticamente.
+
+# Analisis Arquitectonico — {{NOMBRE_PROYECTO}}
+
+> **Version del analisis:** {{VERSION_ANALISIS}}
+> **Fecha:** {{FECHA_ANALISIS}}
+> **Tipo:** {{TIPO_ANALISIS}} (Clean Architecture / Arquitectura General)
+> **Framework:** {{FRAMEWORK}}
+> **Generado por:** STIC.IA {{STIC_VERSION}}
+
+---
+
+## 1. Resumen Ejecutivo
+
+{{RESUMEN_EJECUTIVO}}
+
+### Fortalezas principales
+1. {{FORTALEZA_1}}
+2. {{FORTALEZA_2}}
+3. {{FORTALEZA_3}}
+
+### Debilidades principales
+1. {{DEBILIDAD_1}}
+2. {{DEBILIDAD_2}}
+3. {{DEBILIDAD_3}}
+
+### Veredicto
+{{VEREDICTO}}
+
+---
+
+## 2. Inventario de la Solucion
+
+{{INVENTARIO_TABLA}}
+
+---
+
+## 3. Diagrama de Dependencias
+
+```mermaid
+{{DIAGRAMA_DEPENDENCIAS}}
+```
+
+{{NOTAS_DIAGRAMA}}
+
+---
+
+## 4. {{TITULO_SECCION_4}}
+
+<!-- Para CA: "Auditoria de Clean Architecture" -->
+<!-- Para General: "Identificacion de la Arquitectura Actual" -->
+
+{{CONTENIDO_SECCION_4}}
+
+---
+
+## 5. Metricas Cuantitativas
+
+{{METRICAS_TABLA}}
+
+---
+
+## 6. Patrones de Diseno Detectados
+
+{{PATRONES_DETECTADOS}}
+
+---
+
+## 7. Analisis de Dependencias NuGet
+
+{{NUGET_TABLA}}
+
+{{NUGET_OBSERVACIONES}}
+
+---
+
+## 8. Los 5 Problemas Arquitectonicos Mas Criticos
+
+{{PROBLEMAS_CRITICOS}}
+
+---
+
+## 9. Recomendaciones de Mejora
+
+### Corto plazo (< 1 sprint)
+
+{{RECOMENDACIONES_CORTO}}
+
+### Medio plazo (1-3 sprints)
+
+{{RECOMENDACIONES_MEDIO}}
+
+### Largo plazo (> 3 sprints)
+
+{{RECOMENDACIONES_LARGO}}
+
+---
+
+<!-- SECCION 10: Solo para tipo "general" -->
+{{SECCION_MIGRACION}}
+
+---
+
+## {{NUMERO_SECCION_PUNTUACION}}. Puntuacion General
+
+{{PUNTUACION_TABLA}}
+
+**Puntuacion total: {{PUNTUACION_TOTAL}} / 10**
+
+---
+
+## Especificacion del Proyecto Analizado
+
+| Campo | Valor |
+|-------|-------|
+| Nombre | {{NOMBRE_PROYECTO}} |
+| Tipo de solucion | {{TIPO_SOLUCION}} |
+| Framework | {{FRAMEWORK}} |
+| Arquitectura | {{ARQUITECTURA}} |
+| Base de datos | {{BASE_DATOS}} |
+| Acceso a datos | {{ACCESO_DATOS}} |
+| Autenticacion | {{AUTENTICACION}} |
+| Hosting | {{HOSTING}} |
+
+---
+
+*Generado por STIC.IA {{STIC_VERSION}} — Comando /analisis-arquitectura*
+*Fecha: {{FECHA_ANALISIS}}*

@@ -1,0 +1,110 @@
+# Changelog
+
+> Template para documentación de cambios
+> Skill: documentacion-tecnica
+> Versión: 2.8.0
+
+Todos los cambios notables en este proyecto serán documentados en este archivo.
+
+El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
+y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
+
+---
+
+## [Unreleased]
+
+### Added
+- _Nuevas funcionalidades pendientes de release_
+
+### Changed
+- _Cambios en funcionalidades existentes_
+
+### Deprecated
+- _Funcionalidades que serán eliminadas en futuras versiones_
+
+### Removed
+- _Funcionalidades eliminadas_
+
+### Fixed
+- _Corrección de bugs_
+
+### Security
+- _Correcciones de vulnerabilidades_
+
+---
+
+## [X.Y.Z] - YYYY-MM-DD
+
+### Added
+- Nueva funcionalidad A que permite hacer X (#123)
+- Endpoint `/api/nuevo` para operaciones Y
+- Soporte para autenticación con Azure AD B2C
+
+### Changed
+- Actualizado Entity Framework Core de 8.0 a 10.0
+- Mejorado rendimiento de consultas en módulo de becas (30% más rápido)
+- Migrada validación a FluentValidation
+
+### Fixed
+- Corregido error en cálculo de importes cuando el periodo era menor a un mes (#456)
+- Solucionado problema de timeout en exportación de reportes grandes
+
+### Security
+- Actualizado paquete `System.Text.Json` por vulnerabilidad CVE-2024-XXXX
+
+---
+
+## [X.Y.Z-1] - YYYY-MM-DD
+
+### Added
+- Primera versión con funcionalidad básica de CRUD
+- Autenticación con Azure AD
+- Dashboard de administración
+
+---
+
+## Tipos de cambios
+
+| Tipo | Descripción |
+|------|-------------|
+| **Added** | Nuevas funcionalidades |
+| **Changed** | Cambios en funcionalidades existentes |
+| **Deprecated** | Funcionalidades que serán eliminadas pronto |
+| **Removed** | Funcionalidades eliminadas |
+| **Fixed** | Corrección de bugs |
+| **Security** | Vulnerabilidades corregidas |
+
+---
+
+## Guía para escribir entradas
+
+### Buenas prácticas
+
+```markdown
+✅ BIEN
+- Añadido endpoint `/api/becas/{id}/solicitudes` para obtener solicitudes de una beca (#123)
+- Corregido error donde el importe se mostraba sin decimales en el PDF (#456)
+- Actualizado Bootstrap de 4.x a 5.x por fin de soporte
+
+❌ MAL
+- Arreglado bug
+- Cambios varios
+- Actualizado código
+```
+
+### Incluir siempre
+
+- Referencia al issue/ticket si existe (#123)
+- Descripción clara del cambio
+- Impacto en el usuario si es relevante
+
+---
+
+## Links
+
+[Unreleased]: https://github.com/comillas/proyecto/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/comillas/proyecto/releases/tag/v1.0.0
+
+---
+
+*Generado con documentacion-tecnica skill v2.8.0*

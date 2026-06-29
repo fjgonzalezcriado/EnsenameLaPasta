@@ -1,0 +1,61 @@
+{
+  "skill": "api-integration-patterns",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for api-integration-patterns skill. 8 queries: 4 should trigger, 4 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Implementa la integración con la API de Banner para obtener datos académicos de estudiantes",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: integración con sistema externo Comillas (Banner)"
+    },
+    {
+      "query": "Configure HttpClientFactory with OAuth2 client credentials for the Oracle HCM API",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: HttpClientFactory + OAuth2 + external API"
+    },
+    {
+      "query": "Necesito conectar con la API de Sigma para sincronizar datos de nóminas con retry policies",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keyword directo: API Sigma + integración externa"
+    },
+    {
+      "query": "Generate a typed API client with response caching for the external payroll service",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: typed API client + external service"
+    },
+    {
+      "query": "Crea un CRUD completo para la entidad Factura con Controller y Service",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar generador-crud. Endpoint interno != integración externa"
+    },
+    {
+      "query": "Audita la seguridad de los flujos OAuth2 y verifica que no hay tokens expuestos",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar security-audit. Auditar OAuth != implementar OAuth"
+    },
+    {
+      "query": "Configura Azure Key Vault para guardar los client secrets de las APIs externas",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar azure-config. Configurar Key Vault != integrar API"
+    },
+    {
+      "query": "Add Polly circuit breaker and retry policies to the existing HttpClient",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar resilience-patterns. Polly patterns != API integration"
+    }
+  ],
+  "overlap_notes": {
+    "security-audit": "OAuth2: api-integration IMPLEMENTA OAuth flows, security-audit AUDITA su seguridad",
+    "generador-crud": "Endpoints: api-integration conecta APIs EXTERNAS, generador-crud crea endpoints INTERNOS",
+    "resilience-patterns": "Polly: api-integration puede incluir retry básico, resilience-patterns configura patrones avanzados (circuit breaker, bulkhead)"
+  }
+}

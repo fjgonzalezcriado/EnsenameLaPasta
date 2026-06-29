@@ -1,0 +1,34 @@
+// TEMPLATE: FakeBuilder | Skill: testing-patterns | Version: 3.1.0
+// Generic builder with Bogus for test data
+// Placeholders: {{EntityName}}, {{ProjectNamespace}}
+
+using Bogus;
+
+namespace {{ProjectNamespace}}.Tests.Builders;
+
+public class FakeBuilder<T> where T : class
+{
+    protected readonly Faker<T> Faker;
+
+    public FakeBuilder(Faker<T> faker)
+    {
+        Faker = faker;
+        Faker.UseSeed(42);
+    }
+
+    public T Build() => Faker.Generate();
+    public List<T> BuildMany(int count = 5) => Faker.Generate(count);
+}
+
+// EJEMPLO de builder concreto:
+// public class BecaBuilder : FakeBuilder<Beca>
+// {
+//     public BecaBuilder() : base(new Faker<Beca>("es")
+//         .RuleFor(b => b.Id, f => f.IndexFaker + 1)
+//         .RuleFor(b => b.Nombre, f => f.Commerce.ProductName())
+//         .RuleFor(b => b.Importe, f => f.Finance.Amount(500, 15000)))
+//     { }
+//     public BecaBuilder ConNombre(string nombre)
+//     { Faker.RuleFor(b => b.Nombre, nombre); return this; }
+// }
+// var beca = new BecaBuilder().ConNombre("Excelencia").Build();

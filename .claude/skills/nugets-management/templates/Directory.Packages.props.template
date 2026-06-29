@@ -1,0 +1,54 @@
+<!-- TEMPLATE: Directory.Packages.props | Skill: nugets-management | Version: 3.1.0 -->
+<!-- Central Package Management - Paquetes estandar Comillas -->
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup Label="Framework">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.*" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.*" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.*" />
+  </ItemGroup>
+
+  <ItemGroup Label="Autenticacion">
+    <PackageVersion Include="Microsoft.Identity.Web" Version="3.*" />
+    <PackageVersion Include="Microsoft.Identity.Web.UI" Version="3.*" />
+  </ItemGroup>
+
+  <ItemGroup Label="CQRS y Validacion">
+    <PackageVersion Include="Mediator" Version="3.*" />
+    <PackageVersion Include="Mediator.Abstractions" Version="3.*" />
+    <PackageVersion Include="FluentValidation" Version="11.*" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.*" />
+  </ItemGroup>
+
+  <ItemGroup Label="Logging y Telemetria">
+    <PackageVersion Include="Serilog" Version="4.*" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="8.*" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.*" />
+    <PackageVersion Include="Serilog.Sinks.ApplicationInsights" Version="4.*" />
+    <PackageVersion Include="OpenTelemetry" Version="1.*" />
+  </ItemGroup>
+
+  <ItemGroup Label="Resiliencia">
+    <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="9.*" />
+    <PackageVersion Include="Polly" Version="8.*" />
+  </ItemGroup>
+
+  <ItemGroup Label="Azure">
+    <PackageVersion Include="Azure.Identity" Version="1.*" />
+    <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.*" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.*" />
+    <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.*" />
+  </ItemGroup>
+
+  <ItemGroup Label="Testing">
+    <PackageVersion Include="xunit" Version="2.*" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.*" />
+    <PackageVersion Include="Moq" Version="4.*" />
+    <PackageVersion Include="FluentAssertions" Version="7.*" />
+    <PackageVersion Include="Bogus" Version="35.*" />
+    <PackageVersion Include="Testcontainers.MsSql" Version="4.*" />
+  </ItemGroup>
+</Project>

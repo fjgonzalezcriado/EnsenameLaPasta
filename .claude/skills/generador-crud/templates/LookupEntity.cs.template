@@ -1,0 +1,70 @@
+// TEMPLATE: LookupEntity | Skill: generador-crud | Version: 3.1.0
+// Catalog/lookup entity with caching pattern
+// Placeholders: {{EntityName}}, {{ProjectNamespace}}
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+
+namespace {{ProjectNamespace}}.Domain.Entities;
+
+public abstract class LookupEntity
+{
+    public int Id { get; protected set; }
+    public required string Code { get; set; }
+    public required string Name { get; set; }
+    public string? Description { get; set; }
+    public bool IsActive { get; set; } = true;
+    public int SortOrder { get; set; }
+}
+
+public interface ILookupRepository<T> where T : LookupEntity
+{
+    Task<IReadOnlyList<T>> GetAllActiveAsync(CancellationToken ct = default);
+    Task<T?> GetByCodeAsync(string code, CancellationToken ct = default);
+    Task<T?> GetByIdAsync(int id, CancellationToken ct = default);
+}
+
+public class CachedLookupRepository<T> : ILookupRepository<T> where T : LookupEntity
+{
+    private readonly DbContext _context;
+    private readonly IMemoryCache _cache;
+    private readonly string _cacheKey;
+
+    public CachedLookupRepository(DbContext context, IMemoryCache cache)
+    {
+        _context = context;
+        _cache = cache;
+        _cacheKey = $"Lookup_{typeof(T).Name}";
+    }
+
+    public async Task<IReadOnlyList<T>> GetAllActiveAsync(CancellationToken ct = default)
+    {
+        return await _cache.GetOrCreateAsync(_cacheKey, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+            return await _context.Set<T>()
+                .Where(e => e.IsActive)
+                .OrderBy(e => e.SortOrder)
+                .ThenBy(e => e.Name)
+                .AsNoTracking()
+                .ToListAsync(ct);
+        }) ?? [];
+    }
+
+    public async Task<T?> GetByCodeAsync(string code, CancellationToken ct = default)
+    {
+        var items = await GetAllActiveAsync(ct);
+        return items.FirstOrDefault(e =>
+            e.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public async Task<T?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        var items = await GetAllActiveAsync(ct);
+        return items.FirstOrDefault(e => e.Id == id);
+    }
+}
+
+// EJEMPLO:
+// public class TipoBeca : LookupEntity { }
+// services.AddScoped<ILookupRepository<TipoBeca>, CachedLookupRepository<TipoBeca>>();

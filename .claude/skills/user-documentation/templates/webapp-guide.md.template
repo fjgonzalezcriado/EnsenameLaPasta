@@ -1,0 +1,56 @@
+# Manual de Usuario - {{ProjectName}}
+
+> Guia para usuarios de la aplicacion web
+> Version: {{Version}}
+
+---
+
+## Acceso
+
+1. Navegar a `{{AppUrl}}`
+2. Iniciar sesion con credenciales de Comillas (Azure AD)
+3. Seleccionar rol si tiene multiples asignados
+
+---
+
+## Navegacion
+
+![Pantalla principal](screenshots/main-screen.png)
+
+| Area | Descripcion |
+|------|-------------|
+| Header | Logo, usuario, notificaciones |
+| Sidebar | Menu de navegacion principal |
+| Contenido | Area principal de trabajo |
+| Footer | Version, enlaces de ayuda |
+
+---
+
+## Funcionalidades Principales
+
+### {{Feature1Name}}
+
+1. Acceder desde el menu lateral
+2. {{Feature1Step2}}
+3. {{Feature1Step3}}
+
+![{{Feature1Name}}](screenshots/{{feature1}}.png)
+
+### {{Feature2Name}}
+
+1. {{Feature2Step1}}
+2. {{Feature2Step2}}
+
+---
+
+## Preguntas Frecuentes
+
+**P: No puedo acceder a la aplicacion**
+R: Verificar que sus credenciales de Comillas estan activas. Contactar soporte.stic@comillas.edu
+
+**P: El sistema va lento**
+R: Limpiar cache del navegador. Verificar conexion a la red de Comillas.
+
+---
+
+*Template webapp-guide v3.1.0*

@@ -1,0 +1,110 @@
+{
+  "skill": "git-best-practices",
+  "version": "3.7.0",
+  "created": "2026-03-12",
+  "updated": "2026-04-06",
+  "description": "Trigger evaluation dataset for git-best-practices skill. 16 queries: 10 should trigger, 6 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Configura una estrategia de branching para el equipo: necesitamos definir convenciones de ramas y protección",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: estrategia de ramas + branch protection"
+    },
+    {
+      "query": "Set up GitHub Actions CI/CD pipeline with Conventional Commits validation and GPG signing",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: CI/CD + commits + signing"
+    },
+    {
+      "query": "Necesitamos migrar de TFVC a Git, cuál es la mejor estrategia para nuestro proyecto?",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keyword directo: migración TFVC a Git"
+    },
+    {
+      "query": "Configure pre-commit hooks to enforce linting and run tests before each commit",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: Git hooks automation"
+    },
+    {
+      "query": "Configura branch policies en Azure DevOps para nuestro proyecto con merge queues y build validation",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Nuevo v3.7.0: Azure DevOps branch policies + merge queues"
+    },
+    {
+      "query": "What branching antipatterns should we avoid? Our feature branches live for weeks and we have zombie branches everywhere",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "Nuevo v3.7.0: Branching antipatterns - long-lived branches + zombie branches"
+    },
+    {
+      "query": "Soy desarrollador unico en este proyecto, que estrategia de ramas me recomiendas? No tengo equipo para code review",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Nuevo v3.7.0: GitHub Flow simplificado - solo developer keyword"
+    },
+    {
+      "query": "Trabajo solo en mi rama dev.claudio con ramas locales que nunca pusheo, necesito que Claude siga ese flujo con nomenclatura yyyyMMdd-DT-nnn",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Nuevo v3.7.0: Developer Branch - rama personal remota + nomenclatura temporal"
+    },
+    {
+      "query": "Configure branch naming with date prefix format like 20260406-HV-18-feature-name for my personal development branch",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "Nuevo v3.7.0: Developer Branch - temporal naming convention in English"
+    },
+    {
+      "query": "Quiero configurar una nomenclatura de ramas con fecha y tipo de tarea, que opciones tengo?",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Nuevo v3.7.0: Configurable naming - fecha + tipo tarea keyword"
+    },
+    {
+      "query": "Revisa la seguridad del código y busca credenciales hardcodeadas en el repositorio",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar security-audit. Escanear credenciales != configurar Git"
+    },
+    {
+      "query": "Crea tests unitarios para el CommitService con xUnit",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar testing-patterns. Crear tests != Git workflows"
+    },
+    {
+      "query": "Genera la documentación técnica del proyecto con un README y CONTRIBUTING guide",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar documentacion-tecnica. Docs README != Git config"
+    },
+    {
+      "query": "Analyze NuGet packages for known vulnerabilities and outdated versions",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar nugets-management. NuGet audit != Git practices"
+    },
+    {
+      "query": "Configura feature flags con Microsoft.FeatureManagement para habilitar funcionalidades gradualmente",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Feature flags como implementación de código → NO es git-best-practices. Solo si es en contexto de branching strategy"
+    },
+    {
+      "query": "Quiero mejorar las métricas DORA de mi equipo: deployment frequency y lead time están muy bajos",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: DORA metrics como objetivo de equipo → observability/management. Solo trigger si preguntan qué branching strategy mejora DORA"
+    }
+  ],
+  "overlap_notes": {
+    "documentacion-tecnica": "CONTRIBUTING.md: git-best-practices configura WORKFLOWS Git, documentacion-tecnica genera DOCUMENTOS. Query 'configurar hooks' → git, query 'crear CONTRIBUTING.md' → docs",
+    "azure-config": "Azure DevOps pipelines: git-best-practices configura branch policies y pipeline YAML para branching, azure-config configura servicios Azure (Key Vault, App Config). Query 'branch policies Azure DevOps' → git, query 'Azure Key Vault' → azure",
+    "observability-patterns": "DORA metrics: git-best-practices conecta branching con DORA, observability-patterns implementa telemetría. Query 'qué branching mejora DORA' → git, query 'configurar métricas' → observability"
+  }
+}

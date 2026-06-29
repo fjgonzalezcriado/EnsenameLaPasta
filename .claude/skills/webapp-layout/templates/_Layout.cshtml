@@ -1,0 +1,216 @@
+@* =============================================
+   Layout Principal - Estándares Comillas
+   Versión: 2.8.0
+
+   USO:
+   1. Copiar este archivo a Views/Shared/_Layout.cshtml
+   2. Copiar site.css a wwwroot/css/site.css
+   3. Adaptar el menú del sidebar según el proyecto
+   4. Actualizar el nombre de la aplicación
+   ============================================= *@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - @ViewData["AppName"]</title>
+
+    @* Favicon Comillas *@
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+
+    @* Estilos *@
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    @* Estilos adicionales de la página *@
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="@(ViewData["SidebarCollapsed"] != null ? "sidebar-collapsed" : "")">
+    @* Skip Link - Accesibilidad WCAG 2.1 AA *@
+    <a href="#main-content" class="skip-link">
+        Saltar al contenido principal
+    </a>
+
+    @* ═══════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════ *@
+    <partial name="_Header" />
+
+    @* ═══════════════════════════════════════════════════════════════
+       SIDEBAR
+       ═══════════════════════════════════════════════════════════════ *@
+    <partial name="_Sidebar" />
+
+    @* Overlay para móvil *@
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    @* ═══════════════════════════════════════════════════════════════
+       CONTENIDO PRINCIPAL
+       ═══════════════════════════════════════════════════════════════ *@
+    <div class="content-wrapper">
+        @* Breadcrumb *@
+        @if (ViewData["Breadcrumb"] != null)
+        {
+            var breadcrumb = ViewData["Breadcrumb"] as string[];
+            <nav aria-label="Breadcrumb" class="breadcrumb-nav">
+                <ol class="breadcrumb">
+                    @for (int i = 0; i < breadcrumb.Length; i++)
+                    {
+                        if (i == breadcrumb.Length - 1)
+                        {
+                            <li class="breadcrumb-item active" aria-current="page">
+                                @breadcrumb[i]
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="breadcrumb-item">
+                                <a href="#">@breadcrumb[i]</a>
+                            </li>
+                        }
+                    }
+                </ol>
+            </nav>
+        }
+
+        @* Contenido principal *@
+        <main id="main-content" role="main" tabindex="-1">
+            @RenderBody()
+        </main>
+    </div>
+
+    @* ═══════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════ *@
+    <partial name="_Footer" />
+
+    @* ═══════════════════════════════════════════════════════════════
+       SCRIPTS
+       ═══════════════════════════════════════════════════════════════ *@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    @* Script de layout - Sidebar y navegación *@
+    <script>
+        // Namespace Comillas
+        const Comillas = window.Comillas || {};
+
+        Comillas.Layout = (() => {
+            'use strict';
+
+            const elements = {
+                sidebar: null,
+                sidebarToggle: null,
+                hamburger: null,
+                overlay: null
+            };
+
+            const init = () => {
+                elements.sidebar = document.querySelector('.sidebar');
+                elements.sidebarToggle = document.querySelector('.sidebar-toggle');
+                elements.hamburger = document.querySelector('.hamburger');
+                elements.overlay = document.getElementById('sidebarOverlay');
+
+                bindEvents();
+                initSubmenus();
+            };
+
+            const bindEvents = () => {
+                // Toggle sidebar (desktop/tablet)
+                if (elements.sidebarToggle) {
+                    elements.sidebarToggle.addEventListener('click', toggleSidebar);
+                }
+
+                // Hamburger menu (móvil)
+                if (elements.hamburger) {
+                    elements.hamburger.addEventListener('click', toggleMobileSidebar);
+                }
+
+                // Cerrar sidebar al click en overlay
+                if (elements.overlay) {
+                    elements.overlay.addEventListener('click', closeMobileSidebar);
+                }
+
+                // Cerrar con Escape
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && elements.sidebar?.classList.contains('open')) {
+                        closeMobileSidebar();
+                    }
+                });
+            };
+
+            const toggleSidebar = () => {
+                document.body.classList.toggle('sidebar-collapsed');
+
+                // Guardar preferencia
+                const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+
+                // Actualizar aria-expanded
+                if (elements.sidebarToggle) {
+                    elements.sidebarToggle.setAttribute('aria-expanded', !isCollapsed);
+                }
+            };
+
+            const toggleMobileSidebar = () => {
+                elements.sidebar?.classList.toggle('open');
+                elements.hamburger?.classList.toggle('open');
+
+                // Gestionar focus trap
+                if (elements.sidebar?.classList.contains('open')) {
+                    elements.sidebar.querySelector('a, button')?.focus();
+                }
+            };
+
+            const closeMobileSidebar = () => {
+                elements.sidebar?.classList.remove('open');
+                elements.hamburger?.classList.remove('open');
+                elements.hamburger?.focus();
+            };
+
+            const initSubmenus = () => {
+                const submenuButtons = document.querySelectorAll('.nav-item.has-submenu > .nav-link');
+
+                submenuButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const parent = btn.parentElement;
+                        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+
+                        // Cerrar otros submenús
+                        submenuButtons.forEach(other => {
+                            if (other !== btn) {
+                                other.setAttribute('aria-expanded', 'false');
+                                other.parentElement?.classList.remove('expanded');
+                            }
+                        });
+
+                        // Toggle actual
+                        btn.setAttribute('aria-expanded', !isExpanded);
+                        parent?.classList.toggle('expanded');
+                    });
+                });
+            };
+
+            // Restaurar estado del sidebar
+            const restoreState = () => {
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    document.body.classList.add('sidebar-collapsed');
+                }
+            };
+
+            // Inicializar al cargar
+            restoreState();
+
+            return { init, toggleSidebar, toggleMobileSidebar, closeMobileSidebar };
+        })();
+
+        document.addEventListener('DOMContentLoaded', Comillas.Layout.init);
+    </script>
+
+    @* Scripts adicionales de la página *@
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

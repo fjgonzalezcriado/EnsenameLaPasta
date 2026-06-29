@@ -1,0 +1,61 @@
+#!/bin/sh
+# TEMPLATE: Git commit-msg hook - Conventional Commits validator
+# Skill: git-best-practices | Version: 3.5.0
+# Usage: Copy to .git/hooks/commit-msg and chmod +x
+
+# Read the commit message
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+first_line=$(echo "$commit_msg" | head -1)
+
+# Conventional Commits regex
+# Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert
+# Optional scope in parentheses
+# Optional ! for breaking changes
+# Colon and space separator
+# Description (1-100 chars)
+pattern="^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\([a-zA-Z0-9_-]+\))?(!)?: .{1,100}$"
+
+# Skip merge commits
+if echo "$first_line" | grep -qE "^Merge "; then
+    exit 0
+fi
+
+# Skip revert commits
+if echo "$first_line" | grep -qE "^Revert \""; then
+    exit 0
+fi
+
+# Validate
+if ! echo "$first_line" | grep -qE "$pattern"; then
+    echo ""
+    echo "ERROR: Commit message does not follow Conventional Commits format."
+    echo ""
+    echo "Expected format:"
+    echo "  type(scope): description"
+    echo ""
+    echo "Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert"
+    echo ""
+    echo "Examples:"
+    echo "  feat(becas): add filter by status"
+    echo "  fix(auth): correct token expiration"
+    echo "  docs(readme): update installation steps"
+    echo "  chore(deps): update EF Core to 10.0.1"
+    echo ""
+    echo "Your message:"
+    echo "  $first_line"
+    echo ""
+    exit 1
+fi
+
+# Validate description length (max 100 chars for first line)
+first_line_length=${#first_line}
+if [ "$first_line_length" -gt 100 ]; then
+    echo ""
+    echo "ERROR: First line is too long ($first_line_length chars, max 100)."
+    echo "  $first_line"
+    echo ""
+    exit 1
+fi
+
+exit 0

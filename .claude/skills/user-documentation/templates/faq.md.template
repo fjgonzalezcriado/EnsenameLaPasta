@@ -1,0 +1,52 @@
+# Preguntas Frecuentes - {{ProjectName}}
+
+> Version: {{Version}}
+
+---
+
+## General
+
+### Como accedo a la aplicacion?
+Navegar a `{{AppUrl}}` e iniciar sesion con sus credenciales de Comillas.
+
+### Que navegadores son compatibles?
+Chrome, Edge y Firefox en sus ultimas 2 versiones.
+
+---
+
+## Autenticacion
+
+### Mi sesion caduca muy rapido
+Los tokens de Azure AD duran 60 minutos. La aplicacion renueva automaticamente.
+
+### No puedo iniciar sesion
+1. Verificar credenciales en portal.comillas.edu
+2. Limpiar cookies del navegador
+3. Contactar soporte.stic@comillas.edu
+
+---
+
+## Funcionalidades
+
+### Como exporto datos?
+Usar el boton "Exportar" en la parte superior de cualquier listado. Formatos: Excel, CSV.
+
+### Hay limite de registros?
+Las consultas se paginan a 20 registros por defecto. Maximo configurable: 100.
+
+---
+
+## Errores
+
+### Error 403 - Acceso denegado
+No tiene permisos para esta seccion. Solicitar acceso a su responsable.
+
+### Error 500 - Error del servidor
+Error interno. Si persiste, reportar a soporte.stic@comillas.edu con:
+- URL donde ocurrio
+- Hora aproximada
+- Captura de pantalla
+
+---
+
+*Template FAQ v3.1.0*

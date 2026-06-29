@@ -1,0 +1,93 @@
+{
+	"info": {
+		"_postman_id": "{{COLLECTION_ID}}",
+		"name": "{{PROJECT_NAME}} API",
+		"description": "Colección de endpoints para {{PROJECT_NAME}}.\n\nGenerado automáticamente por Claude Code STIC.\n\n## Autenticación\n\nEsta API usa {{AUTH_TYPE}}.\n\n{{AUTH_INSTRUCTIONS}}",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {{AUTH_CONFIG}},
+	"_auth_variants": {
+		"_comment": "Replace {{AUTH_CONFIG}} with one of these based on detected auth mode",
+		"AUTH_BEARER": {
+			"type": "bearer",
+			"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+		},
+		"AUTH_AZURE_AD": {
+			"type": "bearer",
+			"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+		},
+		"AUTH_APIKEY": {
+			"type": "apikey",
+			"apikey": [
+				{ "key": "key", "value": "{{apiKeyHeader}}", "type": "string" },
+				{ "key": "value", "value": "{{apiKey}}", "type": "string" },
+				{ "key": "in", "value": "header", "type": "string" }
+			]
+		},
+		"AUTH_BASIC": {
+			"type": "basic",
+			"basic": [
+				{ "key": "username", "value": "{{basicUsername}}", "type": "string" },
+				{ "key": "password", "value": "{{basicPassword}}", "type": "string" }
+			]
+		},
+		"AUTH_NOAUTH": {
+			"type": "noauth"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Pre-request script global",
+					"// Se ejecuta antes de cada request",
+					"",
+					"// {{AUTH_PREREQUEST_SCRIPT}}",
+					"// Replace with content from the appropriate auth-prerequest-*.js.template:",
+					"//   Azure AD  → auth-prerequest-azuread.js.template",
+					"//   API Key   → auth-prerequest-apikey.js.template",
+					"//   Basic     → auth-prerequest-basic.js.template",
+					"//   No Auth   → Remove this pre-request script",
+					"",
+					"// Log del request",
+					"console.log('➡️ ' + pm.request.method + ' ' + pm.request.url.toString());"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Test script global",
+					"// Se ejecuta después de cada request",
+					"",
+					"// Log del response",
+					"console.log('⬅️ Status: ' + pm.response.code + ' (' + pm.response.responseTime + 'ms)');",
+					"",
+					"// Validar que no hay errores 5xx",
+					"pm.test('No server errors', function () {",
+					"    pm.expect(pm.response.code).to.be.below(500);",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "{{BASE_URL}}",
+			"type": "string"
+		},
+		{
+			"key": "apiVersion",
+			"value": "v1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{{FOLDERS_AND_REQUESTS}}
+	]
+}

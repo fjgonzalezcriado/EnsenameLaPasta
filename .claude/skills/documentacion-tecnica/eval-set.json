@@ -1,0 +1,48 @@
+{
+  "skill": "documentacion-tecnica",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for documentacion-tecnica skill. 6 queries: 3 should trigger, 3 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Genera un ADR (Architecture Decision Record) para documentar la decisión de usar Mediator en vez de MediatR",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: ADR generation"
+    },
+    {
+      "query": "Create a deployment guide with Mermaid diagrams showing the CI/CD pipeline",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: deployment guide + Mermaid diagrams"
+    },
+    {
+      "query": "Necesito documentar la API con su referencia completa y un README del proyecto",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keywords: API reference + README"
+    },
+    {
+      "query": "Crea una guía de uso para el usuario final con FAQ y capturas de pantalla",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar user-documentation. Docs usuario != docs técnica"
+    },
+    {
+      "query": "Analiza las dependencias entre capas del proyecto y genera un diagrama de arquitectura",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar analisis-arquitectura. Analizar estructura != documentar"
+    },
+    {
+      "query": "Generate a Postman collection with environment variables for the REST API",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar postman-collection. Postman collection != tech docs"
+    }
+  ],
+  "overlap_notes": {
+    "user-documentation": "Audience: documentacion-tecnica para DESARROLLADORES (ADR, API ref), user-documentation para USUARIOS (FAQ, guías)",
+    "analisis-arquitectura": "Diagramas: documentacion-tecnica GENERA documentos/diagramas, analisis-arquitectura ANALIZA la estructura existente"
+  }
+}

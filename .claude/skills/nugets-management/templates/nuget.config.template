@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TEMPLATE: nuget.config | Skill: nugets-management | Version: 3.1.0 -->
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <!-- Feed privado Comillas (descomentar si aplica) -->
+    <!-- <add key="Comillas" value="https://pkgs.dev.azure.com/comillas/_packaging/feed/nuget/v3/index.json" /> -->
+  </packageSources>
+
+  <packageSourceMapping>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+    <!-- <packageSource key="Comillas">
+      <package pattern="Comillas.*" />
+    </packageSource> -->
+  </packageSourceMapping>
+</configuration>

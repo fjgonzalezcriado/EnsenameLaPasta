@@ -1,0 +1,490 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Solution>
+  <Folder Name="/_STIC.IA/" />
+  <Folder Name="/_STIC.IA/Raiz/">
+    <File Path="..\CLAUDE.md" />
+    <File Path="..\README.md" />
+    <File Path="..\INICIO_RAPIDO.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/" />
+  <Folder Name="/_STIC.IA/skills/analisis-arquitectura/">
+    <File Path="..\.claude\skills\analisis-arquitectura\eval-set.json" />
+    <File Path="..\.claude\skills\analisis-arquitectura\README.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/analisis-arquitectura/checklists/">
+    <File Path="..\.claude\skills\analisis-arquitectura\checklists\api-design-review.md" />
+    <File Path="..\.claude\skills\analisis-arquitectura\checklists\clean-architecture.md" />
+    <File Path="..\.claude\skills\analisis-arquitectura\checklists\database-review.md" />
+    <File Path="..\.claude\skills\analisis-arquitectura\checklists\microservices-review.md" />
+    <File Path="..\.claude\skills\analisis-arquitectura\checklists\migration-viability.md" />
+    <File Path="..\.claude\skills\analisis-arquitectura\checklists\performance-review.md" />
+    <File Path="..\.claude\skills\analisis-arquitectura\checklists\security-review.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/analisis-arquitectura/patterns/">
+    <File Path="..\.claude\skills\analisis-arquitectura\patterns\architecture-diagrams.md" />
+    <File Path="..\.claude\skills\analisis-arquitectura\patterns\dependency-analysis.md" />
+    <File Path="..\.claude\skills\analisis-arquitectura\patterns\design-pattern-catalog.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/analisis-arquitectura/prompts/">
+    <File Path="..\.claude\skills\analisis-arquitectura\prompts\prompt-clean-architecture.md" />
+    <File Path="..\.claude\skills\analisis-arquitectura\prompts\prompt-general.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/analisis-arquitectura/templates/">
+    <File Path="..\.claude\skills\analisis-arquitectura\templates\ANALISIS_ARQUITECTURA.html.template" />
+    <File Path="..\.claude\skills\analisis-arquitectura\templates\ANALISIS_ARQUITECTURA.md.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/api-integration-patterns/">
+    <File Path="..\.claude\skills\api-integration-patterns\eval-set.json" />
+    <File Path="..\.claude\skills\api-integration-patterns\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/api-integration-patterns/checklists/">
+    <File Path="..\.claude\skills\api-integration-patterns\checklists\api-integration-checklist.md" />
+    <File Path="..\.claude\skills\api-integration-patterns\checklists\security-checklist.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/api-integration-patterns/examples/">
+    <File Path="..\.claude\skills\api-integration-patterns\examples\banner-api-example.md" />
+    <File Path="..\.claude\skills\api-integration-patterns\examples\oracle-hcm-example.md" />
+    <File Path="..\.claude\skills\api-integration-patterns\examples\polly-advanced.md" />
+    <File Path="..\.claude\skills\api-integration-patterns\examples\sigma-example.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/api-integration-patterns/patterns/">
+    <File Path="..\.claude\skills\api-integration-patterns\patterns\api-versioning.md" />
+    <File Path="..\.claude\skills\api-integration-patterns\patterns\circuit-breaker.md" />
+    <File Path="..\.claude\skills\api-integration-patterns\patterns\httpclient-factory.md" />
+    <File Path="..\.claude\skills\api-integration-patterns\patterns\oauth2-client-credentials.md" />
+    <File Path="..\.claude\skills\api-integration-patterns\patterns\response-caching.md" />
+    <File Path="..\.claude\skills\api-integration-patterns\patterns\retry-policy.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/api-integration-patterns/references/">
+    <File Path="..\.claude\skills\api-integration-patterns\references\integration-examples.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/api-integration-patterns/scripts/">
+    <File Path="..\.claude\skills\api-integration-patterns\scripts\Generate-ApiClient.ps1" />
+    <File Path="..\.claude\skills\api-integration-patterns\scripts\Test-ApiConnection.ps1" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/api-integration-patterns/templates/">
+    <File Path="..\.claude\skills\api-integration-patterns\templates\ApiClient.cs.template" />
+    <File Path="..\.claude\skills\api-integration-patterns\templates\ApiOptions.cs.template" />
+    <File Path="..\.claude\skills\api-integration-patterns\templates\ApiResponse.cs.template" />
+    <File Path="..\.claude\skills\api-integration-patterns\templates\BannerClient.cs.template" />
+    <File Path="..\.claude\skills\api-integration-patterns\templates\DelegatingHandler.cs.template" />
+    <File Path="..\.claude\skills\api-integration-patterns\templates\OracleHcmClient.cs.template" />
+    <File Path="..\.claude\skills\api-integration-patterns\templates\SigmaClient.cs.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/azure-config/">
+    <File Path="..\.claude\skills\azure-config\eval-set.json" />
+    <File Path="..\.claude\skills\azure-config\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/azure-config/patterns/">
+    <File Path="..\.claude\skills\azure-config\patterns\azure-ad-auth.md" />
+    <File Path="..\.claude\skills\azure-config\patterns\azure-functions.md" />
+    <File Path="..\.claude\skills\azure-config\patterns\cosmosdb.md" />
+    <File Path="..\.claude\skills\azure-config\patterns\health-checks-azure.md" />
+    <File Path="..\.claude\skills\azure-config\patterns\managed-identity.md" />
+    <File Path="..\.claude\skills\azure-config\patterns\service-bus.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/azure-config/templates/">
+    <File Path="..\.claude\skills\azure-config\templates\AzureHealthChecksConfig.cs.template" />
+    <File Path="..\.claude\skills\azure-config\templates\BlobStorageService.cs.template" />
+    <File Path="..\.claude\skills\azure-config\templates\KeyVaultConfig.cs.template" />
+    <File Path="..\.claude\skills\azure-config\templates\ServiceBusPublisher.cs.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/azure-devops-sync/">
+    <File Path="..\.claude\skills\azure-devops-sync\eval-set.json" />
+    <File Path="..\.claude\skills\azure-devops-sync\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/documentacion-tecnica/">
+    <File Path="..\.claude\skills\documentacion-tecnica\eval-set.json" />
+    <File Path="..\.claude\skills\documentacion-tecnica\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/documentacion-tecnica/patterns/">
+    <File Path="..\.claude\skills\documentacion-tecnica\patterns\diagrams-mermaid.md" />
+    <File Path="..\.claude\skills\documentacion-tecnica\patterns\documentation-standards.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/documentacion-tecnica/templates/">
+    <File Path="..\.claude\skills\documentacion-tecnica\templates\ADR.md.template" />
+    <File Path="..\.claude\skills\documentacion-tecnica\templates\API-REFERENCE.md.template" />
+    <File Path="..\.claude\skills\documentacion-tecnica\templates\ARCHITECTURE.md.template" />
+    <File Path="..\.claude\skills\documentacion-tecnica\templates\CHANGELOG.md.template" />
+    <File Path="..\.claude\skills\documentacion-tecnica\templates\CONTRIBUTING.md.template" />
+    <File Path="..\.claude\skills\documentacion-tecnica\templates\DEPLOYMENT.md.template" />
+    <File Path="..\.claude\skills\documentacion-tecnica\templates\SECURITY.md.template" />
+    <File Path="..\.claude\skills\documentacion-tecnica\templates\TROUBLESHOOTING.md.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/generador-crud/">
+    <File Path="..\.claude\skills\generador-crud\eval-set.json" />
+    <File Path="..\.claude\skills\generador-crud\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/generador-crud/templates/">
+    <File Path="..\.claude\skills\generador-crud\templates\AuditableEntity.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\Command.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\CommandHandler.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\Configuration.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\Controller.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\Dto.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\EndpointFilters.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\Entity.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\LookupEntity.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\MinimalApiEndpoints.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\Query.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\QueryHandler.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\Repository.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\Service.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\SoftDeleteEntity.cs.template" />
+    <File Path="..\.claude\skills\generador-crud\templates\Validator.cs.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/git-best-practices/">
+    <File Path="..\.claude\skills\git-best-practices\eval-set.json" />
+    <File Path="..\.claude\skills\git-best-practices\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/git-best-practices/checklists/">
+    <File Path="..\.claude\skills\git-best-practices\checklists\branching-antipatterns.md" />
+    <File Path="..\.claude\skills\git-best-practices\checklists\git3-readiness.md" />
+    <File Path="..\.claude\skills\git-best-practices\checklists\pre-merge.md" />
+    <File Path="..\.claude\skills\git-best-practices\checklists\repository-setup.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/git-best-practices/patterns/">
+    <File Path="..\.claude\skills\git-best-practices\patterns\azure-devops-branching.md" />
+    <File Path="..\.claude\skills\git-best-practices\patterns\conventional-commits.md" />
+    <File Path="..\.claude\skills\git-best-practices\patterns\gitattributes-config.md" />
+    <File Path="..\.claude\skills\git-best-practices\patterns\gitignore-patterns.md" />
+    <File Path="..\.claude\skills\git-best-practices\patterns\monorepo-patterns.md" />
+    <File Path="..\.claude\skills\git-best-practices\patterns\ssh-signing.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/git-best-practices/strategies/">
+    <File Path="..\.claude\skills\git-best-practices\strategies\branching-models.md" />
+    <File Path="..\.claude\skills\git-best-practices\strategies\merge-strategies.md" />
+    <File Path="..\.claude\skills\git-best-practices\strategies\release-management.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/git-best-practices/templates/">
+    <File Path="..\.claude\skills\git-best-practices\templates\branch-ruleset.json.template" />
+    <File Path="..\.claude\skills\git-best-practices\templates\commit-msg-hook.sh.template" />
+    <File Path="..\.claude\skills\git-best-practices\templates\github-workflow.yml.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/git-best-practices/tools/">
+    <File Path="..\.claude\skills\git-best-practices\tools\context7-git.md" />
+    <File Path="..\.claude\skills\git-best-practices\tools\git-hooks-automation.md" />
+    <File Path="..\.claude\skills\git-best-practices\tools\github-actions-patterns.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/nugets-management/">
+    <File Path="..\.claude\skills\nugets-management\eval-set.json" />
+    <File Path="..\.claude\skills\nugets-management\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/nugets-management/patterns/">
+    <File Path="..\.claude\skills\nugets-management\patterns\central-package-management.md" />
+    <File Path="..\.claude\skills\nugets-management\patterns\version-strategy.md" />
+    <File Path="..\.claude\skills\nugets-management\patterns\vulnerability-remediation.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/nugets-management/scripts/">
+    <File Path="..\.claude\skills\nugets-management\scripts\Audit-Packages.ps1" />
+    <File Path="..\.claude\skills\nugets-management\scripts\Migrate-ToCPM.ps1" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/nugets-management/templates/">
+    <File Path="..\.claude\skills\nugets-management\templates\Directory.Build.props.template" />
+    <File Path="..\.claude\skills\nugets-management\templates\Directory.Packages.props.template" />
+    <File Path="..\.claude\skills\nugets-management\templates\nuget.config.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/observability-patterns/">
+    <File Path="..\.claude\skills\observability-patterns\eval-set.json" />
+    <File Path="..\.claude\skills\observability-patterns\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/observability-patterns/patterns/">
+    <File Path="..\.claude\skills\observability-patterns\patterns\opentelemetry-setup.md" />
+    <File Path="..\.claude\skills\observability-patterns\patterns\serilog-config.md" />
+    <File Path="..\.claude\skills\observability-patterns\patterns\structured-logging.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/observability-patterns/templates/">
+    <File Path="..\.claude\skills\observability-patterns\templates\SerilogConfig.cs.template" />
+    <File Path="..\.claude\skills\observability-patterns\templates\TelemetryConfig.cs.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/postman-collection/">
+    <File Path="..\.claude\skills\postman-collection\eval-set.json" />
+    <File Path="..\.claude\skills\postman-collection\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/postman-collection/checklists/">
+    <File Path="..\.claude\skills\postman-collection\checklists\auth-configuration-checklist.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/postman-collection/patterns/">
+    <File Path="..\.claude\skills\postman-collection\patterns\auth-detection.md" />
+    <File Path="..\.claude\skills\postman-collection\patterns\azure-ad-auth.md" />
+    <File Path="..\.claude\skills\postman-collection\patterns\http-signature-mtls.md" />
+    <File Path="..\.claude\skills\postman-collection\patterns\oauth2-token-lifecycle.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/postman-collection/references/">
+    <File Path="..\.claude\skills\postman-collection\references\auth-examples.md" />
+    <File Path="..\.claude\skills\postman-collection\references\test-assertions.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/postman-collection/templates/">
+    <File Path="..\.claude\skills\postman-collection\templates\auth-prerequest-apikey.js.template" />
+    <File Path="..\.claude\skills\postman-collection\templates\auth-prerequest-azuread.js.template" />
+    <File Path="..\.claude\skills\postman-collection\templates\auth-prerequest-basic.js.template" />
+    <File Path="..\.claude\skills\postman-collection\templates\collection.json.template" />
+    <File Path="..\.claude\skills\postman-collection\templates\environment.json.template" />
+    <File Path="..\.claude\skills\postman-collection\templates\request.json.template" />
+    <File Path="..\.claude\skills\postman-collection\templates\tests.js.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/resilience-patterns/">
+    <File Path="..\.claude\skills\resilience-patterns\eval-set.json" />
+    <File Path="..\.claude\skills\resilience-patterns\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/resilience-patterns/patterns/">
+    <File Path="..\.claude\skills\resilience-patterns\patterns\graceful-shutdown.md" />
+    <File Path="..\.claude\skills\resilience-patterns\patterns\health-checks.md" />
+    <File Path="..\.claude\skills\resilience-patterns\patterns\polly-policies.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/resilience-patterns/templates/">
+    <File Path="..\.claude\skills\resilience-patterns\templates\HealthChecksConfig.cs.template" />
+    <File Path="..\.claude\skills\resilience-patterns\templates\ResiliencePolicies.cs.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/security-audit/">
+    <File Path="..\.claude\skills\security-audit\eval-set.json" />
+    <File Path="..\.claude\skills\security-audit\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/security-audit/ai-security/">
+    <File Path="..\.claude\skills\security-audit\ai-security\llm-security.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/security-audit/attacks/">
+    <File Path="..\.claude\skills\security-audit\attacks\clickjacking.md" />
+    <File Path="..\.claude\skills\security-audit\attacks\csrf-attacks.md" />
+    <File Path="..\.claude\skills\security-audit\attacks\jwt-security.md" />
+    <File Path="..\.claude\skills\security-audit\attacks\mass-assignment.md" />
+    <File Path="..\.claude\skills\security-audit\attacks\path-traversal.md" />
+    <File Path="..\.claude\skills\security-audit\attacks\ssrf-attacks.md" />
+    <File Path="..\.claude\skills\security-audit\attacks\xss-in-depth.md" />
+    <File Path="..\.claude\skills\security-audit\attacks\xxe-attacks.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/security-audit/checklists/">
+    <File Path="..\.claude\skills\security-audit\checklists\api-security.md" />
+    <File Path="..\.claude\skills\security-audit\checklists\code-review-security.md" />
+    <File Path="..\.claude\skills\security-audit\checklists\http-methods-security.md" />
+    <File Path="..\.claude\skills\security-audit\checklists\post-remediation.md" />
+    <File Path="..\.claude\skills\security-audit\checklists\pre-deployment.md" />
+    <File Path="..\.claude\skills\security-audit\checklists\wstg-checklist.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/security-audit/mobile/">
+    <File Path="..\.claude\skills\security-audit\mobile\owasp-mastg.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/security-audit/owasp/">
+    <File Path="..\.claude\skills\security-audit\owasp\owasp-dotnet.md" />
+    <File Path="..\.claude\skills\security-audit\owasp\owasp-frameworks.md" />
+    <File Path="..\.claude\skills\security-audit\owasp\owasp-top10-2025.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/security-audit/patterns/">
+    <File Path="..\.claude\skills\security-audit\patterns\attack-surface-mapping.md" />
+    <File Path="..\.claude\skills\security-audit\patterns\authentication-patterns.md" />
+    <File Path="..\.claude\skills\security-audit\patterns\secret-detection.md" />
+    <File Path="..\.claude\skills\security-audit\patterns\secure-coding-checklist.md" />
+    <File Path="..\.claude\skills\security-audit\patterns\secure-headers.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/security-audit/reports/">
+    <File Path="..\.claude\skills\security-audit\reports\cwe-references.md" />
+    <File Path="..\.claude\skills\security-audit\reports\mitigation-plan.md" />
+    <File Path="..\.claude\skills\security-audit\reports\report-format.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/security-audit/templates/">
+    <File Path="..\.claude\skills\security-audit\templates\AttackSimulation.md" />
+    <File Path="..\.claude\skills\security-audit\templates\SecureStartup.cs.template" />
+    <File Path="..\.claude\skills\security-audit\templates\SecurityHeaders.cs.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/security-audit/tools/">
+    <File Path="..\.claude\skills\security-audit\tools\context7-security.md" />
+    <File Path="..\.claude\skills\security-audit\tools\sast-integration.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/testing-patterns/">
+    <File Path="..\.claude\skills\testing-patterns\eval-set.json" />
+    <File Path="..\.claude\skills\testing-patterns\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/testing-patterns/patterns/">
+    <File Path="..\.claude\skills\testing-patterns\patterns\api-contract-testing.md" />
+    <File Path="..\.claude\skills\testing-patterns\patterns\builders.md" />
+    <File Path="..\.claude\skills\testing-patterns\patterns\bunit-patterns.md" />
+    <File Path="..\.claude\skills\testing-patterns\patterns\integration-fixtures.md" />
+    <File Path="..\.claude\skills\testing-patterns\patterns\mocking-avanzado.md" />
+    <File Path="..\.claude\skills\testing-patterns\patterns\performance-testing.md" />
+    <File Path="..\.claude\skills\testing-patterns\patterns\snapshot-testing.md" />
+    <File Path="..\.claude\skills\testing-patterns\patterns\test-data-factory.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/testing-patterns/references/">
+    <File Path="..\.claude\skills\testing-patterns\references\test-helpers.md" />
+    <File Path="..\.claude\skills\testing-patterns\references\test-templates.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/testing-patterns/templates/">
+    <File Path="..\.claude\skills\testing-patterns\templates\ApiTestBase.cs.template" />
+    <File Path="..\.claude\skills\testing-patterns\templates\FakeBuilder.cs.template" />
+    <File Path="..\.claude\skills\testing-patterns\templates\IntegrationTestBase.cs.template" />
+    <File Path="..\.claude\skills\testing-patterns\templates\TestBase.cs.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/user-documentation/">
+    <File Path="..\.claude\skills\user-documentation\eval-set.json" />
+    <File Path="..\.claude\skills\user-documentation\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/user-documentation/patterns/">
+    <File Path="..\.claude\skills\user-documentation\patterns\screenshots-guide.md" />
+    <File Path="..\.claude\skills\user-documentation\patterns\user-flows.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/user-documentation/references/">
+    <File Path="..\.claude\skills\user-documentation\references\api-consumer-guide.md" />
+    <File Path="..\.claude\skills\user-documentation\references\cli-guide.md" />
+    <File Path="..\.claude\skills\user-documentation\references\operations-guide.md" />
+    <File Path="..\.claude\skills\user-documentation\references\user-guide-template.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/user-documentation/templates/">
+    <File Path="..\.claude\skills\user-documentation\templates\api-guide.md.template" />
+    <File Path="..\.claude\skills\user-documentation\templates\faq.md.template" />
+    <File Path="..\.claude\skills\user-documentation\templates\postman-collection.json.template" />
+    <File Path="..\.claude\skills\user-documentation\templates\webapp-guide.md.template" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/webapp-layout/">
+    <File Path="..\.claude\skills\webapp-layout\eval-set.json" />
+    <File Path="..\.claude\skills\webapp-layout\SKILL.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/webapp-layout/patterns/">
+    <File Path="..\.claude\skills\webapp-layout\patterns\accesibilidad.md" />
+    <File Path="..\.claude\skills\webapp-layout\patterns\colores-corporativos.md" />
+    <File Path="..\.claude\skills\webapp-layout\patterns\dark-mode.md" />
+    <File Path="..\.claude\skills\webapp-layout\patterns\layout-estandar.md" />
+    <File Path="..\.claude\skills\webapp-layout\patterns\print-styles.md" />
+    <File Path="..\.claude\skills\webapp-layout\patterns\responsive.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/skills/webapp-layout/templates/">
+    <File Path="..\.claude\skills\webapp-layout\templates\_ErrorPage.cshtml" />
+    <File Path="..\.claude\skills\webapp-layout\templates\_Footer.cshtml" />
+    <File Path="..\.claude\skills\webapp-layout\templates\_Header.cshtml" />
+    <File Path="..\.claude\skills\webapp-layout\templates\_Layout.cshtml" />
+    <File Path="..\.claude\skills\webapp-layout\templates\_Loading.cshtml" />
+    <File Path="..\.claude\skills\webapp-layout\templates\_Sidebar.cshtml" />
+    <File Path="..\.claude\skills\webapp-layout\templates\forms.css" />
+    <File Path="..\.claude\skills\webapp-layout\templates\site.css" />
+  </Folder>
+  <Folder Name="/_STIC.IA/hooks/">
+    <File Path="..\.claude\hooks\agent-telemetry.ps1" />
+    <File Path="..\.claude\hooks\antipattern-guard.ps1" />
+    <File Path="..\.claude\hooks\auth-config-guard.ps1" />
+    <File Path="..\.claude\hooks\auto-format.ps1" />
+    <File Path="..\.claude\hooks\banner.ps1" />
+    <File Path="..\.claude\hooks\bash-guard.ps1" />
+    <File Path="..\.claude\hooks\cert-expiry-reminder.ps1" />
+    <File Path="..\.claude\hooks\duran-checkpoint.ps1" />
+    <File Path="..\.claude\hooks\duran-freshness.ps1" />
+    <File Path="..\.claude\hooks\hook-helpers.ps1" />
+    <File Path="..\.claude\hooks\mcp-check.ps1" />
+    <File Path="..\.claude\hooks\multi-rol-coordination.ps1" />
+    <File Path="..\.claude\hooks\post-build-check.ps1" />
+    <File Path="..\.claude\hooks\protect-files.ps1" />
+    <File Path="..\.claude\hooks\quality-alert.ps1" />
+    <File Path="..\.claude\hooks\secret-scanner.ps1" />
+    <File Path="..\.claude\hooks\session-checkpoint.ps1" />
+    <File Path="..\.claude\hooks\sql-baseline-generate.ps1" />
+    <File Path="..\.claude\hooks\sql-injection-guard.ps1" />
+    <File Path="..\.claude\hooks\sql-nomenclatura-guard.ps1" />
+    <File Path="..\.claude\hooks\token-validation-guard.ps1" />
+  </Folder>
+  <Folder Name="/_STIC.IA/_duran/">
+    <File Path="..\_duran\.mcp-check.json" />
+    <File Path="..\_duran\.mcp-credentials.json" />
+    <File Path="..\_duran\.mcp-project.json" />
+    <File Path="..\_duran\.update-check.json" />
+    <File Path="..\_duran\AUDITORIA_NUGET.json" />
+    <File Path="..\_duran\CONTEXTO_TECNICO.md" />
+    <File Path="..\_duran\DECISIONES.md" />
+    <File Path="..\_duran\DEPENDENCIAS.md" />
+    <File Path="..\_duran\DEUDA_TECNICA.md" />
+    <File Path="..\_duran\DURAN.md" />
+    <File Path="..\_duran\ESTADO_PROYECTO.json" />
+    <File Path="..\_duran\FUNCIONALIDADES.md" />
+    <File Path="..\_duran\HISTORIAL_CAMBIOS.md" />
+    <File Path="..\_duran\LECCIONES.md" />
+    <File Path="..\_duran\METRICAS.json" />
+    <File Path="..\_duran\SESION_ACTUAL.md" />
+    <File Path="..\_duran\VERSION.json" />
+  </Folder>
+  <Folder Name="/_STIC.IA/_duran/reuniones/">
+    <File Path="..\_duran\reuniones\PLANTILLA_REUNION.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/_duran/specs/">
+    <File Path="..\_duran\specs\EJEMPLO_SPEC.md" />
+    <File Path="..\_duran\specs\HV-001.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/_atlas/">
+    <File Path="..\_atlas\ATLAS.md" />
+    <File Path="..\_atlas\INDICE.json" />
+  </Folder>
+  <Folder Name="/_STIC.IA/00_Gestion/">
+    <File Path="..\00_Gestion\CHECKLIST_INICIO.md" />
+    <File Path="..\00_Gestion\README.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/00_Gestion/Requerimientos/">
+    <File Path="..\00_Gestion\Requerimientos\REQUERIMIENTOS.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/00_Gestion/Reuniones/">
+    <File Path="..\00_Gestion\Reuniones\PLANTILLA_ACTA_REUNION.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/01_Diseno/">
+    <File Path="..\01_Diseno\README.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/01_Diseno/Arquitectura/">
+    <File Path="..\01_Diseno\Arquitectura\GUIA_ACCESO_DATOS.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/02_Entorno/">
+    <File Path="..\02_Entorno\.env.example" />
+    <File Path="..\02_Entorno\docker-compose.yml" />
+    <File Path="..\02_Entorno\README.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/04_Pruebas/">
+    <File Path="..\04_Pruebas\README.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/05_CICD/">
+    <File Path="..\05_CICD\README.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/06_Documentacion/">
+    <File Path="..\06_Documentacion\README.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/07_UAP/">
+    <File Path="..\07_UAP\README.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/Documentos_Base/">
+    <File Path="..\Documentos_Base\README.md" />
+    <File Path="..\Documentos_Base\SISTEMA_CONTEXTO_CLAUDE_EN.md" />
+    <File Path="..\Documentos_Base\SISTEMA_CONTEXTO_CLAUDE.md" />
+    <File Path="..\Documentos_Base\TAREAS_COMITE_TECNICO_EN.md" />
+    <File Path="..\Documentos_Base\TAREAS_COMITE_TECNICO.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/Documentos_Base/01_Estructura_Tecnica/">
+    <File Path="..\Documentos_Base\01_Estructura_Tecnica\ESTRUCTURA_TECNICA_EN.md" />
+    <File Path="..\Documentos_Base\01_Estructura_Tecnica\ESTRUCTURA_TECNICA.md" />
+    <File Path="..\Documentos_Base\01_Estructura_Tecnica\GUIA_ARQUITECTURA_EN.md" />
+    <File Path="..\Documentos_Base\01_Estructura_Tecnica\GUIA_ARQUITECTURA.md" />
+    <File Path="..\Documentos_Base\01_Estructura_Tecnica\GUIA_MCP_INSTALACION.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/Documentos_Base/02_Diseno_Usabilidad/">
+    <File Path="..\Documentos_Base\02_Diseno_Usabilidad\GUIA_ESTILOS_EN.md" />
+    <File Path="..\Documentos_Base\02_Diseno_Usabilidad\GUIA_ESTILOS.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/Documentos_Base/03_Consideraciones_Comunes/">
+    <File Path="..\Documentos_Base\03_Consideraciones_Comunes\CONSIDERACIONES_EN.md" />
+    <File Path="..\Documentos_Base\03_Consideraciones_Comunes\CONSIDERACIONES.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/Documentos_Base/04_Plantillas_Documentacion/">
+    <File Path="..\Documentos_Base\04_Plantillas_Documentacion\PLANTILLA_DOC_FUNCIONAL_EN.md" />
+    <File Path="..\Documentos_Base\04_Plantillas_Documentacion\PLANTILLA_DOC_FUNCIONAL.md" />
+    <File Path="..\Documentos_Base\04_Plantillas_Documentacion\PLANTILLA_DOC_TECNICA_EN.md" />
+    <File Path="..\Documentos_Base\04_Plantillas_Documentacion\PLANTILLA_DOC_TECNICA.md" />
+    <File Path="..\Documentos_Base\04_Plantillas_Documentacion\README.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/Documentos_Base/05_Plantillas_SQL/">
+    <File Path="..\Documentos_Base\05_Plantillas_SQL\README.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/Documentos_Base/06_Observabilidad/">
+    <File Path="..\Documentos_Base\06_Observabilidad\GUIA_OBSERVABILIDAD_EN.md" />
+    <File Path="..\Documentos_Base\06_Observabilidad\GUIA_OBSERVABILIDAD.md" />
+  </Folder>
+  <Folder Name="/_STIC.IA/Documentos_Base/07_Resiliencia/">
+    <File Path="..\Documentos_Base\07_Resiliencia\GUIA_RESILIENCIA_EN.md" />
+    <File Path="..\Documentos_Base\07_Resiliencia\GUIA_RESILIENCIA.md" />
+  </Folder>
+  <Project Path="Comillas.AITradingSimulator.Application/Comillas.AITradingSimulator.Application.csproj" />
+  <Project Path="Comillas.AITradingSimulator.Domain/Comillas.AITradingSimulator.Domain.csproj" />
+  <Project Path="Comillas.AITradingSimulator.Infrastructure/Comillas.AITradingSimulator.Infrastructure.csproj" />
+  <Project Path="Comillas.AITradingSimulator.Tests/Comillas.AITradingSimulator.Tests.csproj" />
+  <Project Path="Comillas.AITradingSimulator.Web/Comillas.AITradingSimulator.Web.csproj" />
+</Solution>

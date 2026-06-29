@@ -1,0 +1,48 @@
+{
+  "skill": "azure-config",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for azure-config skill. 6 queries: 3 should trigger, 3 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Configura Azure Key Vault con Managed Identity para gestionar los secretos de producción",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: configurar Key Vault + Managed Identity"
+    },
+    {
+      "query": "Set up Azure Blob Storage for file uploads with SAS tokens and the BlobServiceClient",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: Azure Blob Storage configuration"
+    },
+    {
+      "query": "Integra Redis como caché distribuida y configura Application Insights para telemetría",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keywords: Redis + Application Insights"
+    },
+    {
+      "query": "Busca secretos hardcodeados y vulnerabilidades de seguridad en el código",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar security-audit. Buscar secretos != configurar Azure"
+    },
+    {
+      "query": "Configura OpenTelemetry y Serilog para logging estructurado",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar observability-patterns. OpenTelemetry != Azure config"
+    },
+    {
+      "query": "Connect to the Oracle HCM external API using HttpClientFactory with OAuth2",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar api-integration-patterns. Integrar API externa != configurar Azure"
+    }
+  ],
+  "overlap_notes": {
+    "security-audit": "Key Vault: azure-config CONFIGURA Key Vault, security-audit DETECTA secretos expuestos",
+    "observability-patterns": "App Insights: azure-config configura el SERVICIO Azure, observability-patterns configura la INSTRUMENTACIÓN OpenTelemetry"
+  }
+}

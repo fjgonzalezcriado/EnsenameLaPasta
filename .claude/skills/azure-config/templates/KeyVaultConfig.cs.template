@@ -1,0 +1,28 @@
+// TEMPLATE: KeyVaultConfig | Skill: azure-config | Version: 3.1.0
+// Azure Key Vault configuration
+// Placeholders: {{ProjectNamespace}}
+
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+
+namespace {{ProjectNamespace}}.Infrastructure.Configuration;
+
+public static class KeyVaultExtensions
+{
+    public static IConfigurationBuilder AddAzureKeyVaultConfiguration(
+        this IConfigurationBuilder builder, string? keyVaultUrl = null)
+    {
+        var config = builder.Build();
+        var vaultUrl = keyVaultUrl ?? config["KeyVault:Url"];
+        if (string.IsNullOrEmpty(vaultUrl)) return builder;
+
+        builder.AddAzureKeyVault(
+            new Uri(vaultUrl),
+            new DefaultAzureCredential());
+        return builder;
+    }
+}
+
+// En Program.cs:
+// builder.Configuration.AddAzureKeyVaultConfiguration();
+// O en appsettings.json: { "KeyVault": { "Url": "https://myvault.vault.azure.net/" } }

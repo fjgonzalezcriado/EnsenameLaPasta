@@ -1,0 +1,55 @@
+// TEMPLATE: IntegrationTestBase | Skill: testing-patterns | Version: 3.1.0
+// Base for integration tests with Testcontainers SQL Server
+// Placeholders: {{ProjectNamespace}}, {{DbContextName}}
+
+using Microsoft.EntityFrameworkCore;
+using Testcontainers.MsSql;
+using Xunit;
+
+namespace {{ProjectNamespace}}.Tests.Integration;
+
+public class DatabaseFixture : IAsyncLifetime
+{
+    private readonly MsSqlContainer _container = new MsSqlBuilder()
+        .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+        .Build();
+
+    public string ConnectionString => _container.GetConnectionString();
+
+    public async Task InitializeAsync()
+    {
+        await _container.StartAsync();
+        var options = new DbContextOptionsBuilder<{{DbContextName}}>()
+            .UseSqlServer(ConnectionString).Options;
+        await using var context = new {{DbContextName}}(options);
+        await context.Database.MigrateAsync();
+    }
+
+    public async Task DisposeAsync() => await _container.DisposeAsync();
+}
+
+[Collection("Database")]
+public abstract class IntegrationTestBase : IAsyncLifetime
+{
+    protected readonly {{DbContextName}} Context;
+
+    protected IntegrationTestBase(DatabaseFixture fixture)
+    {
+        var options = new DbContextOptionsBuilder<{{DbContextName}}>()
+            .UseSqlServer(fixture.ConnectionString).Options;
+        Context = new {{DbContextName}}(options);
+    }
+
+    public virtual async Task InitializeAsync()
+        => await Context.Database.BeginTransactionAsync();
+
+    public virtual async Task DisposeAsync()
+    {
+        if (Context.Database.CurrentTransaction is not null)
+            await Context.Database.RollbackTransactionAsync();
+        await Context.DisposeAsync();
+    }
+}
+
+[CollectionDefinition("Database")]
+public class DatabaseCollection : ICollectionFixture<DatabaseFixture> { }

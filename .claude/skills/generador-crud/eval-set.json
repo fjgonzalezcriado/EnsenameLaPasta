@@ -1,0 +1,73 @@
+{
+  "skill": "generador-crud",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for generador-crud skill. 10 queries: 5 should trigger, 5 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Crea un CRUD completo para la entidad Beca con todas las capas: Controller, Service, Repository y DTOs",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso de uso principal: scaffolding CRUD completo"
+    },
+    {
+      "query": "Generate a new entity called Student with all layers following Clean Architecture",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: new entity + all layers"
+    },
+    {
+      "query": "Necesito un endpoint API para gestionar solicitudes: crear, leer, actualizar y eliminar",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "CRUD implícito via operaciones CRUD + endpoint API"
+    },
+    {
+      "query": "Scaffold a Minimal API endpoint for the Order entity with validators and DTOs",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: Minimal API scaffold"
+    },
+    {
+      "query": "Estandariza el CRUD existente de Facturas al patrón Comillas con Clean Architecture",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Refactorizar CRUD existente a estándares Comillas"
+    },
+    {
+      "query": "Revisa la seguridad de este Controller y busca vulnerabilidades OWASP",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar security-audit. Revisar seguridad != generar CRUD"
+    },
+    {
+      "query": "Analiza la arquitectura del proyecto y genera un diagrama de dependencias entre capas",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar analisis-arquitectura. Analizar != generar código"
+    },
+    {
+      "query": "Create unit tests for the BecaService using xUnit and Moq",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar testing-patterns. Crear tests != crear CRUD"
+    },
+    {
+      "query": "Genera la documentación técnica del módulo de Becas con ADR y diagramas Mermaid",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar documentacion-tecnica. Documentar != scaffolding"
+    },
+    {
+      "query": "Configura el layout web con los colores corporativos de Comillas y responsive design",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar webapp-layout. Diseño web != CRUD backend"
+    }
+  ],
+  "overlap_notes": {
+    "analisis-arquitectura": "Clean Architecture: generador-crud CREA código siguiendo el patrón, analisis-arquitectura EVALÚA si se cumple. Query 'crear entidad' → generador-crud, query 'revisar si cumple Clean Architecture' → analisis-arquitectura",
+    "api-integration-patterns": "API endpoints: generador-crud genera CRUD endpoints internos, api-integration-patterns conecta con APIs EXTERNAS (Banner, Oracle). Query 'crear endpoint para Becas' → generador-crud, query 'conectar con API Banner' → api-integration-patterns",
+    "testing-patterns": "Service/Controller: generador-crud GENERA el Service, testing-patterns GENERA los tests del Service. Query 'crear BecaService' → generador-crud, query 'tests para BecaService' → testing-patterns"
+  }
+}

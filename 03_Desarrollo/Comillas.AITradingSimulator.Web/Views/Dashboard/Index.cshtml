@@ -1,0 +1,403 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="dashboard px-2 px-lg-3">
+    <!-- Cabecera + estado del feed -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h1 class="h3 mb-0">🤖 AI Trading Simulator</h1>
+        <div class="d-flex flex-wrap align-items-center gap-3 small text-muted">
+            <span>
+                <span class="me-1">Proveedor:</span>
+                <span id="providerBadge" class="badge text-bg-secondary">—</span>
+            </span>
+            <span>Ticks: <strong id="tickCount" class="text-body">—</strong></span>
+            <span>BD: <strong id="dbSize" class="text-body">—</strong></span>
+            <span>
+                <span class="live-dot"></span>
+                Último: <strong id="lastTick" class="text-body">—</strong>
+            </span>
+            <label class="d-flex align-items-center gap-1 mb-0" title="Las métricas y tablas se actualizan en vivo cada 3 s; esto solo afecta al gráfico">
+                <span>Gráfico cada:</span>
+                <select id="refreshSelect" class="form-select form-select-sm w-auto py-0">
+                    <option value="3000">Tiempo real (3 s)</option>
+                    <option value="30000">30 s</option>
+                    <option value="60000">1 min</option>
+                    <option value="120000">2 min</option>
+                    <option value="300000">5 min</option>
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <!-- Métricas principales -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card metric-card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle text-muted text-uppercase small">Valor de cuenta</h6>
+                    <div class="fs-3 fw-semibold"><span id="accountValue">—</span></div>
+                    <small><span id="returnPct" class="fw-semibold">—</span> <span class="text-muted">sobre aportado</span></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card metric-card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle text-muted text-uppercase small">Efectivo</h6>
+                    <div class="fs-3 fw-semibold"><span id="cash">—</span></div>
+                    <small class="text-muted">Aportado: <span id="netDeposits">—</span></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card metric-card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle text-muted text-uppercase small">Valor de cartera</h6>
+                    <div class="fs-3 fw-semibold"><span id="marketValue">—</span></div>
+                    <small class="text-muted">Invertido: <span id="invested">—</span></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card metric-card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle text-muted text-uppercase small">PnL total</h6>
+                    <div class="fs-3 fw-semibold" id="totalPnL">—</div>
+                    <small class="text-muted">
+                        Real.: <span id="realizedPnL">—</span> ·
+                        No real.: <span id="unrealizedPnL">—</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card metric-card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle text-muted text-uppercase small">Posiciones</h6>
+                    <div class="fs-3 fw-semibold"><span id="openPositions">—</span> <small class="fs-6 text-muted">abiertas</small></div>
+                    <small class="text-muted">Cerradas: <span id="closedTrades">—</span></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card metric-card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle text-muted text-uppercase small">Winrate</h6>
+                    <div class="fs-3 fw-semibold" id="winrate">—</div>
+                    <small class="text-muted">% de trades ganadores</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones (modales) -->
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#searchModal">
+            🔎 Buscar / añadir instrumento
+        </button>
+        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#cashModal">
+            💰 Caja
+        </button>
+    </div>
+
+    <!-- Gráfico -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                        <h5 class="card-title mb-0">📈 Evolución de precios <small class="text-muted fw-normal">(valor, eje a la derecha)</small></h5>
+                        <label class="d-flex align-items-center gap-1 mb-0 small">
+                            <span class="text-muted">Símbolo:</span>
+                            <select id="symbolSelect" class="form-select form-select-sm w-auto py-0"></select>
+                            <button type="button" id="removeSymbolBtn" class="btn btn-outline-danger btn-sm py-0"
+                                    title="Dejar de seguir el símbolo seleccionado (borra su histórico)">✕</button>
+                        </label>
+                        <label class="d-flex align-items-center gap-1 mb-0 small" title="Cuántos puntos de histórico mostrar (se conservan entre sesiones)">
+                            <span class="text-muted">Histórico:</span>
+                            <select id="historySelect" class="form-select form-select-sm w-auto py-0">
+                                <option value="50">50 puntos</option>
+                                <option value="250">250 puntos</option>
+                                <option value="1000">1.000 puntos</option>
+                                <option value="5000">Máx (5.000)</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="chart-wrap" style="height: 460px;">
+                        <canvas id="chartPrices"></canvas>
+                        <div id="tickCountdown" class="tick-countdown" style="display:none;"></div>
+                    </div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Rango temporal" id="rangeBar">
+                            <button type="button" class="btn btn-outline-secondary active" data-range="LIVE">En vivo</button>
+                            <button type="button" class="btn btn-outline-secondary" data-range="1D">1D</button>
+                            <button type="button" class="btn btn-outline-secondary" data-range="5D">5D</button>
+                            <button type="button" class="btn btn-outline-secondary" data-range="1M">1M</button>
+                            <button type="button" class="btn btn-outline-secondary" data-range="3M">3M</button>
+                            <button type="button" class="btn btn-outline-secondary" data-range="6M">6M</button>
+                            <button type="button" class="btn btn-outline-secondary" data-range="YTD">YTD</button>
+                            <button type="button" class="btn btn-outline-secondary" data-range="1A">1A</button>
+                            <button type="button" class="btn btn-outline-secondary" data-range="3A">3A</button>
+                            <button type="button" class="btn btn-outline-secondary" data-range="5A">5A</button>
+                        </div>
+                        <span id="rangeHint" class="text-muted small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evolución del valor de cuenta -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                        <h5 class="card-title mb-0">📊 Evolución del valor de cuenta <small class="text-muted fw-normal">(snapshots)</small></h5>
+                        <label class="d-flex align-items-center gap-1 mb-0 small" title="Cuántos snapshots mostrar">
+                            <span class="text-muted">Puntos:</span>
+                            <select id="accountHistorySelect" class="form-select form-select-sm w-auto py-0">
+                                <option value="50">Últimos 50</option>
+                                <option value="200">Últimos 200</option>
+                                <option value="1000">Últimos 1.000</option>
+                                <option value="5000">Máx (5.000)</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="chart-wrap" style="height: 280px;">
+                        <canvas id="chartAccount"></canvas>
+                    </div>
+                    <div id="accountHistoryHint" class="text-muted small mt-2">Se toma un snapshot al arrancar y luego cada pocos minutos.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tablas -->
+    <div class="row g-3">
+        <div class="col-12 col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                        <h5 class="card-title mb-0">🟢 Posiciones abiertas</h5>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
+                                📥 Importar CSV
+                            </button>
+                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#positionModal">
+                                ➕ Nueva posición
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive table-scroll">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Símbolo</th>
+                                    <th>Div</th>
+                                    <th>Entry</th>
+                                    <th>Actual</th>
+                                    <th>Qty</th>
+                                    <th>PnL</th>
+                                    <th>%</th>
+                                    <th>Abierto</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="openTradesBody">
+                                <tr><td colspan="9" class="text-center text-muted">Cargando…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📋 Trades cerrados recientes</h5>
+                    <div class="table-responsive table-scroll">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Símbolo</th>
+                                    <th>Div</th>
+                                    <th>Entry → Exit</th>
+                                    <th>Qty</th>
+                                    <th>PnL</th>
+                                    <th>%</th>
+                                    <th>Cerrado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="closedTradesBody">
+                                <tr><td colspan="7" class="text-center text-muted">Cargando…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: buscador de instrumentos -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">🔎 Buscar instrumento <small class="text-muted fw-normal">(descripción, ISIN o ticker)</small></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="searchForm" class="d-flex flex-wrap gap-2 mb-2" autocomplete="off">
+                    <input type="search" id="searchInput" class="form-control flex-grow-1"
+                           placeholder="p.ej. SK hynix · KR7000660001 · HY9H" minlength="2" aria-label="Buscar instrumento" />
+                    <button type="submit" class="btn btn-primary" id="searchBtn">Buscar</button>
+                </form>
+                <div id="searchHint" class="text-muted small mb-2">Yahoo no indexa WKN; usa descripción, ISIN o ticker.</div>
+                <div class="table-responsive" id="searchResultsWrap" style="display:none;">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Símbolo</th>
+                                <th>Nombre</th>
+                                <th>Bolsa</th>
+                                <th>Tipo</th>
+                                <th class="text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: nueva posición (cartera real del usuario) -->
+<div class="modal fade" id="positionModal" tabindex="-1" aria-labelledby="positionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="positionModalLabel">➕ Nueva posición</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form id="positionForm" autocomplete="off">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="posSymbol" class="form-label">Símbolo</label>
+                        <input type="text" id="posSymbol" class="form-control" list="trackedSymbolsList" required placeholder="p.ej. HY9H.F" />
+                        <datalist id="trackedSymbolsList"></datalist>
+                        <div class="form-text">Si aún no lo sigues, se añadirá automáticamente a la watchlist.</div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6 mb-3">
+                            <label for="posEntry" class="form-label">Precio de entrada (€)</label>
+                            <input type="number" id="posEntry" class="form-control" min="0.0001" step="any" required />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="posQty" class="form-label">Cantidad</label>
+                            <input type="number" id="posQty" class="form-control" min="0.0001" step="any" required />
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="posDate" class="form-label">Fecha de apertura</label>
+                        <input type="datetime-local" id="posDate" class="form-control" />
+                    </div>
+                    <div id="positionError" class="text-danger small mt-2" style="display:none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success" id="positionSubmit">Crear posición</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: caja / efectivo -->
+<div class="modal fade" id="cashModal" tabindex="-1" aria-labelledby="cashModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cashModalLabel">💰 Caja / efectivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="cashForm" class="row g-2 align-items-end mb-2" autocomplete="off">
+                    <div class="col-12 col-sm-4">
+                        <label for="cashAmount" class="form-label">Importe (€)</label>
+                        <input type="number" id="cashAmount" class="form-control" min="0.01" step="any" required />
+                    </div>
+                    <div class="col-12 col-sm-5">
+                        <label for="cashNote" class="form-label">Nota (opcional)</label>
+                        <input type="text" id="cashNote" class="form-control" maxlength="200" placeholder="p.ej. transferencia inicial" />
+                    </div>
+                    <div class="col-12 col-sm-3 d-flex gap-2">
+                        <button type="button" id="cashDepositBtn" class="btn btn-success flex-fill">＋ Ingreso</button>
+                        <button type="button" id="cashWithdrawBtn" class="btn btn-outline-danger flex-fill">－ Retirada</button>
+                    </div>
+                </form>
+                <div id="cashError" class="text-danger small mb-2" style="display:none;"></div>
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Movimientos</span>
+                    <span>Aportado neto: <strong id="cashNetDeposits" class="text-body">—</strong></span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Concepto</th>
+                                <th class="text-end">Importe</th>
+                                <th class="text-end"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cashMovementsBody">
+                            <tr><td colspan="4" class="text-center text-muted">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: importar histórico de compras (CSV) -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">📥 Importar histórico de compras (CSV)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-2">
+                    Columnas: <code>symbol, entry, qty, date</code> (la fecha es opcional). Cabecera opcional.
+                    Delimitador <code>,</code> o <code>;</code> (con <code>;</code> el decimal puede ser <code>,</code>). Fecha: <code>yyyy-MM-dd</code> o <code>dd/MM/yyyy</code>.
+                </p>
+                <pre class="small bg-body-secondary p-2 rounded mb-2">symbol,entry,qty,date
+HY9H.F,1360,5,2026-06-01
+AAPL,180.5,10,2026-05-20</pre>
+                <div class="mb-2">
+                    <input type="file" id="importFile" class="form-control" accept=".csv,.txt,text/csv,text/plain" />
+                </div>
+                <div class="mb-2">
+                    <textarea id="importText" class="form-control" rows="6" placeholder="…o pega aquí el CSV"></textarea>
+                </div>
+                <div id="importResult" class="small" style="display:none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="importSubmit">Importar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,98 @@
+:root {
+  /* Paleta corporativa Comillas */
+  --comillas-azul: #003366;
+  --comillas-azul-claro: #0066cc;
+}
+
+html {
+  font-size: 14px;
+  position: relative;
+  min-height: 100%;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(0, 102, 204, 0.35);
+}
+
+/* ── Marca / cabecera ─────────────────────────────────────────────── */
+.navbar-brand {
+  color: var(--comillas-azul);
+}
+[data-bs-theme="dark"] .navbar-brand {
+  color: #e9f1ff;
+}
+
+/* ── Cards de métricas ────────────────────────────────────────────── */
+.metric-card {
+  border-left: 4px solid var(--comillas-azul-claro);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .12) !important;
+}
+.metric-card .display-6 {
+  font-size: clamp(1.4rem, 2.5vw, 2.1rem);
+  line-height: 1.1;
+}
+
+/* ── Tablas con scroll y cabecera fija ────────────────────────────── */
+.table-scroll {
+  max-height: 360px;
+  overflow-y: auto;
+}
+.table-scroll thead.sticky-top th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* ── Indicador "en vivo" ──────────────────────────────────────────── */
+.live-dot {
+  display: inline-block;
+  width: .55rem;
+  height: .55rem;
+  margin-right: .15rem;
+  border-radius: 50%;
+  background: #198754;
+  box-shadow: 0 0 0 rgba(25, 135, 84, .7);
+  animation: live-pulse 1.8s infinite;
+  vertical-align: middle;
+}
+@keyframes live-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(25, 135, 84, .6); }
+  70%  { box-shadow: 0 0 0 .4rem rgba(25, 135, 84, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; }
+}
+
+/* ── Cuenta atrás al próximo registro (sobre el gráfico, bajo el valor) ──── */
+.chart-wrap {
+  position: relative;
+}
+.tick-countdown {
+  position: absolute;
+  right: 2px;
+  transform: translateY(-50%);
+  font-size: .68rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: rgba(108, 117, 125, .85);
+  color: #fff;
+  pointer-events: none;
+  white-space: nowrap;
+}

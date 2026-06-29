@@ -1,0 +1,65 @@
+# Troubleshooting - {{ProjectName}}
+
+> Skill: documentacion-tecnica | Version: 3.1.0
+
+---
+
+## Problemas Comunes
+
+| Sintoma | Causa probable | Solucion |
+|---------|---------------|----------|
+| 401 Unauthorized | Token expirado | Renovar token Azure AD |
+| 500 en inicio | Connection string invalida | Verificar appsettings/Key Vault |
+| Timeout en queries | Indice faltante | Revisar plan de ejecucion |
+| CORS error | Origen no permitido | Agregar origen a CORS policy |
+
+---
+
+## Autenticacion
+
+### AUTH-001: Token invalido
+**Sintoma:** 401 en todas las peticiones
+**Causa:** Token JWT expirado o audience incorrecta
+**Solucion:** Verificar AzureAd:ClientId en appsettings. Renovar token.
+
+### AUTH-002: Forbidden 403
+**Sintoma:** Usuario autenticado pero sin acceso
+**Causa:** Rol o claim faltante
+**Solucion:** Verificar asignacion de roles en Azure AD App Registration.
+
+---
+
+## Base de Datos
+
+### DB-001: Connection timeout
+**Sintoma:** SqlException timeout
+**Causa:** Firewall, connection string, o DB sobrecargada
+**Solucion:** Verificar IP en firewall. Comprobar connection string. Revisar DTU/vCores.
+
+### DB-002: Migration fallida
+**Sintoma:** Error al aplicar migracion
+**Causa:** Schema desincronizado
+**Solucion:** `dotnet ef migrations list` para verificar estado. Aplicar migraciones pendientes.
+
+---
+
+## Analisis de Logs
+
+### Application Insights (KQL)
+
+```kql
+// Errores en ultima hora
+exceptions
+| where timestamp > ago(1h)
+| summarize count() by outerMessage
+| order by count_ desc
+
+// Requests lentas
+requests
+| where duration > 5000
+| project timestamp, name, duration, resultCode
+```
+
+---
+
+*Template troubleshooting v3.1.0*

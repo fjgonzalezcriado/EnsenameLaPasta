@@ -1,0 +1,48 @@
+{
+  "skill": "nugets-management",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for nugets-management skill. 6 queries: 3 should trigger, 3 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Analiza los paquetes NuGet obsoletos del proyecto y propón un plan de actualización",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso principal: auditar NuGet outdated + plan actualización"
+    },
+    {
+      "query": "Set up Central Package Management with Directory.Packages.props and consolidate versions",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: CPM setup + Directory.Packages.props"
+    },
+    {
+      "query": "Hay paquetes NuGet con vulnerabilidades conocidas en la solución? Haz una auditoría",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keywords: NuGet vulnerabilidades + auditoría de paquetes"
+    },
+    {
+      "query": "Revisa la seguridad del código fuente y busca vulnerabilidades OWASP",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar security-audit. Seguridad código != gestión paquetes"
+    },
+    {
+      "query": "Analiza la arquitectura del proyecto y las dependencias entre capas",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar analisis-arquitectura. Dependencias de capas != dependencias NuGet"
+    },
+    {
+      "query": "Configure Azure Key Vault to store the NuGet feed API key securely",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar azure-config. Configurar Key Vault != gestionar NuGets"
+    }
+  ],
+  "overlap_notes": {
+    "security-audit": "Vulnerabilidades: nugets-management audita PAQUETES (CVEs en dependencies), security-audit audita CÓDIGO (OWASP, secrets)",
+    "analisis-arquitectura": "Dependencies: nugets-management analiza PAQUETES NuGet, analisis-arquitectura analiza dependencias entre CAPAS/PROYECTOS"
+  }
+}

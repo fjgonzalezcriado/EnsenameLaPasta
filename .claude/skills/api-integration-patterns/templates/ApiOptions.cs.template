@@ -1,0 +1,182 @@
+// TEMPLATE: API Configuration Options
+// Version: 1.0.0
+// Uso: Clases de configuración para APIs externas con IOptions pattern
+
+using System.ComponentModel.DataAnnotations;
+
+namespace Comillas.MiApp.Infrastructure.ApiClients.Configuration;
+
+/// <summary>
+/// Configuración base para cualquier API externa
+/// </summary>
+public abstract class ApiOptionsBase
+{
+    [Required(ErrorMessage = "BaseUrl es requerido")]
+    [Url(ErrorMessage = "BaseUrl debe ser una URL válida")]
+    public string BaseUrl { get; set; } = string.Empty;
+
+    [Range(5, 300, ErrorMessage = "TimeoutSeconds debe estar entre 5 y 300")]
+    public int TimeoutSeconds { get; set; } = 30;
+
+    [Range(0, 10, ErrorMessage = "MaxRetries debe estar entre 0 y 10")]
+    public int MaxRetries { get; set; } = 3;
+
+    public bool EnableLogging { get; set; } = true;
+}
+
+/// <summary>
+/// Configuración para Banner API
+/// </summary>
+public class BannerApiOptions : ApiOptionsBase
+{
+    public const string SectionName = "BannerApi";
+
+    [Required(ErrorMessage = "ClientId es requerido")]
+    public string ClientId { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "ClientSecret es requerido")]
+    public string ClientSecret { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "TokenUrl es requerido")]
+    [Url(ErrorMessage = "TokenUrl debe ser una URL válida")]
+    public string TokenUrl { get; set; } = string.Empty;
+
+    public string? Scope { get; set; }
+
+    public int TokenCacheDurationMinutes { get; set; } = 50; // 90% de 60 minutos
+}
+
+/// <summary>
+/// Configuración para Oracle HCM Cloud API
+/// </summary>
+public class OracleHcmApiOptions : ApiOptionsBase
+{
+    public const string SectionName = "OracleHcmApi";
+
+    [Required(ErrorMessage = "ClientId es requerido")]
+    public string ClientId { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "ClientSecret es requerido")]
+    public string ClientSecret { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "TokenUrl es requerido")]
+    [Url]
+    public string TokenUrl { get; set; } = string.Empty;
+
+    public int PageSize { get; set; } = 100;
+
+    public int CacheDurationMinutes { get; set; } = 60;
+}
+
+/// <summary>
+/// Configuración para Sigma API
+/// </summary>
+public class SigmaApiOptions : ApiOptionsBase
+{
+    public const string SectionName = "SigmaApi";
+
+    [Required(ErrorMessage = "ApiKey es requerido")]
+    public string ApiKey { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "ApiSecret es requerido")]
+    public string ApiSecret { get; set; } = string.Empty;
+
+    public bool UseHmacAuthentication { get; set; } = true;
+}
+
+// ============================================================================
+// Extension Methods para Registro en DI
+// ============================================================================
+
+public static class ApiOptionsExtensions
+{
+    /// <summary>
+    /// Registra opciones de Banner API con validación
+    /// </summary>
+    public static IServiceCollection AddBannerApiOptions(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddOptionsWithValidateOnStart<BannerApiOptions>()
+            .Bind(configuration.GetSection(BannerApiOptions.SectionName))
+            .ValidateDataAnnotations()
+            .Validate(options =>
+            {
+                // Validaciones adicionales
+                if (options.TimeoutSeconds > 120)
+                {
+                    Console.WriteLine("⚠️ Warning: TimeoutSeconds > 120s puede causar problemas de rendimiento");
+                }
+
+                return true;
+            });
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registra opciones de Oracle HCM API con validación
+    /// </summary>
+    public static IServiceCollection AddOracleHcmApiOptions(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddOptionsWithValidateOnStart<OracleHcmApiOptions>()
+            .Bind(configuration.GetSection(OracleHcmApiOptions.SectionName))
+            .ValidateDataAnnotations();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registra opciones de Sigma API con validación
+    /// </summary>
+    public static IServiceCollection AddSigmaApiOptions(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddOptionsWithValidateOnStart<SigmaApiOptions>()
+            .Bind(configuration.GetSection(SigmaApiOptions.SectionName))
+            .ValidateDataAnnotations();
+
+        return services;
+    }
+}
+
+// ============================================================================
+// appsettings.json Example
+// ============================================================================
+
+/*
+{
+  "BannerApi": {
+    "BaseUrl": "https://banner.comillas.edu/api",
+    "TimeoutSeconds": 30,
+    "MaxRetries": 3,
+    "EnableLogging": true,
+    "ClientId": "comillas-app",
+    "ClientSecret": "{{KeyVault}}",
+    "TokenUrl": "https://auth.comillas.edu/oauth/token",
+    "Scope": "students:read courses:read",
+    "TokenCacheDurationMinutes": 50
+  },
+  "OracleHcmApi": {
+    "BaseUrl": "https://oracle-hcm.comillas.edu/api",
+    "TimeoutSeconds": 45,
+    "MaxRetries": 3,
+    "ClientId": "{{KeyVault}}",
+    "ClientSecret": "{{KeyVault}}",
+    "TokenUrl": "https://oracle-auth.comillas.edu/oauth/token",
+    "PageSize": 100,
+    "CacheDurationMinutes": 60
+  },
+  "SigmaApi": {
+    "BaseUrl": "https://sigma.comillas.edu/api",
+    "TimeoutSeconds": 30,
+    "MaxRetries": 3,
+    "ApiKey": "{{KeyVault}}",
+    "ApiSecret": "{{KeyVault}}",
+    "UseHmacAuthentication": true
+  }
+}
+*/

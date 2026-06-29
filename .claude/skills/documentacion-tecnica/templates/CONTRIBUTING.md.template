@@ -1,0 +1,280 @@
+# Guía de Contribución
+
+> Template para documentar cómo contribuir al proyecto
+> Skill: documentacion-tecnica
+> Versión: 2.8.0
+
+Gracias por tu interés en contribuir a **{{NombreProyecto}}**. Esta guía te ayudará
+a entender cómo puedes colaborar de manera efectiva.
+
+---
+
+## Tabla de Contenidos
+
+- [Código de Conducta](#código-de-conducta)
+- [Cómo Empezar](#cómo-empezar)
+- [Proceso de Desarrollo](#proceso-de-desarrollo)
+- [Estándares de Código](#estándares-de-código)
+- [Commits y Pull Requests](#commits-y-pull-requests)
+- [Testing](#testing)
+- [Documentación](#documentación)
+- [Contacto](#contacto)
+
+---
+
+## Código de Conducta
+
+Este proyecto sigue el código de conducta de la Universidad Pontificia Comillas.
+Se espera que todos los contribuidores:
+
+- Sean respetuosos y profesionales
+- Acepten críticas constructivas
+- Se enfoquen en lo mejor para el proyecto
+- Muestren empatía hacia otros miembros del equipo
+
+---
+
+## Cómo Empezar
+
+### Requisitos Previos
+
+- .NET 10 SDK
+- SQL Server 2019+ o Docker
+- Visual Studio 2022 / VS Code / Rider
+- Git
+
+### Configuración del Entorno
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/comillas/{{NombreProyecto}}.git
+   cd {{NombreProyecto}}
+   ```
+
+2. **Restaurar dependencias**
+   ```bash
+   dotnet restore
+   ```
+
+3. **Configurar secretos locales**
+   ```bash
+   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "tu-connection-string"
+   ```
+
+4. **Ejecutar migraciones**
+   ```bash
+   dotnet ef database update --project src/Infrastructure
+   ```
+
+5. **Ejecutar la aplicación**
+   ```bash
+   dotnet run --project src/Web
+   ```
+
+---
+
+## Proceso de Desarrollo
+
+### 1. Buscar o Crear Issue
+
+- Revisa los [issues existentes](https://github.com/comillas/{{NombreProyecto}}/issues)
+- Si no existe, crea uno describiendo el bug o feature
+- Espera confirmación antes de empezar (para features grandes)
+
+### 2. Crear Rama
+
+```bash
+# Para features
+git checkout -b feature/HV-123-descripcion-corta
+
+# Para bugs
+git checkout -b bugfix/HV-456-descripcion-corta
+
+# Para hotfixes
+git checkout -b hotfix/HV-789-descripcion-corta
+```
+
+### 3. Desarrollar
+
+- Escribe código siguiendo los estándares
+- Añade tests para código nuevo
+- Actualiza documentación si es necesario
+
+### 4. Commit y Push
+
+```bash
+git add .
+git commit -m "feat(becas): añadir filtro por estado (#123)"
+git push origin feature/HV-123-descripcion-corta
+```
+
+### 5. Crear Pull Request
+
+- Usa la plantilla de PR
+- Describe los cambios claramente
+- Enlaza el issue relacionado
+- Solicita revisión
+
+---
+
+## Estándares de Código
+
+### Nomenclatura
+
+| Elemento | Convención | Ejemplo |
+|----------|------------|---------|
+| Clases | PascalCase | `BecaService` |
+| Interfaces | IPascalCase | `IBecaRepository` |
+| Métodos | PascalCase | `GetByIdAsync` |
+| Variables | camelCase | `becaActual` |
+| Constantes | UPPER_SNAKE | `MAX_ITEMS` |
+| Campos privados | _camelCase | `_repository` |
+
+### Estructura de Archivos
+
+```
+src/
+├── Domain/           # Entidades, Value Objects
+├── Application/      # Servicios, DTOs, Validadores
+├── Infrastructure/   # EF Core, Repositorios
+└── Web/              # Controllers, Views
+```
+
+### Reglas Generales
+
+- Máximo 120 caracteres por línea
+- Usar `var` cuando el tipo es evidente
+- Métodos async deben terminar en `Async`
+- Una clase por archivo
+- Ordenar miembros: campos, constructores, propiedades, métodos
+
+---
+
+## Commits y Pull Requests
+
+### Formato de Commits
+
+Usamos [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+tipo(ámbito): descripción corta (#issue)
+
+Cuerpo opcional con más detalles.
+
+BREAKING CHANGE: descripción si aplica
+```
+
+**Tipos permitidos:**
+- `feat`: Nueva funcionalidad
+- `fix`: Corrección de bug
+- `docs`: Documentación
+- `style`: Formato (sin cambio de código)
+- `refactor`: Refactorización
+- `test`: Tests
+- `chore`: Mantenimiento
+
+### Ejemplos
+
+```bash
+feat(becas): añadir endpoint de exportación a Excel (#123)
+fix(solicitudes): corregir cálculo de fecha límite (#456)
+docs(readme): actualizar instrucciones de instalación
+refactor(domain): extraer validaciones a Value Objects
+test(services): añadir tests para BecaService
+```
+
+### Pull Request Template
+
+```markdown
+## Descripción
+Breve descripción de los cambios.
+
+## Issue Relacionado
+Closes #123
+
+## Tipo de Cambio
+- [ ] Bug fix
+- [ ] Nueva feature
+- [ ] Breaking change
+- [ ] Documentación
+
+## Checklist
+- [ ] He seguido los estándares de código
+- [ ] He añadido tests
+- [ ] He actualizado la documentación
+- [ ] Los tests pasan localmente
+```
+
+---
+
+## Testing
+
+### Ejecutar Tests
+
+```bash
+# Todos los tests
+dotnet test
+
+# Con cobertura
+dotnet test --collect:"XPlat Code Coverage"
+
+# Tests específicos
+dotnet test --filter "FullyQualifiedName~BecaServiceTests"
+```
+
+### Cobertura Mínima
+
+| Capa | Mínimo |
+|------|--------|
+| Domain | 90% |
+| Application | 80% |
+| Infrastructure | 60% |
+
+### Estructura de Tests
+
+```csharp
+[Fact]
+public async Task NombreMetodo_Escenario_ResultadoEsperado()
+{
+    // Arrange
+    var sut = new BecaService(...);
+
+    // Act
+    var result = await sut.GetByIdAsync(1);
+
+    // Assert
+    result.Should().NotBeNull();
+}
+```
+
+---
+
+## Documentación
+
+### Cuándo Documentar
+
+- Nuevos endpoints API
+- Cambios en configuración
+- Nuevas dependencias
+- Decisiones arquitectónicas (ADRs)
+
+### Dónde Documentar
+
+| Tipo | Ubicación |
+|------|-----------|
+| API | Comentarios XML + Swagger |
+| Arquitectura | `docs/architecture/` |
+| Configuración | `README.md` |
+| Decisiones | `docs/adr/` |
+
+---
+
+## Contacto
+
+- **Equipo**: STIC - Universidad Pontificia Comillas
+- **Email**: soporte.stic@comillas.edu
+- **Issues**: [GitHub Issues](https://github.com/comillas/{{NombreProyecto}}/issues)
+
+---
+
+*Generado con documentacion-tecnica skill v2.8.0*

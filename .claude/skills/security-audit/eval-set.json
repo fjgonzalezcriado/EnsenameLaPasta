@@ -1,0 +1,73 @@
+{
+  "skill": "security-audit",
+  "version": "3.5.0",
+  "created": "2026-03-12",
+  "description": "Trigger evaluation dataset for security-audit skill. 10 queries: 5 should trigger, 5 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Revisa la seguridad de este Controller de autenticación",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso de uso principal: auditoría de seguridad en código"
+    },
+    {
+      "query": "Review the security of this login endpoint for SQL injection vulnerabilities",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: explicit security review request"
+    },
+    {
+      "query": "Busca vulnerabilidades OWASP en el proyecto y genera un informe CVSS",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Keywords directos: OWASP + CVSS"
+    },
+    {
+      "query": "Hay secrets o credenciales hardcodeadas en el código? Escanea todo el repositorio",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Secret detection - keyword: secrets, credenciales hardcodeadas"
+    },
+    {
+      "query": "Analyze the CORS configuration and security headers of this ASP.NET application",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: CORS + security headers analysis"
+    },
+    {
+      "query": "Crea un CRUD completo para la entidad Estudiante con Controller, Service y Repository",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar generador-crud, no security-audit. Scaffolding de código, no auditoría"
+    },
+    {
+      "query": "Configura Azure Key Vault para guardar los connection strings de producción",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar azure-config. Configurar Key Vault != auditar secretos"
+    },
+    {
+      "query": "Genera tests unitarios con xUnit y FluentAssertions para el BecaService",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar testing-patterns. Crear tests != auditar seguridad"
+    },
+    {
+      "query": "Analiza las dependencias entre capas y genera un diagrama de arquitectura",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar analisis-arquitectura. Análisis de capas != auditoría de seguridad"
+    },
+    {
+      "query": "Add Polly retry policies and circuit breaker to the HttpClient configuration",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar resilience-patterns. Configurar Polly != security audit"
+    }
+  ],
+  "overlap_notes": {
+    "azure-config": "Key Vault: security-audit DETECTA secretos expuestos, azure-config CONFIGURA Key Vault. Query 'configurar Key Vault' → azure-config, query 'buscar secretos hardcodeados' → security-audit",
+    "testing-patterns": "Security tests: security-audit ANALIZA código existente, testing-patterns GENERA tests nuevos. Query 'crear tests' → testing-patterns, query 'revisar seguridad' → security-audit",
+    "api-integration-patterns": "OAuth2: security-audit AUDITA flujos auth, api-integration-patterns IMPLEMENTA OAuth2. Query 'implementar OAuth' → api-integration, query 'auditar autenticación' → security-audit"
+  }
+}

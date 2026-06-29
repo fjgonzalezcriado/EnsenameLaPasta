@@ -1,0 +1,199 @@
+// ============================================================================
+// TEMPLATE: Dto.cs - Data Transfer Objects
+// Skill: generador-crud
+// Versión: 2.8.0
+// ============================================================================
+// USO: Reemplazar {{Entidad}}, {{Namespace}}, {{Propiedades}}
+// ============================================================================
+
+namespace {{Namespace}}.Application.Features.{{Entidades}}.Dtos;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DTO DE RESPUESTA (para GET)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// <summary>
+/// DTO completo de {{Entidad}} para respuestas
+/// </summary>
+public record {{Entidad}}Dto
+{
+    public int Id { get; init; }
+
+    {{PropiedadesDto}}
+
+    // Auditoría
+    public DateTime CreatedAt { get; init; }
+    public string? CreatedBy { get; init; }
+    public DateTime? ModifiedAt { get; init; }
+    public string? ModifiedBy { get; init; }
+}
+
+/// <summary>
+/// DTO resumido de {{Entidad}} para listados
+/// </summary>
+public record {{Entidad}}ListDto
+{
+    public int Id { get; init; }
+
+    {{PropiedadesListDto}}
+}
+
+/// <summary>
+/// DTO para select/dropdown
+/// </summary>
+public record {{Entidad}}SelectDto
+{
+    public int Id { get; init; }
+    public string Nombre { get; init; } = string.Empty;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DTO DE REQUEST (para POST/PUT)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// <summary>
+/// Request para crear {{Entidad}}
+/// </summary>
+public record Create{{Entidad}}Request
+{
+    {{PropiedadesCreateRequest}}
+}
+
+/// <summary>
+/// Request para actualizar {{Entidad}}
+/// </summary>
+public record Update{{Entidad}}Request
+{
+    {{PropiedadesUpdateRequest}}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DTO PAGINADO
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// <summary>
+/// Request de paginación y filtros
+/// </summary>
+public record {{Entidad}}FilterRequest
+{
+    public int Page { get; init; } = 1;
+    public int Size { get; init; } = 10;
+
+    // Filtros específicos
+    {{PropiedadesFiltro}}
+
+    // Ordenación
+    public string? OrderBy { get; init; }
+    public bool OrderDescending { get; init; } = true;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAPPING PROFILE
+// ═══════════════════════════════════════════════════════════════════════════
+
+using AutoMapper;
+using {{Namespace}}.Domain.Entities;
+
+public class {{Entidad}}MappingProfile : Profile
+{
+    public {{Entidad}}MappingProfile()
+    {
+        // Entity → DTO
+        CreateMap<{{Entidad}}, {{Entidad}}Dto>();
+        CreateMap<{{Entidad}}, {{Entidad}}ListDto>();
+        CreateMap<{{Entidad}}, {{Entidad}}SelectDto>();
+
+        // Request → Command (si se usa MediatR)
+        // CreateMap<Create{{Entidad}}Request, Create{{Entidad}}Command>();
+        // CreateMap<Update{{Entidad}}Request, Update{{Entidad}}Command>();
+    }
+}
+
+// ============================================================================
+// EJEMPLO GENERADO - BecaDto
+// ============================================================================
+/*
+// DTO completo
+public record BecaDto
+{
+    public int Id { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public string Nombre { get; init; } = string.Empty;
+    public string? Descripcion { get; init; }
+    public decimal Importe { get; init; }
+    public string Estado { get; init; } = string.Empty;
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+    public int TotalSolicitudes { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public string? CreatedBy { get; init; }
+    public DateTime? ModifiedAt { get; init; }
+    public string? ModifiedBy { get; init; }
+}
+
+// DTO para listados
+public record BecaListDto
+{
+    public int Id { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public string Nombre { get; init; } = string.Empty;
+    public decimal Importe { get; init; }
+    public string Estado { get; init; } = string.Empty;
+    public DateTime FechaFin { get; init; }
+}
+
+// DTO para selects
+public record BecaSelectDto
+{
+    public int Id { get; init; }
+    public string Nombre { get; init; } = string.Empty;
+}
+
+// Request crear
+public record CreateBecaRequest
+{
+    public required string Codigo { get; init; }
+    public required string Nombre { get; init; }
+    public string? Descripcion { get; init; }
+    public decimal Importe { get; init; }
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+}
+
+// Request actualizar
+public record UpdateBecaRequest
+{
+    public required string Nombre { get; init; }
+    public string? Descripcion { get; init; }
+    public decimal Importe { get; init; }
+}
+
+// Request filtros
+public record BecaFilterRequest
+{
+    public int Page { get; init; } = 1;
+    public int Size { get; init; } = 10;
+    public string? Estado { get; init; }
+    public decimal? ImporteMinimo { get; init; }
+    public decimal? ImporteMaximo { get; init; }
+    public bool? SoloActivas { get; init; }
+    public string? OrderBy { get; init; }
+    public bool OrderDescending { get; init; } = true;
+}
+
+// Mapping
+public class BecaMappingProfile : Profile
+{
+    public BecaMappingProfile()
+    {
+        CreateMap<Beca, BecaDto>()
+            .ForMember(d => d.Estado, opt => opt.MapFrom(s => s.Estado.ToString()))
+            .ForMember(d => d.TotalSolicitudes, opt => opt.MapFrom(s => s.Solicitudes.Count));
+
+        CreateMap<Beca, BecaListDto>()
+            .ForMember(d => d.Estado, opt => opt.MapFrom(s => s.Estado.ToString()));
+
+        CreateMap<Beca, BecaSelectDto>();
+    }
+}
+*/

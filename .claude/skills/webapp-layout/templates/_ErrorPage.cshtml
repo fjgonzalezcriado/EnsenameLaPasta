@@ -1,0 +1,29 @@
+@* TEMPLATE: ErrorPage | Skill: webapp-layout | Version: 3.1.0 *@
+@* Pagina de error generica con branding Comillas *@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+    Layout = "_Layout";
+    var statusCode = Model?.StatusCode ?? 500;
+    var message = statusCode switch
+    {
+        404 => "La pagina que busca no existe o ha sido movida.",
+        403 => "No tiene permisos para acceder a este recurso.",
+        500 => "Ha ocurrido un error interno. El equipo tecnico ha sido notificado.",
+        _ => "Ha ocurrido un error inesperado."
+    };
+}
+
+<div class="error-page text-center" style="padding: 60px 20px;">
+    <h1 style="font-size: 6rem; color: var(--accent, #003366); margin-bottom: 0;">@statusCode</h1>
+    <h2>@message</h2>
+    <p class="text-muted">Si el problema persiste, contacte con <a href="mailto:soporte.stic@comillas.edu">soporte tecnico</a>.</p>
+    <a href="/" class="btn btn-primary mt-3">Volver al inicio</a>
+
+    @if (Model?.RequestId != null)
+    {
+        <p class="text-muted mt-4" style="font-size: 0.8rem;">
+            ID de solicitud: <code>@Model.RequestId</code>
+        </p>
+    }
+</div>

@@ -1,0 +1,111 @@
+{
+  "skill": "analisis-arquitectura",
+  "version": "3.7.0",
+  "created": "2026-03-12",
+  "updated": "2026-04-06",
+  "description": "Trigger evaluation dataset for analisis-arquitectura skill. 16 queries: 9 should trigger, 7 should NOT trigger.",
+  "queries": [
+    {
+      "query": "Analiza la arquitectura del proyecto y genera un diagrama de dependencias entre capas",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Caso de uso principal: análisis de arquitectura con diagramas"
+    },
+    {
+      "query": "Review the project architecture for Clean Architecture compliance and layer violations",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: architecture compliance audit"
+    },
+    {
+      "query": "Estoy haciendo onboarding en este proyecto, necesito entender la estructura y las dependencias entre módulos",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Onboarding trigger: entender proyecto nuevo"
+    },
+    {
+      "query": "Hay violaciones de capas en el proyecto? Infrastructure referencia directamente a los Controllers?",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "Layer violation detection"
+    },
+    {
+      "query": "Generate a dependency graph showing how Domain, Application, Infrastructure and Web interact",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "English trigger: dependency graph generation"
+    },
+    {
+      "query": "Genera un informe de auditoría arquitectónica completo con puntuación y recomendaciones en HTML y Markdown",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "NEW: Formal report generation trigger (HTML+MD)"
+    },
+    {
+      "query": "¿Merece la pena migrar este proyecto a Clean Architecture? Evalúa la viabilidad",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "NEW: Migration viability assessment trigger"
+    },
+    {
+      "query": "Produce an architecture audit report with scoring, patterns detected, and NuGet analysis",
+      "should_trigger": true,
+      "language": "en-US",
+      "note": "NEW: English formal audit report trigger"
+    },
+    {
+      "query": "Quiero un análisis de la arquitectura actual con métricas cuantitativas y los 5 problemas más críticos",
+      "should_trigger": true,
+      "language": "es-ES",
+      "note": "NEW: Quantitative analysis with critical problems"
+    },
+    {
+      "query": "Crea un CRUD completo para la entidad Alumno con Controller, Service y Repository",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar generador-crud. Crear código != analizar arquitectura"
+    },
+    {
+      "query": "Revisa la seguridad de este endpoint y busca vulnerabilidades OWASP Top 10",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar security-audit. Seguridad != arquitectura"
+    },
+    {
+      "query": "Configure Azure Application Insights and OpenTelemetry for distributed tracing",
+      "should_trigger": false,
+      "language": "en-US",
+      "note": "NEGATIVE: Debe activar observability-patterns. Configurar telemetría != analizar arquitectura"
+    },
+    {
+      "query": "Actualiza los paquetes NuGet obsoletos y audita vulnerabilidades en las dependencias",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar nugets-management. Gestión NuGet != análisis arquitectura"
+    },
+    {
+      "query": "Genera la documentación técnica del proyecto con ADR y README",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar documentacion-tecnica. Generar docs != analizar estructura"
+    },
+    {
+      "query": "Genera un informe de tests con cobertura y recomendaciones de mejora de tests",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar testing-patterns. Tests != arquitectura"
+    },
+    {
+      "query": "Crea una colección Postman para probar los endpoints de la API",
+      "should_trigger": false,
+      "language": "es-ES",
+      "note": "NEGATIVE: Debe activar postman-collection. Postman != arquitectura"
+    }
+  ],
+  "overlap_notes": {
+    "generador-crud": "Clean Architecture: analisis-arquitectura EVALÚA compliance, generador-crud GENERA código siguiendo el patrón. Query 'revisar capas' → analisis-arquitectura, query 'crear entidad con capas' → generador-crud",
+    "security-audit": "Code review: analisis-arquitectura revisa ESTRUCTURA y patrones, security-audit revisa VULNERABILIDADES. Query 'revisar dependencias entre módulos' → analisis-arquitectura, query 'buscar SQL injection' → security-audit",
+    "nugets-management": "Dependencies: analisis-arquitectura analiza dependencias entre CAPAS del código, nugets-management analiza dependencias de PAQUETES NuGet. Query 'dependencias entre proyectos' → analisis-arquitectura, query 'NuGet desactualizados' → nugets-management",
+    "documentacion-tecnica": "Reports: analisis-arquitectura genera informes de AUDITORÍA ARQUITECTÓNICA, documentacion-tecnica genera documentación FUNCIONAL/TÉCNICA del proyecto. Query 'informe arquitectura' → analisis-arquitectura, query 'documentación API' → documentacion-tecnica"
+  }
+}

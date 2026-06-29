@@ -1,0 +1,121 @@
+// TEMPLATE: Sigma API Client
+// Version: 1.0.0
+// Uso: Cliente para Sigma (sistema de nóminas)
+
+namespace Comillas.MiApp.Infrastructure.ApiClients;
+
+public interface ISigmaClient
+{
+    Task<IReadOnlyList<PayrollDto>> GetPayrollsAsync(int year, int month, CancellationToken ct = default);
+    Task<PayslipDto?> GetEmployeePayslipAsync(string employeeId, int year, int month, CancellationToken ct = default);
+}
+
+public class SigmaClient : ApiClientBase, ISigmaClient
+{
+    private readonly IConfiguration _configuration;
+
+    public SigmaClient(
+        HttpClient httpClient,
+        ILogger<SigmaClient> logger,
+        IConfiguration configuration)
+        : base(httpClient, logger)
+    {
+        _configuration = configuration;
+    }
+
+    public async Task<IReadOnlyList<PayrollDto>> GetPayrollsAsync(
+        int year,
+        int month,
+        CancellationToken ct = default)
+    {
+        Logger.LogInformation("Obteniendo nóminas de {Year}/{Month} desde Sigma", year, month);
+
+        // Sigma requiere autenticación HMAC personalizada
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var signature = GenerateHmacSignature($"GET/payrolls/{year}/{month}", timestamp);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, $"payrolls/{year}/{month}");
+        request.Headers.Add("X-Sigma-Timestamp", timestamp.ToString());
+        request.Headers.Add("X-Sigma-Signature", signature);
+
+        var response = await HttpClient.SendAsync(request, ct);
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<SigmaListResponse<PayrollDto>>(ct);
+
+        return result?.Data ?? new List<PayrollDto>();
+    }
+
+    public async Task<PayslipDto?> GetEmployeePayslipAsync(
+        string employeeId,
+        int year,
+        int month,
+        CancellationToken ct = default)
+    {
+        Logger.LogInformation(
+            "Obteniendo nómina del empleado {EmployeeId} para {Year}/{Month}",
+            employeeId,
+            year,
+            month);
+
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var signature = GenerateHmacSignature($"GET/employees/{employeeId}/payslip/{year}/{month}", timestamp);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, $"employees/{employeeId}/payslip/{year}/{month}");
+        request.Headers.Add("X-Sigma-Timestamp", timestamp.ToString());
+        request.Headers.Add("X-Sigma-Signature", signature);
+
+        var response = await HttpClient.SendAsync(request, ct);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return null;
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<PayslipDto>(ct);
+    }
+
+    private string GenerateHmacSignature(string message, long timestamp)
+    {
+        var apiSecret = _configuration["SigmaApi:ApiSecret"] ?? throw new InvalidOperationException("Sigma API Secret no configurado");
+
+        using var hmac = new System.Security.Cryptography.HMACSHA256(System.Text.Encoding.UTF8.GetBytes(apiSecret));
+        var payload = $"{message}:{timestamp}";
+        var hash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(payload));
+
+        return Convert.ToBase64String(hash);
+    }
+}
+
+// ============================================================================
+// DTOs
+// ============================================================================
+
+public record PayrollDto(
+    string PayrollId,
+    int Year,
+    int Month,
+    DateTime ProcessDate,
+    int EmployeeCount,
+    decimal TotalAmount,
+    string Status);
+
+public record PayslipDto(
+    string PayslipId,
+    string EmployeeId,
+    string EmployeeName,
+    int Year,
+    int Month,
+    decimal GrossSalary,
+    decimal NetSalary,
+    decimal Deductions,
+    List<PayslipLineDto> Lines);
+
+public record PayslipLineDto(
+    string Concept,
+    decimal Amount,
+    string Type);
+
+public record SigmaListResponse<T>(
+    List<T> Data,
+    int TotalCount);

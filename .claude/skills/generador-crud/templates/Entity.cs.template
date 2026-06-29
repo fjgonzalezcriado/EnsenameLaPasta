@@ -1,0 +1,184 @@
+// ============================================================================
+// TEMPLATE: Entity.cs - Entidad de Dominio
+// Skill: generador-crud
+// Versión: 2.8.0
+// ============================================================================
+// USO: Reemplazar {{Entidad}}, {{Namespace}}, {{Propiedades}}
+// ============================================================================
+
+using System;
+using System.Collections.Generic;
+
+namespace {{Namespace}}.Domain.Entities;
+
+/// <summary>
+/// Entidad de dominio: {{Entidad}}
+/// </summary>
+public class {{Entidad}} : AuditableEntity, ISoftDelete
+{
+    // ═══════════════════════════════════════════════════════════════════════
+    // PROPIEDADES - Solo getters públicos, setters privados
+    // ═══════════════════════════════════════════════════════════════════════
+
+    public int Id { get; private set; }
+
+    {{Propiedades}}
+
+    // Soft delete
+    public bool IsDeleted { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
+    public string? DeletedBy { get; private set; }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // NAVEGACIÓN (si aplica)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // private readonly List<EntidadRelacionada> _relacionados = [];
+    // public IReadOnlyCollection<EntidadRelacionada> Relacionados => _relacionados.AsReadOnly();
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // CONSTRUCTOR - Privado para forzar uso de factory
+    // ═══════════════════════════════════════════════════════════════════════
+
+    private {{Entidad}}() { } // Para EF Core
+
+    private {{Entidad}}({{ParametrosConstructor}})
+    {
+        {{AsignacionesConstructor}}
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // FACTORY - Punto único de creación con validación
+    // ═══════════════════════════════════════════════════════════════════════
+
+    public static {{Entidad}} Crear({{ParametrosFactory}})
+    {
+        // Validaciones de dominio
+        {{Validaciones}}
+
+        var entidad = new {{Entidad}}({{ArgumentosConstructor}});
+
+        // Evento de dominio (opcional)
+        // entidad.AddDomainEvent(new {{Entidad}}CreadoEvent(entidad.Id));
+
+        return entidad;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COMPORTAMIENTOS - Métodos con lógica de negocio
+    // ═══════════════════════════════════════════════════════════════════════
+
+    public void Actualizar({{ParametrosActualizar}})
+    {
+        // Validaciones
+        {{ValidacionesActualizar}}
+
+        // Actualizar propiedades
+        {{AsignacionesActualizar}}
+
+        // Evento de dominio (opcional)
+        // AddDomainEvent(new {{Entidad}}ActualizadoEvent(Id));
+    }
+
+    public void Eliminar(string usuario)
+    {
+        if (IsDeleted)
+            throw new DomainException("La entidad ya está eliminada");
+
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        DeletedBy = usuario;
+
+        // AddDomainEvent(new {{Entidad}}EliminadoEvent(Id));
+    }
+
+    public void Restaurar()
+    {
+        if (!IsDeleted)
+            throw new DomainException("La entidad no está eliminada");
+
+        IsDeleted = false;
+        DeletedAt = null;
+        DeletedBy = null;
+    }
+}
+
+// ============================================================================
+// EJEMPLO DE USO - Entidad "Beca"
+// ============================================================================
+/*
+public class Beca : AuditableEntity, ISoftDelete
+{
+    public int Id { get; private set; }
+    public string Codigo { get; private set; } = null!;
+    public string Nombre { get; private set; } = null!;
+    public string? Descripcion { get; private set; }
+    public decimal Importe { get; private set; }
+    public EstadoBeca Estado { get; private set; }
+    public DateTime FechaInicio { get; private set; }
+    public DateTime FechaFin { get; private set; }
+
+    public bool IsDeleted { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
+    public string? DeletedBy { get; private set; }
+
+    private readonly List<Solicitud> _solicitudes = [];
+    public IReadOnlyCollection<Solicitud> Solicitudes => _solicitudes.AsReadOnly();
+
+    private Beca() { }
+
+    private Beca(string codigo, string nombre, decimal importe, DateTime fechaInicio, DateTime fechaFin)
+    {
+        Codigo = codigo;
+        Nombre = nombre;
+        Importe = importe;
+        FechaInicio = fechaInicio;
+        FechaFin = fechaFin;
+        Estado = EstadoBeca.Borrador;
+    }
+
+    public static Beca Crear(string codigo, string nombre, decimal importe, DateTime fechaInicio, DateTime fechaFin)
+    {
+        if (string.IsNullOrWhiteSpace(codigo))
+            throw new DomainException("El código es obligatorio");
+
+        if (string.IsNullOrWhiteSpace(nombre))
+            throw new DomainException("El nombre es obligatorio");
+
+        if (nombre.Length > 200)
+            throw new DomainException("El nombre no puede exceder 200 caracteres");
+
+        if (importe <= 0)
+            throw new DomainException("El importe debe ser positivo");
+
+        if (fechaFin <= fechaInicio)
+            throw new DomainException("La fecha fin debe ser posterior a la fecha inicio");
+
+        return new Beca(codigo.ToUpperInvariant(), nombre.Trim(), importe, fechaInicio, fechaFin);
+    }
+
+    public void Publicar()
+    {
+        if (Estado != EstadoBeca.Borrador)
+            throw new DomainException("Solo se pueden publicar becas en borrador");
+
+        Estado = EstadoBeca.Publicada;
+    }
+
+    public void Cerrar()
+    {
+        if (Estado != EstadoBeca.Publicada)
+            throw new DomainException("Solo se pueden cerrar becas publicadas");
+
+        Estado = EstadoBeca.Cerrada;
+    }
+}
+
+public enum EstadoBeca
+{
+    Borrador = 0,
+    Publicada = 1,
+    Cerrada = 2,
+    Cancelada = 3
+}
+*/

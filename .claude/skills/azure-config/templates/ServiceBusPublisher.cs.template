@@ -1,0 +1,44 @@
+// TEMPLATE: ServiceBusPublisher | Skill: azure-config | Version: 3.1.0
+// Azure Service Bus publisher service
+// Placeholders: {{ProjectNamespace}}
+
+using Azure.Messaging.ServiceBus;
+using System.Text.Json;
+
+namespace {{ProjectNamespace}}.Infrastructure.Messaging;
+
+public interface IMessagePublisher
+{
+    Task PublishAsync<T>(string destination, T message, CancellationToken ct = default);
+    Task PublishScheduledAsync<T>(string destination, T message, DateTimeOffset scheduledTime, CancellationToken ct = default);
+}
+
+public sealed class ServiceBusPublisher : IMessagePublisher, IAsyncDisposable
+{
+    private readonly ServiceBusClient _client;
+    public ServiceBusPublisher(ServiceBusClient client) => _client = client;
+
+    public async Task PublishAsync<T>(string destination, T message, CancellationToken ct = default)
+    {
+        var sender = _client.CreateSender(destination);
+        var sbMessage = new ServiceBusMessage(BinaryData.FromObjectAsJson(message))
+        {
+            ContentType = "application/json",
+            Subject = typeof(T).Name
+        };
+        await sender.SendMessageAsync(sbMessage, ct);
+    }
+
+    public async Task PublishScheduledAsync<T>(string destination, T message, DateTimeOffset scheduledTime, CancellationToken ct = default)
+    {
+        var sender = _client.CreateSender(destination);
+        var sbMessage = new ServiceBusMessage(BinaryData.FromObjectAsJson(message))
+        {
+            ContentType = "application/json",
+            Subject = typeof(T).Name
+        };
+        await sender.ScheduleMessageAsync(sbMessage, scheduledTime, ct);
+    }
+
+    public async ValueTask DisposeAsync() => await _client.DisposeAsync();
+}

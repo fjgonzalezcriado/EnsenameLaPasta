@@ -1,0 +1,71 @@
+# ADR-{{Number}}: {{Title}}
+
+> Template para Architecture Decision Record
+> Skill: documentacion-tecnica | Version: 3.1.0
+
+---
+
+## Estado
+
+{{Status}}
+
+> Estados validos: Propuesta | Aceptada | Deprecada | Sustituida por ADR-XXX
+
+## Fecha: {{Date}}
+## Autor: {{Author}}
+## Revisores: {{Reviewers}}
+
+---
+
+## Contexto
+
+{{Context}}
+
+---
+
+## Decision
+
+{{Decision}}
+
+---
+
+## Consecuencias
+
+### Positivas
+- {{PositiveConsequence1}}
+- {{PositiveConsequence2}}
+
+### Negativas
+- {{NegativeConsequence1}}
+
+### Neutrales
+- {{NeutralConsequence1}}
+
+---
+
+## Alternativas Consideradas
+
+| Alternativa | Pros | Contras | Descarte |
+|-------------|------|---------|----------|
+| {{Alt1Name}} | {{Alt1Pros}} | {{Alt1Cons}} | {{Alt1Reason}} |
+| {{Alt2Name}} | {{Alt2Pros}} | {{Alt2Cons}} | {{Alt2Reason}} |
+
+---
+
+## Impacto
+
+| Componente | Impacto | Accion |
+|------------|---------|--------|
+| {{Component1}} | {{Impact1}} | {{Action1}} |
+| {{Component2}} | {{Impact2}} | {{Action2}} |
+
+---
+
+## Referencias
+
+- {{Reference1}}
+- {{Reference2}}
+
+---
+
+*ADR-{{Number}} | {{Status}} | {{Date}} - Generado con documentacion-tecnica skill v3.1.0*

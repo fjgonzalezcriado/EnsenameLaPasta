@@ -1,0 +1,67 @@
+# Arquitectura - {{ProjectName}}
+
+> Skill: documentacion-tecnica | Version: 3.1.0
+
+---
+
+## Vision General
+
+```mermaid
+graph TB
+    User[Usuario] --> WebApp[Aplicacion Web]
+    WebApp --> API[API .NET 10]
+    API --> DB[(SQL Server)]
+    API --> KeyVault[Azure Key Vault]
+    API --> Blob[Azure Blob Storage]
+    API --> ServiceBus[Azure Service Bus]
+```
+
+## Estilo: Clean Architecture
+
+```mermaid
+graph TB
+    subgraph Domain
+        Entities[Entidades]
+        Interfaces[Interfaces]
+    end
+    subgraph Application
+        Commands[Commands/Queries]
+        Handlers[Handlers]
+        DTOs[DTOs]
+    end
+    subgraph Infrastructure
+        EFCore[EF Core]
+        AzureServices[Azure Services]
+    end
+    subgraph Web
+        Endpoints[Minimal API]
+        Middleware[Middleware]
+    end
+    Web --> Application
+    Application --> Domain
+    Infrastructure --> Application
+    Infrastructure --> Domain
+```
+
+## Stack Tecnologico
+
+| Capa | Tecnologia |
+|------|------------|
+| Framework | .NET 10 |
+| ORM | Entity Framework Core 9.0 |
+| CQRS | Mediator |
+| Validacion | FluentValidation |
+| Auth | Azure AD / Entra ID |
+| Logging | Serilog + Application Insights |
+| DB | SQL Server |
+
+## Decisiones Clave
+
+| ADR | Decision |
+|-----|----------|
+| {{ADR1}} | {{Decision1}} |
+| {{ADR2}} | {{Decision2}} |
+
+---
+
+*Template architecture v3.1.0*

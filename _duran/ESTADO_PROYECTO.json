@@ -1,0 +1,683 @@
+﻿{
+    "_comentario":  "Este archivo mantiene el estado actual del proyecto. Claude lo lee automaticamente.",
+    "ecosistema":  {
+                       "nombre":  "STIC.IA",
+                       "version":  "3.9.0",
+                       "componentes":  {
+                                           "STIC.IA":  {
+                                                           "descripcion":  "Ecosistema completo (plantilla + comandos + skills + reglas)",
+                                                           "carpeta":  "/"
+                                                       },
+                                           "DURAN":  {
+                                                         "descripcion":  "Sistema de memoria del proyecto (estado, sesiones, lecciones)",
+                                                         "carpeta":  "_duran/"
+                                                     },
+                                           "ATLAS":  {
+                                                         "descripcion":  "Base de conocimiento (Documentos_Base, rules, patterns)",
+                                                         "carpeta":  "_atlas/"
+                                                     }
+                                       }
+                   },
+    "proyecto":  {
+                     "nombre":  "AI Trading Simulator",
+                     "descripcion":  "Simulador de trading algoritmico personal en ASP.NET Core MVC .NET 10 con Clean Architecture, EF Core + SQLite. Evolucionado a tracker de precios reales: buscador de instrumentos (Yahoo), watchlist persistida editable y feed 100% real (sin simulacion ni auto-trading). Roadmap: APIs adicionales (Binance/AlphaVantage), ML.NET, paper trading.",
+                     "owner":  "Personal (fuera de scope STIC Comillas)",
+                     "jefe_proyecto":  "stic.claude3",
+                     "responsable_tecnico":  "stic.claude3",
+                     "lider_tecnico":  "stic.claude3",
+                     "fecha_inicio":  "2026-05-26",
+                     "repositorio":  null
+                 },
+    "equipo":  {
+                   "_comentario":  "Proyecto personal de 1 desarrollador. Todos los roles los asume el mismo usuario.",
+                   "miembros":  [
+                                    {
+                                        "usuario":  "stic.claude3",
+                                        "nombre":  "STIC Claude 3",
+                                        "email":  "stic.claude3@comillas.edu",
+                                        "roles":  [
+                                                      "jefe_proyecto",
+                                                      "lider_tecnico",
+                                                      "desarrollador",
+                                                      "arquitecto"
+                                                  ],
+                                        "git_author_name":  null
+                                    }
+                                ]
+               },
+    "configuracion":  {
+                          "_comentario":  "Configuracion del comportamiento de Claude",
+                          "nivelIntegracionGit":  "medio",
+                          "convencionRamas":  "feature/{codigo}-{descripcion}",
+                          "prefijoCommit":  "[{codigo}]",
+                          "ramaBase":  "main",
+                          "branching":  {
+                                            "estrategia":  "github-flow-simplificado",
+                                            "ramaBase":  "main",
+                                            "ramaDevelop":  null,
+                                            "mergeStrategy":  "no-ff",
+                                            "releasesBranches":  false,
+                                            "convencionRamas":  "feature/{codigo}-{descripcion}",
+                                            "pushFeatures":  false,
+                                            "tiposTarea":  null,
+                                            "branchPolicies":  {
+                                                                   "reviewersMinimo":  0,
+                                                                   "buildValidation":  false,
+                                                                   "linkedWorkItems":  false,
+                                                                   "commentResolution":  false
+                                                               },
+                                            "flujoDespliegue":  "main (solo local, sin Pre/Pro por ahora)",
+                                            "_notas":  "Proyecto personal sin CI/CD inicial. github-flow-simplificado con --no-ff preserva commits de cada feature. pushFeatures=false porque aun no hay remoto."
+                                        }
+                      },
+    "soluciones":  {
+                       "multiSolucion":  false,
+                       "solucionActiva":  "Comillas.AITradingSimulator.slnx",
+                       "soluciones":  [
+                                          {
+                                              "nombre":  "Comillas.AITradingSimulator.slnx",
+                                              "ruta":  "03_Desarrollo/Comillas.AITradingSimulator.slnx",
+                                              "formato":  "slnx",
+                                              "_formato_nota":  "Formato XML nuevo de .NET 10 (default en SDK 10.0.300). Soportado por VS 2022 17.10+.",
+                                              "framework":  ".NET 10",
+                                              "descripcion":  "Solucion principal AI Trading Simulator (Clean Architecture: Domain/Application/Infrastructure/Web/Tests)",
+                                              "esActiva":  true
+                                          }
+                                      ],
+                       "_nota":  "Solucion creada con dotnet new sln (formato slnx por defecto en SDK 10.0.300)."
+                   },
+    "jira":  {
+                 "habilitado":  false,
+                 "proyectoKey":  null,
+                 "url":  null
+             },
+    "estado":  {
+                   "modo":  "desarrollo",
+                   "fase_actual":  "desarrollo",
+                   "sprint_actual":  null,
+                   "version_actual":  "1.8.0-currency",
+                   "ultima_actualizacion":  "2026-06-29",
+                   "actualizado_por":  "Francisco Javier Gonzalez Criado",
+                   "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
+               },
+    "stack":  {
+                  "framework":  ".NET 10",
+                  "lenguaje":  "C# 13",
+                  "tipo_proyecto":  "ASP.NET Core MVC (Web App)",
+                  "orm":  "Entity Framework Core 10",
+                  "frontend":  "Razor Views + Bootstrap 5 + Chart.js (jQuery solo si necesario)",
+                  "base_datos":  "SQLite local (App_Data/trading.db)",
+                  "formato_salida":  "HTML (Razor) + JSON cuando se expongan endpoints internos",
+                  "autenticacion":  null,
+                  "_autenticacion_nota":  "Sin autenticacion en MVP. Planificada para fases futuras (roadmap).",
+                  "vcs":  "Git (decision de remoto pendiente)",
+                  "nuget_feeds":  [
+                                      "nuget.org (default)"
+                                  ],
+                  "cpm":  false
+              },
+    "arquitectura":  {
+                         "patron":  "Clean Architecture",
+                         "capas":  [
+                                       "Domain",
+                                       "Application",
+                                       "Infrastructure",
+                                       "Web (MVC)"
+                                   ],
+                         "reglas":  [
+                                        "Domain sin dependencias",
+                                        "Application no depende de Infrastructure",
+                                        "Infrastructure implementa interfaces de Application",
+                                        "Web es delgado: controllers solo orquestan",
+                                        "Async/await obligatorio",
+                                        "DI en todo, sin estaticos",
+                                        "Options Pattern para configuracion"
+                                    ],
+                         "carpeta_codigo":  "03_Desarrollo/"
+                     },
+    "acceso_bd":  {
+                      "_comentario":  "SQLite local con EF Core Code First. Sin enmascaramiento (es BD local personal sin datos reales).",
+                      "habilitado":  true,
+                      "entorno":  "desarrollo",
+                      "motor":  "SQLite",
+                      "nombre_bd":  "trading.db",
+                      "ruta_bd":  "App_Data/trading.db",
+                      "connection_string_key":  "ConnectionStrings:Default",
+                      "usa_stored_procedures":  false,
+                      "sistema_migraciones":  "EF Core Migrations",
+                      "tablas_principales_estimadas":  [
+                                                           "Trade",
+                                                           "MarketTick",
+                                                           "Strategy",
+                                                           "PortfolioSnapshot",
+                                                           "TrackedSymbol"
+                                                       ],
+                      "naming":  {
+                                     "tablas":  "singular (Trade, MarketTick, TrackedSymbol)",
+                                     "claves":  "Guid"
+                                 },
+                      "permisos":  {
+                                       "select":  true,
+                                       "insert":  true,
+                                       "update":  true,
+                                       "delete":  true,
+                                       "execute_sp":  false
+                                   }
+                  },
+    "integraciones":  {
+                          "consume_apis_externas":  true,
+                          "expone_apis":  false,
+                          "apis_consumidas_planificadas":  [
+                                                               {
+                                                                   "nombre":  "Yahoo Finance",
+                                                                   "fase":  "2",
+                                                                   "estado":  "en_uso"
+                                                               },
+                                                               {
+                                                                   "nombre":  "Binance",
+                                                                   "fase":  "2",
+                                                                   "estado":  "roadmap"
+                                                               },
+                                                               {
+                                                                   "nombre":  "AlphaVantage",
+                                                                   "fase":  "2",
+                                                                   "estado":  "roadmap"
+                                                               }
+                                                           ],
+                          "integraciones_comillas":  [
+
+                                                     ],
+                          "background_services":  [
+                                                      "MarketTickGeneratorService",
+                                                      "DatabaseRetentionService"
+                                                  ],
+                          "_background_nota":  "StrategyExecutionService DESACTIVADO (panel solo-visor). Codigo conservado; reactivar = volver a registrarlo en DI."
+                      },
+    "infraestructura":  {
+                            "_comentario":  "Proyecto personal. Solo entorno local de desarrollo.",
+                            "entornos":  [
+                                             {
+                                                 "nombre":  "Local",
+                                                 "tipo":  "desarrollo",
+                                                 "servidor_app":  "localhost",
+                                                 "url_app":  "https://localhost:5001 (Kestrel)",
+                                                 "deploy_automatico":  false,
+                                                 "balanceo":  false
+                                             }
+                                         ],
+                            "cicd":  {
+                                         "plataforma":  null,
+                                         "pipeline_existente":  false,
+                                         "deployment_groups":  false
+                                     },
+                            "aprobadores":  {
+                                                "Pre":  [
+
+                                                        ],
+                                                "Pro":  [
+
+                                                        ]
+                                            },
+                            "azureDevOps":  {
+                                                "url":  null,
+                                                "teamName":  null,
+                                                "epicId":  null,
+                                                "autoSync":  false,
+                                                "ultimaSync":  null,
+                                                "pendingOps":  null
+                                            }
+                        },
+    "criticidad":  {
+                       "nivel":  "baja",
+                       "_motivo":  "Proyecto personal de aprendizaje/sandbox. Sin usuarios reales, sin dinero real, sin SLA.",
+                       "sla":  null,
+                       "horario_mantenimiento":  null,
+                       "dependencias_inter_proyecto":  [
+
+                                                       ]
+                   },
+    "calendario":  {
+                       "deadline":  null,
+                       "freeze_periods":  [
+
+                                          ],
+                       "release_cycle":  "continuo"
+                   },
+    "mcpSync":  {
+                    "_comentario":  "Proyecto personal - NO registrado en hub STIC.IA Comillas.",
+                    "habilitado":  false,
+                    "serverUrl":  null,
+                    "projectId":  null,
+                    "categorias":  {
+                                       "decisiones":  false,
+                                       "lecciones":  false,
+                                       "nugets":  false,
+                                       "deuda":  false,
+                                       "evolutivos":  false,
+                                       "equipo":  false
+                                   },
+                    "ultimaSync":  null
+                },
+    "onboarding":  {
+                       "completado":  true,
+                       "fecha_inicio_onboarding":  "2026-05-26",
+                       "fecha_fin_onboarding":  "2026-05-26",
+                       "pasos_completados":  {
+                                                 "informacion_general":  true,
+                                                 "stack_tecnologico":  true,
+                                                 "estructura_codigo":  true,
+                                                 "base_datos":  true,
+                                                 "integraciones":  true,
+                                                 "infraestructura_despliegue":  true,
+                                                 "autenticacion":  false,
+                                                 "funcionalidades":  true,
+                                                 "dependencias":  true,
+                                                 "tests_existentes":  false,
+                                                 "documentacion_existente":  true,
+                                                 "equipo":  true,
+                                                 "problemas_conocidos":  true
+                                             }
+                   },
+    "desarrollo":  {
+                       "modulos_en_desarrollo":  [
+
+                                                 ],
+                       "funcionalidades_en_progreso":  [
+
+                                                       ],
+                       "bloqueadores":  [
+
+                                        ],
+                       "proxima_entrega":  "Tracker de precios reales operativo (buscador + watchlist + feed Yahoo)",
+                       "notas_sprint":  "App pivotada a tracker: buscador de instrumentos, watchlist persistida (TrackedSymbol) y feed 100% Yahoo. Auto-trading desactivado."
+                   },
+    "evolutivoActivo":  null,
+    "evolutivos":  {
+                       "pendientes":  [
+
+                                      ],
+                       "enProgreso":  [
+
+                                      ],
+                       "completados":  [
+                                           {
+                                               "codigo":  "HV-019",
+                                               "titulo":  "Divisa por instrumento",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-29",
+                                               "fechaInicio":  "2026-06-29",
+                                               "fechaCompletado":  "2026-06-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-019.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Captura y muestra la divisa de cotizacion por instrumento. TrackedSymbol gana Currency mas SetCurrency mas migracion AddTrackedSymbolCurrency. IMarketDataProvider.GetLatestAsync pasa a devolver MarketQuote(Tick, Currency) (Yahoo /v8/chart ya informa meta.currency); MarketTickGeneratorService sella la divisa de cada simbolo seguido cada ciclo (~30s), cubriendo altas por buscador/manuales/importadas. Currency propagado a TrackedSymbolDto/OpenTradeDto/ClosedTradeDto via mapa en DashboardService. UI: columna Div (badge) mas formateo monetario por fila en su divisa (money()). Los totales de cuenta SIGUEN en EUR y mezclan divisas hasta el paso FX (documentado). 3 tests nuevos. 123 verdes. Smoke real: HY9H.F-\u003eEUR, ^GSPC-\u003eUSD; posicion HY9H.F con divisa EUR."
+                                           },
+                                           {
+                                               "codigo":  "HV-018",
+                                               "titulo":  "Importar historico de compras (CSV)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-29",
+                                               "fechaInicio":  "2026-06-29",
+                                               "fechaCompletado":  "2026-06-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-018.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Alta masiva de posiciones desde CSV (symbol, entry, qty[, date]). IPositionService.ImportCsvAsync reutiliza OpenAsync por fila; parser con cabecera opcional, delimitador autodetectado (; o ,; con ; admite coma decimal), fechas multiples (UTC); filas con error se reportan por linea y no abortan el resto. ImportResultDto/ImportErrorDto mas endpoint POST /api/positions/import. UI: modal Importar CSV (subir fichero via FileReader o pegar texto) con resultados. 4 tests. 120 verdes. Smoke real: endpoint responde con reporte de error correcto (fila invalida, sin escribir en BD para no ensuciar la cartera real)."
+                                           },
+                                           {
+                                               "codigo":  "HV-017",
+                                               "titulo":  "Historico del valor de cuenta",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-29",
+                                               "fechaInicio":  "2026-06-29",
+                                               "fechaCompletado":  "2026-06-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-017.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Grafico de evolucion del valor de cuenta. Reutiliza la entidad PortfolioSnapshot (tabla ya en InitialCreate, sin uso hasta ahora -\u003e sin migracion). Nuevo PortfolioSnapshotService BackgroundService: snapshot al arrancar (tras 15s) y cada IntervalSeconds (300, seccion Snapshot), reutilizando IDashboardService. AccountHistoryPointDto mas GetAccountHistoryAsync (ordena ascendente; deriva NetDeposits = Capital - TotalPnL y ReturnPct) mas endpoint GET /api/account/history. UI: tarjeta Evolucion del valor de cuenta con grafico Chart.js (valor de cuenta mas aportado neto), refresco propio 60s. TakeSnapshotAsync publico como seam de pruebas; guard de valor negativo. 5 tests (2 de GetAccountHistoryAsync, 3 del servicio incl. persistencia end-to-end). 116 verdes. Smoke real: /api/account/history devuelve 1 punto coherente (28306,65 / aportado 30000 / -5,64 por ciento)."
+                                           },
+                                           {
+                                               "codigo":  "HV-016",
+                                               "titulo":  "Rentabilidad por posicion",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-29",
+                                               "fechaInicio":  "2026-06-29",
+                                               "fechaCompletado":  "2026-06-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-016.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Porcentaje de rendimiento por fila en las tablas de posiciones. OpenTradeDto.ReturnPct ((current-entry)/entry x100) y ClosedTradeDto.ReturnPct ((exit-entry)/entry x100) calculados en DashboardService (0 si entry=0). UI: nueva columna porcentaje tras PnL en abiertas y cerradas, con signo y color (reusa pctSigned/signClass). Sin migracion ni cambios de dominio/BD. 2 tests (abierta +10, cerrada -10). 113 verdes. Smoke real manual pendiente."
+                                           },
+                                           {
+                                               "codigo":  "HV-015",
+                                               "titulo":  "Rentabilidad porcentual de la cuenta",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-29",
+                                               "fechaInicio":  "2026-06-29",
+                                               "fechaCompletado":  "2026-06-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-015.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Metrica derivada del rendimiento de la cuenta sobre el aportado neto. DashboardDto.ReturnPct mas calculo en DashboardService (ReturnPct = TotalPnL / NetDeposits x 100; 0 por ciento si NetDeposits = 0; equivale a (AccountValue - NetDeposits) / NetDeposits x 100 por el invariante de HV-014). UI: el subtitulo de la tarjeta Valor de cuenta muestra el porcentaje con signo y color mas sobre aportado, reutilizando pctSigned/setSigned. Sin migracion ni cambios de dominio/BD. 3 tests (ganancia +0,5, perdida -10, sin aportaciones 0). 111 verdes. Smoke real manual pendiente."
+                                           },
+                                           {
+                                               "codigo":  "HV-014",
+                                               "titulo":  "Caja y efectivo (valor de cuenta)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-16",
+                                               "fechaInicio":  "2026-06-16",
+                                               "fechaCompletado":  "2026-06-16",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-014.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "Entidad CashMovement (ingreso o retirada) mas migracion AddCashMovement mas CashService mas endpoints de caja (alta, lista, borrado). DashboardService deriva NetDeposits, Cash (aportado menos invertido mas realizado) y AccountValue (efectivo mas cartera); invariante valor de cuenta igual a aportado mas PnL total. UI: 6 tarjetas (valor de cuenta, efectivo, valor de cartera, PnL total, posiciones, winrate) mas modal Caja. 5 tests. 108 verdes. Smoke real: 10000 aportado mas HY9H.F 1360x5 da efectivo 3200 y valor de cuenta 10150."
+                                           },
+                                           {
+                                               "codigo":  "HV-013",
+                                               "titulo":  "Posiciones reales del usuario (tracker de cartera) + modal de alta",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-16",
+                                               "fechaInicio":  "2026-06-16",
+                                               "fechaCompletado":  "2026-06-16",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-013.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "IPositionService/PositionService (open, close y borrado por Id; varias posiciones por simbolo; auto-anade a watchlist) sobre la entidad Trade. Endpoints REST de posiciones (crear, cerrar, borrar). Modal Nueva posicion (datalist watchlist, entry, qty, fecha) + columna Acciones (cerrar/eliminar). PnL en vivo vs precio real. Buscador convertido en modal. 7 tests PositionService. 103 verdes. Smoke real: HY9H.F 1360x5 -\u003e +150 EUR; cierre 1400 -\u003e +200 EUR."
+                                           },
+                                           {
+                                               "codigo":  "HV-012",
+                                               "titulo":  "Eliminar simulacion - feed 100% real (panel solo-visor)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-16",
+                                               "fechaInicio":  "2026-06-16",
+                                               "fechaCompletado":  "2026-06-16",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "refactor",
+                                               "specFile":  "_duran/specs/HV-012.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "Borrado RandomWalk (+test). IMarketDataProvider=YahooFinanceProvider siempre; intervalo 30s. Estrategia MA Crossover DESACTIVADA (no se registra StrategyExecutionService) -\u003e panel solo-visor; codigo de estrategia conservado. MarketDataOptions/appsettings reducidos (sin Symbols/Volatility/Drift/Volume/Seed). Smoke real: provider=YahooFinance, tick real HY9H.F=1390. 96 tests verdes."
+                                           },
+                                           {
+                                               "codigo":  "HV-011",
+                                               "titulo":  "Alta dinamica de simbolos seguidos (watchlist persistida)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-16",
+                                               "fechaInicio":  "2026-06-16",
+                                               "fechaCompletado":  "2026-06-16",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-011.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "Entidad TrackedSymbol + migracion AddTrackedSymbol + DbSet. IWatchlistService/WatchlistService (add/remove/list; remove borra MarketTick del simbolo). Generador lee watchlist de BD cada ciclo. Endpoints GET/POST/DELETE /api/instruments/track[ed] (symbol por query por el punto en HY9H.F). Seed HY9H.F al arrancar. UI: +Anadir y boton quitar. 7 tests WatchlistService. Smoke real OK."
+                                           },
+                                           {
+                                               "codigo":  "HV-010",
+                                               "titulo":  "Buscador de instrumentos (descripcion / ISIN / ticker)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-16",
+                                               "fechaInicio":  "2026-06-16",
+                                               "fechaCompletado":  "2026-06-16",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-010.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "IInstrumentSearchProvider + YahooInstrumentSearchProvider (/v1/finance/search) -\u003e GET /api/instruments/search. Busca por nombre/ISIN/ticker; WKN NO soportado por Yahoo (fuera de alcance, verificado). UI: tarjeta buscador + tabla resultados + boton Anadir. 8 tests del provider. Smoke real: q=SK hynix -\u003e HY9H.F, 000660.KS, etc."
+                                           },
+                                           {
+                                               "codigo":  "HV-009",
+                                               "titulo":  "Historico real de Yahoo para la barra de rangos (1D..5A)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-15",
+                                               "fechaInicio":  "2026-06-15",
+                                               "fechaCompletado":  "2026-06-15",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-009.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "IMarketHistoryProvider + YahooHistoryProvider (/v8/chart range/interval), endpoint /api/history, modo historico en dashboard.js con eje X adaptativo. HttpClient Yahoo registrado siempre. Smoke real: AAPL 1M=22pts, BTCUSD 5A=262pts. 89 tests verdes."
+                                           },
+                                           {
+                                               "codigo":  "HV-008",
+                                               "titulo":  "Fix YahooFinanceProvider: migrar a endpoint /v8/chart (API real)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-06-15",
+                                               "fechaInicio":  "2026-06-15",
+                                               "fechaCompletado":  "2026-06-15",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "bugfix",
+                                               "specFile":  "_duran/specs/HV-008.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "Smoke test real revelo 401 en /v7/finance/quote (Yahoo exige cookie+crumb). Migrado a /v8/finance/chart (precio+volumen sin auth, parseo de meta) + User-Agent navegador. 11 tests reescritos. Smoke real OK: AAPL=291.13, GOOG=358.16; BTCUSD-\u003e404 capturado per-simbolo. 89 tests verdes."
+                                           },
+                                           {
+                                               "codigo":  "HV-001",
+                                               "titulo":  "Scaffold inicial de la solucion (Clean Architecture)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "alta",
+                                               "fechaCreacion":  "2026-05-26",
+                                               "fechaInicio":  "2026-05-26",
+                                               "fechaCompletado":  "2026-05-26",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "specFile":  "_duran/specs/HV-001.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "Scaffold completado: .slnx + 5 proyectos Clean Architecture + referencias + build/test verdes + Solution Folders STIC.IA. SDK 10.0.300 genera .slnx en lugar de .sln (formato XML nuevo)."
+                                           },
+                                           {
+                                               "codigo":  "HV-002",
+                                               "titulo":  "Modelo de dominio: Trade, MarketTick, Portfolio",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "alta",
+                                               "fechaCreacion":  "2026-05-26",
+                                               "fechaInicio":  "2026-05-26",
+                                               "fechaCompletado":  "2026-05-26",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "specFile":  "_duran/specs/HV-002.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "Modelo de dominio: TradeStatus + Trade (factory Open, Close, RealizedPnL) + MarketTick + PortfolioSnapshot (TotalPnL). 36 tests verdes. Domain sin NuGet."
+                                           },
+                                           {
+                                               "codigo":  "HV-003",
+                                               "titulo":  "Persistencia SQLite + EF Core Migrations",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "alta",
+                                               "fechaCreacion":  "2026-05-26",
+                                               "fechaInicio":  "2026-05-26",
+                                               "fechaCompletado":  "2026-05-26",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "specFile":  "_duran/specs/HV-003.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "EF Core 10.0.8 + SQLite + DbContext + 3 entity configs (decimal-TEXT) + DI + Auto-migrate + 6 tests integracion. Total 42 tests verdes. Smoke test runtime: trading.db creado en App_Data."
+                                           },
+                                           {
+                                               "codigo":  "HV-004",
+                                               "titulo":  "BackgroundService de generacion de ticks de mercado",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-05-26",
+                                               "fechaInicio":  "2026-05-26",
+                                               "fechaCompletado":  "2026-05-26",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-004.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "RandomWalkTickGenerator (Box-Muller, seedable) + MarketTickGeneratorService BackgroundService. 8 tests unitarios verdes + smoke runtime: 12 ticks persistidos en 12s. NOTA: RandomWalk retirado en HV-012."
+                                           },
+                                           {
+                                               "codigo":  "HV-005",
+                                               "titulo":  "Estrategia MA Crossover automatica",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-05-26",
+                                               "fechaInicio":  "2026-05-26",
+                                               "fechaCompletado":  "2026-05-26",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-005.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "MA Crossover + ChannelTickBus + OrderService + StrategyExecutionService. Refactor generator publica al bus. 21 tests nuevos. Smoke test: 1 BUY BTCUSD abierto en 95s. NOTA: auto-trading desactivado en HV-012 (codigo conservado)."
+                                           },
+                                           {
+                                               "codigo":  "HV-006",
+                                               "titulo":  "Dashboard con metricas y grafico Chart.js",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-05-26",
+                                               "fechaInicio":  "2026-05-26",
+                                               "fechaCompletado":  "2026-05-26",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-006.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "Dashboard MVP final: DashboardService + Controller + Razor + Bootstrap + Chart.js + polling 3s. 7 tests + smoke test runtime OK. 78 tests total. Bug detectado SQLite+decimal-TEXT resuelto cargando a memoria. MVP COMPLETO."
+                                           },
+                                           {
+                                               "codigo":  "HV-007",
+                                               "titulo":  "Provider real Yahoo Finance + abstraccion intercambiable (Fase 2)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-05-26",
+                                               "fechaInicio":  "2026-05-26",
+                                               "fechaCompletado":  "2026-05-26",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-007.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "stic.claude3",
+                                               "notas":  "Fase 2 iniciada. IMarketDataProvider async + YahooFinanceProvider + DI selector. RandomWalk preservado (default). 11 tests Yahoo + 8 RandomWalk migrados. 89 total. AlphaVantage manana = 1 archivo + 1 case."
+                                           }
+                                       ]
+                   },
+    "ultimaSesion":  {
+                         "fecha":  "2026-06-29",
+                         "evolutivoActivo":  null,
+                         "usuario":  "Francisco Javier Gonzalez Criado",
+                         "ramaActiva":  null,
+                         "proximoPaso":  "Opcional: CONVERSION FX a divisa base (que los totales dejen de mezclar divisas; HV-019 ya captura la divisa por instrumento), dashboard visor puro, retencion/rango temporal del grafico de evolucion, importar tambien trades cerrados.",
+                         "resumenSesion":  "HV-015 rentabilidad % cuenta mas HV-016 rentabilidad por posicion mas HV-017 historico del valor de cuenta (PortfolioSnapshotService mas grafico) mas HV-018 importar CSV de compras mas HV-019 divisa por instrumento (TrackedSymbol.Currency sellada por el generador; MarketQuote; columna Div mas formateo por fila; totales siguen en EUR hasta FX). 123 tests verdes; smokes reales OK.",
+                         "archivosModificados":  [
+                                                     "_duran/ESTADO_PROYECTO.json",
+                                                     "_duran/FUNCIONALIDADES.md",
+                                                     "_duran/HISTORIAL_CAMBIOS.md",
+                                                     "_duran/SESION_ACTUAL.md",
+                                                     "_duran/specs/HV-015.md",
+                                                     "_duran/specs/HV-016.md",
+                                                     "_duran/specs/HV-017.md",
+                                                     "_duran/specs/HV-018.md",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Application/Common/Dtos/* (DashboardDto, AccountHistoryPointDto, ImportResultDto)",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Application/Common/Options/SnapshotOptions.cs",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Application/Common/Interfaces/* (IDashboardService, IPositionService)",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Application/Services/* (DashboardService, PositionService)",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Infrastructure/Persistence/PortfolioSnapshotService.cs",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Infrastructure/DependencyInjection.cs",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Web/Controllers/* (DashboardController, PositionsController)",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Web/appsettings.json",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Web/Views/Dashboard/Index.cshtml",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Web/wwwroot/js/dashboard.js",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Tests/Application/* (DashboardServiceTests, PositionServiceTests)",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Tests/Infrastructure/PortfolioSnapshotServiceTests.cs"
+                                                 ],
+                         "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 19 evolutivos completados. Feed real requiere Internet. Migracion nueva AddTrackedSymbolCurrency (se auto-aplica al arrancar)."
+                     },
+    "metricas":  {
+                     "cobertura_tests":  0,
+                     "ultimo_build":  "2026-06-29 OK (123 tests verdes; HV-019 divisa por instrumento: TrackedSymbol.Currency sellada por el generador, columna Div mas formateo por fila; migracion AddTrackedSymbolCurrency; smoke real HY9H.F-\u003eEUR / ^GSPC-\u003eUSD)",
+                     "ultimo_deploy":  null,
+                     "incidencias_abiertas":  0,
+                     "evolutivos_completados_mes":  19
+                 },
+    "alertas":  {
+                    "activas":  [
+                                    {
+                                        "tipo":  "success",
+                                        "mensaje":  "App pivotada a tracker de precios reales: buscador de instrumentos + watchlist editable + feed 100% Yahoo. Auto-trading desactivado (panel solo-visor)."
+                                    }
+                                ]
+                },
+    "historial_modos":  [
+                            {
+                                "modo":  "puesta_a_punto",
+                                "fecha":  "2026-05-26",
+                                "motivo":  "Bootstrap inicial con arranque.ps1"
+                            },
+                            {
+                                "modo":  "desarrollo",
+                                "fecha":  "2026-05-26",
+                                "motivo":  "Onboarding completado"
+                            }
+                        ]
+}
