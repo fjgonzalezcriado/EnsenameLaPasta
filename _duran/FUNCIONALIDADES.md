@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-033 Selector de proveedor de datos en la interfaz (cambio en caliente) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-033.md`
+- **Resumen**: Cambiar Yahoo ↔ Twelve Data **desde la UI en runtime** (antes solo por config al arrancar). `IMarketProviderState`/`MarketProviderState` (conmutable + persistido en `App_Data/active-provider.txt`) + wrappers `SelectableMarketDataProvider`/`SelectableMarketHistoryProvider` que delegan en el activo por llamada. DI registra ambos concretos + wrappers + estado (fuera el selector de arranque). `DashboardService` reporta el activo. `ProviderController` (`GET`/`POST /api/provider`). UI: badge → **selector** en cabecera (aviso "⚠ sin API key"). 3 tests nuevos (`MarketProviderState`) + tests adaptados al nuevo ctor. 149 verdes. Smoke real: switch por API (dashboard refleja el cambio, inválido→400, vuelta a Yahoo) + Playwright del selector. `.gitignore` excluye el fichero de estado.
+
 #### HV-032 Histórico de Twelve Data (/time_series) + mapeo de símbolos ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-032.md`

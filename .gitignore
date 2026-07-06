@@ -45,6 +45,9 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+# Estado runtime del proveedor activo (se regenera; per-instalacion)
+**/App_Data/active-provider.txt
+
 # SQLite local DB del simulador (no se commitea, se regenera por migrations)
 **/App_Data/*.db
 **/App_Data/*.db-journal

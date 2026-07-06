@@ -15,7 +15,6 @@ public sealed class DashboardServiceTests : IDisposable
 
     private readonly SqliteConnection _connection;
     private readonly DbContextOptions<TradingDbContext> _options;
-    private readonly IOptionsMonitor<MarketDataOptions> _marketDataOpts;
 
     public DashboardServiceTests()
     {
@@ -28,8 +27,6 @@ public sealed class DashboardServiceTests : IDisposable
 
         using var ctx = new TradingDbContext(_options);
         ctx.Database.EnsureCreated();
-
-        _marketDataOpts = new StaticOptionsMonitor<MarketDataOptions>(new MarketDataOptions { ProviderType = "YahooFinance" });
     }
 
     private TradingDbContext NewContext() => new(_options);
@@ -39,7 +36,7 @@ public sealed class DashboardServiceTests : IDisposable
         => NewService(ctx, new StubFxRateProvider());
 
     private DashboardService NewService(TradingDbContext ctx, IFxRateProvider fx)
-        => new(ctx, _marketDataOpts, fx,
+        => new(ctx, new StaticProviderState(), fx,
             Microsoft.Extensions.Options.Options.Create(new FxOptions { BaseCurrency = "EUR" }));
 
     [Fact]
@@ -528,12 +525,12 @@ public sealed class DashboardServiceTests : IDisposable
         }
     }
 
-    /// <summary>Stub mínimo de IOptionsMonitor para tests.</summary>
-    private sealed class StaticOptionsMonitor<T> : IOptionsMonitor<T>
+    /// <summary>Stub de IMarketProviderState (proveedor fijo) para tests.</summary>
+    private sealed class StaticProviderState : IMarketProviderState
     {
-        public StaticOptionsMonitor(T value) => CurrentValue = value;
-        public T CurrentValue { get; }
-        public T Get(string? name) => CurrentValue;
-        public IDisposable? OnChange(Action<T, string?> listener) => null;
+        public string Current { get; }
+        public StaticProviderState(string current = "YahooFinance") => Current = current;
+        public IReadOnlyList<string> Available { get; } = new[] { "YahooFinance", "TwelveData" };
+        public void Set(string provider) { }
     }
 }

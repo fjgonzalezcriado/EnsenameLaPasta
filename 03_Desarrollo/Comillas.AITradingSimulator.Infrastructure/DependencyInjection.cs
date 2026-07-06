@@ -31,9 +31,9 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(MarketDataOptions.SectionName))
             .ValidateOnStart();
 
-        // Proveedor activo (feed en vivo e histórico): "YahooFinance" (default) | "TwelveData".
-        var providerType = configuration.GetSection(MarketDataOptions.SectionName)["ProviderType"];
-        var useTwelveData = string.Equals(providerType, "TwelveData", StringComparison.OrdinalIgnoreCase);
+        // Estado del proveedor activo, conmutable en runtime desde la UI (HV-033).
+        // Valor inicial: MarketData:ProviderType (o el persistido en App_Data/active-provider.txt).
+        services.AddSingleton<IMarketProviderState, MarketProviderState>();
 
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ITickBus, ChannelTickBus>();
@@ -53,11 +53,11 @@ public static class DependencyInjection
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36");
         });
-        // Histórico (barra de rangos): mismo proveedor activo. Yahoo por defecto.
-        if (useTwelveData)
-            services.AddSingleton<IMarketHistoryProvider, TwelveDataHistoryProvider>();
-        else
-            services.AddSingleton<IMarketHistoryProvider, YahooHistoryProvider>();
+        // Histórico (barra de rangos): ambos proveedores registrados; el activo lo resuelve
+        // en runtime SelectableMarketHistoryProvider (coherente con el feed en vivo).
+        services.AddSingleton<YahooHistoryProvider>();
+        services.AddSingleton<TwelveDataHistoryProvider>();
+        services.AddSingleton<IMarketHistoryProvider, SelectableMarketHistoryProvider>();
 
         // Búsqueda de instrumentos (nombre / ISIN / ticker) vía Yahoo /v1/finance/search.
         services.AddSingleton<IInstrumentSearchProvider, YahooInstrumentSearchProvider>();
@@ -91,12 +91,11 @@ public static class DependencyInjection
             client.Timeout = TimeSpan.FromSeconds(opts.TimeoutSeconds);
         });
 
-        // Feed EN VIVO: proveedor real según el ProviderType calculado arriba
-        // ("YahooFinance" por defecto | "TwelveData"). La simulación RandomWalk se retiró.
-        if (useTwelveData)
-            services.AddSingleton<IMarketDataProvider, TwelveDataProvider>();
-        else
-            services.AddSingleton<IMarketDataProvider, YahooFinanceProvider>();
+        // Feed EN VIVO: ambos proveedores registrados; el activo lo resuelve en runtime
+        // SelectableMarketDataProvider. La simulación RandomWalk se retiró.
+        services.AddSingleton<YahooFinanceProvider>();
+        services.AddSingleton<TwelveDataProvider>();
+        services.AddSingleton<IMarketDataProvider, SelectableMarketDataProvider>();
         services.AddHostedService<MarketTickGeneratorService>();
 
         // Estrategia automática MA Crossover DESACTIVADA: el panel es ahora un visor

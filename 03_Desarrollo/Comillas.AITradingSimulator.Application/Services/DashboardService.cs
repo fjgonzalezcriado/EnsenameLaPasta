@@ -11,18 +11,18 @@ namespace Comillas.AITradingSimulator.Application.Services;
 public sealed class DashboardService : IDashboardService
 {
     private readonly ITradingDbContext _db;
-    private readonly IOptionsMonitor<MarketDataOptions> _marketData;
+    private readonly IMarketProviderState _providerState;
     private readonly IFxRateProvider _fx;
     private readonly IOptions<FxOptions> _fxOptions;
 
     public DashboardService(
         ITradingDbContext db,
-        IOptionsMonitor<MarketDataOptions> marketData,
+        IMarketProviderState providerState,
         IFxRateProvider fx,
         IOptions<FxOptions> fxOptions)
     {
         _db = db;
-        _marketData = marketData;
+        _providerState = providerState;
         _fx = fx;
         _fxOptions = fxOptions;
     }
@@ -185,7 +185,7 @@ public sealed class DashboardService : IDashboardService
 
         return new DashboardDto
         {
-            ProviderType = _marketData.CurrentValue.ProviderType,
+            ProviderType = _providerState.Current,
             TotalTicks = totalTicks,
             LastTickUtc = lastTickUtc,
             DatabaseSizeBytes = dbSizeBytes,
