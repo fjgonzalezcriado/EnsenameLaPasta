@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-028 Persistir el rango del gráfico de precios entre sesiones ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-028.md`
+- **Resumen**: Última preferencia del panel que no se guardaba: el **rango del gráfico de precios** (barra LIVE/1D/5D/…). `initRangeBar` guarda `chartRange` en `localStorage` al hacer clic y lo restaura al iniciar (marca el botón activo y fija `chartMode`); sin preferencia → default 1D (HV-027). Validación por inclusión en los `data-range` existentes. Verificado con Playwright: 1D → 5D → reload → sigue en 5D. Con esto **todas** las preferencias sobreviven entre sesiones: `theme`, `chartSymbol`, `chartRefreshMs`, `historyPoints`, `accountRange`, `chartRange`.
+
 #### HV-027 El gráfico de precios arranca en el rango diario (1D) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-027.md`

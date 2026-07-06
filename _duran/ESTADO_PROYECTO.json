@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.16.0-chart-default-1d",
+                   "version_actual":  "1.17.0-persist-range",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-028",
+                                               "titulo":  "Persistir el rango del grafico de precios entre sesiones",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-07-06",
+                                               "fechaInicio":  "2026-07-06",
+                                               "fechaCompletado":  "2026-07-06",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-028.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Ultima preferencia del panel sin guardar: el rango del grafico de precios (barra LIVE/1D/5D/...). initRangeBar guarda chartRange en localStorage al hacer clic y lo restaura al iniciar (marca boton activo y fija chartMode); sin preferencia -> default 1D. Validacion por inclusion en los data-range existentes. Verificado con Playwright: 1D->5D->reload sigue en 5D. Con esto todas las preferencias sobreviven entre sesiones: theme, chartSymbol, chartRefreshMs, historyPoints, accountRange, chartRange. Solo JS. Rama feature/HV-028-persistir-rango-grafico."
+                                           },
                                            {
                                                "codigo":  "HV-027",
                                                "titulo":  "El grafico de precios arranca en el rango diario (1D)",
@@ -773,10 +790,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (build limpio; HV-027 el grafico de precios arranca en 1D - fix solo JS verificado con Playwright). 135 tests C# sin cambios",
+                     "ultimo_build":  "2026-07-06 OK (build limpio; HV-028 persistir el rango del grafico de precios en localStorage - fix solo JS verificado con Playwright). 135 tests C# sin cambios",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  27
+                     "evolutivos_completados_mes":  28
                  },
     "alertas":  {
                     "activas":  [

@@ -619,6 +619,21 @@
     function initRangeBar() {
         const bar = document.getElementById('rangeBar');
         if (!bar) return;
+
+        // Restaura el rango elegido en una sesión anterior (persistencia HV-028).
+        // El default sigue siendo 1D (HV-027) si no hay preferencia guardada.
+        try {
+            const allowed = Array.prototype.map.call(bar.querySelectorAll('button[data-range]'),
+                function (b) { return b.getAttribute('data-range'); });
+            const saved = localStorage.getItem('chartRange');
+            if (saved && allowed.indexOf(saved) !== -1) {
+                chartMode = saved;
+                Array.prototype.forEach.call(bar.querySelectorAll('button'), function (b) {
+                    b.classList.toggle('active', b.getAttribute('data-range') === saved);
+                });
+            }
+        } catch (e) { }
+
         bar.addEventListener('click', function (e) {
             const btn = e.target.closest('button[data-range]');
             if (!btn) return;
@@ -635,6 +650,7 @@
                 chartMode = range;
                 loadHistory(range);
             }
+            try { localStorage.setItem('chartRange', chartMode); } catch (e) { }
         });
     }
 
