@@ -66,8 +66,15 @@ public sealed class YahooHistoryProvider : IMarketHistoryProvider
         var quote = result?.Indicators?.Quote?.FirstOrDefault();
         var closes = quote?.Close;
         var volumes = quote?.Volume;   // array de volumen en paralelo al de cierre
+        var opens = quote?.Open;       // OHLC en paralelo (para velas japonesas, HV-041)
+        var highs = quote?.High;
+        var lows = quote?.Low;
         if (timestamps is null || closes is null)
             return [];
+
+        // Toma el valor del array paralelo si existe y no es nulo; si no, cae al cierre.
+        static decimal PickOr(List<double?>? arr, int i, decimal fallback)
+            => (arr is not null && i < arr.Count && arr[i].HasValue) ? (decimal)arr[i]!.Value : fallback;
 
         var count = Math.Min(timestamps.Count, closes.Count);
         var points = new List<PricePoint>(count);
@@ -79,7 +86,9 @@ public sealed class YahooHistoryProvider : IMarketHistoryProvider
             var volume = (volumes is not null && i < volumes.Count && volumes[i].HasValue)
                 ? (decimal)volumes[i]!.Value
                 : 0m;
-            points.Add(new PricePoint(ts, (decimal)close.Value, volume));
+            var c = (decimal)close.Value;
+            points.Add(new PricePoint(ts, c, volume,
+                Open: PickOr(opens, i, c), High: PickOr(highs, i, c), Low: PickOr(lows, i, c)));
         }
 
         _logger.LogDebug("Yahoo histórico {Symbol} {Range}: {Count} puntos.", yahooSymbol, range, points.Count);
@@ -110,5 +119,8 @@ public sealed class YahooHistoryProvider : IMarketHistoryProvider
 
     private sealed record ChartQuote(
         [property: JsonPropertyName("close")] List<double?>? Close,
-        [property: JsonPropertyName("volume")] List<long?>? Volume);
+        [property: JsonPropertyName("volume")] List<long?>? Volume,
+        [property: JsonPropertyName("open")] List<double?>? Open = null,
+        [property: JsonPropertyName("high")] List<double?>? High = null,
+        [property: JsonPropertyName("low")] List<double?>? Low = null);
 }

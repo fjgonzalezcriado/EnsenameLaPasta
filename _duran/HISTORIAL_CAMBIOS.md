@@ -18,6 +18,19 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.28.0-velas-japonesas] - 2026-07-06
+
+### Added
+- 🕯️ **HV-041** Switch **línea ↔ velas japonesas** en el gráfico de precios. Velas OHLC (verde/rojo, mecha + cuerpo) dibujadas con un plugin propio sobre el eje de categorías (sin huecos de findes). Tooltip Apert./Máx/Mín/Cierre; persistido entre sesiones.
+
+### Changed
+- 🔧 Backend: `PricePoint` gana `Open/High/Low`; `YahooHistoryProvider` y `TwelveDataHistoryProvider` parsean OHLC (fallback al cierre).
+
+### Métricas
+- 156 tests verdes (154 + 2 de parseo OHLC). Smoke Playwright: velas ON → 21 velas en 1M, techo/suelo 1725/1060, línea oculta; OFF → línea restaurada; persistencia OK; 0 errores.
+
+---
+
 ## [1.27.1-margen-selector-derecha] - 2026-07-06
 
 ### Changed

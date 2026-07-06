@@ -73,4 +73,7 @@ public sealed record ClosedTradeDto(
 
 public sealed record PriceSeriesDto(string Symbol, IReadOnlyList<PricePoint> Points);
 
-public sealed record PricePoint(DateTime Timestamp, decimal Price, decimal Volume = 0);
+// Price = cierre (compatibilidad). Open/High/Low se rellenan en el histórico para el modo velas
+// japonesas (HV-041); valen 0 en el feed en vivo (no se usa para el gráfico).
+public sealed record PricePoint(DateTime Timestamp, decimal Price, decimal Volume = 0,
+    decimal Open = 0, decimal High = 0, decimal Low = 0);

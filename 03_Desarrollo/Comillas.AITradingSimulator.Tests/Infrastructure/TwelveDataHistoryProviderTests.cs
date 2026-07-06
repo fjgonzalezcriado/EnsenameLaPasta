@@ -19,9 +19,9 @@ public class TwelveDataHistoryProviderTests
     // Twelve Data devuelve los valores del más reciente al más antiguo.
     private const string Json = """
         {"values":[
-          {"datetime":"2026-07-06 15:30:00","close":"102.0","volume":"3000"},
-          {"datetime":"2026-07-06 15:25:00","close":"101.0","volume":"2000"},
-          {"datetime":"2026-07-06 15:20:00","close":"100.0","volume":"1000"}
+          {"datetime":"2026-07-06 15:30:00","open":"101.5","high":"103.0","low":"101.0","close":"102.0","volume":"3000"},
+          {"datetime":"2026-07-06 15:25:00","open":"100.5","high":"101.5","low":"100.0","close":"101.0","volume":"2000"},
+          {"datetime":"2026-07-06 15:20:00","open":"99.0","high":"100.5","low":"98.5","close":"100.0","volume":"1000"}
         ],"status":"ok"}
         """;
 
@@ -38,6 +38,23 @@ public class TwelveDataHistoryProviderTests
         Assert.Equal(1000m, points[0].Volume);
         Assert.Equal(102m, points[2].Price);
         Assert.Equal(3000m, points[2].Volume);
+    }
+
+    [Fact]
+    public async Task GetHistoryAsync_ParseaOHLC_ParaVelas()
+    {
+        var provider = NewProvider(MockHttpMessageHandler.Json(Json));
+
+        var points = await provider.GetHistoryAsync("AAPL", "1D");
+
+        // Tras ordenar ascendente, la 1ª barra es la más antigua (15:20).
+        Assert.Equal(99.0m, points[0].Open);
+        Assert.Equal(100.5m, points[0].High);
+        Assert.Equal(98.5m, points[0].Low);
+        Assert.Equal(100.0m, points[0].Price);
+        Assert.Equal(101.5m, points[2].Open);
+        Assert.Equal(103.0m, points[2].High);
+        Assert.Equal(101.0m, points[2].Low);
     }
 
     [Fact]
