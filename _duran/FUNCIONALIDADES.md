@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-040 Selector de margen del eje Y (compresión/extensión) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: `_duran/specs/HV-040.md`
+- **Resumen**: Sustituye el margen fijo de HV-039 (±20 absoluto) por un **selector** `#yMarginSelect` en el gráfico: **Ajustado** (0 %, máxima extensión) · ±1/±2/±5/±10/±20 % (más compresión). El margen es **relativo al precio medio** del rango (`margin = ((techo+suelo)/2)×pct`), así vale para cualquier instrumento (1400 o 3). `Ajustado` deja la línea pegada a los bordes (con epsilon mínimo si los datos son planos). Preferencia persistida en `localStorage` (`chartYMargin`, default 2 %); el cambio recalcula el eje **sin refetch** (`lastRenderedSeries`). Las líneas de techo/suelo se mantienen. Solo JS/cshtml, sin migración. 154 verdes. Smoke Playwright: 1M (techo 1700/suelo 1120) → Ajustado 1120–1700, ±5 % 1049,5–1770,5, ±20 % 838–1982, ±2 % 1091,8–1728,2; persistencia OK; 0 errores.
+
 #### HV-039 Líneas de techo/suelo + margen en el eje Y del gráfico de precios ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: `_duran/specs/HV-039.md`

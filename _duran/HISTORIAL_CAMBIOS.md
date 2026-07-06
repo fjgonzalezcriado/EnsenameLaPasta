@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.27.0-margen-eje-y] - 2026-07-06
+
+### Changed
+- 🎛️ **HV-040** El margen del eje Y del gráfico de precios pasa de fijo (±20) a **seleccionable** (`Margen Y`: Ajustado/±1/±2/±5/±10/±20 %) y **relativo al precio** (compresión ↔ extensión). Se recalcula al instante sin recargar el histórico y se conserva entre sesiones.
+
+### Métricas
+- 154 tests verdes (solo frontend). Smoke Playwright: 1M Ajustado 1120–1700, ±5 % 1049,5–1770,5, ±20 % 838–1982; persistencia OK; 0 errores de consola.
+
+---
+
 ## [1.26.0-techo-suelo] - 2026-07-06
 
 ### Added
