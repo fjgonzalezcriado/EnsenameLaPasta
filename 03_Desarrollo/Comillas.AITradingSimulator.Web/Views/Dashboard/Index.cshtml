@@ -106,6 +106,10 @@
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
                         <h5 class="card-title mb-0">📈 Evolución de precios <small class="text-muted fw-normal">(valor, eje a la derecha)</small></h5>
                         <span id="chartDelta" class="small fw-semibold" title="Variación acumulada en el rango seleccionado (importe en la divisa del instrumento y porcentaje)"></span>
+                        <div class="form-check form-switch mb-0 small" title="Cambiar entre línea y velas japonesas (OHLC). Las velas requieren un único símbolo seleccionado">
+                            <input class="form-check-input" type="checkbox" role="switch" id="candleSwitch">
+                            <label class="form-check-label text-muted" for="candleSwitch">🕯️ Velas</label>
+                        </div>
                         <label class="d-flex align-items-center gap-1 mb-0 small">
                             <span class="text-muted">Símbolo:</span>
                             <select id="symbolSelect" class="form-select form-select-sm w-auto py-0"></select>

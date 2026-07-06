@@ -8,6 +8,7 @@
     const Y_MARGIN_ALLOWED = [0, 0.01, 0.02, 0.05, 0.10, 0.20];
     let yMarginPct = 0.02;
     let lastRenderedSeries = null;   // última serie dibujada (para re-render al cambiar el margen)
+    let chartType = 'line';          // 'line' | 'candle' (velas japonesas, HV-041)
     const COLORS = ['#0d6efd', '#fd7e14', '#198754', '#dc3545', '#6f42c1', '#20c997'];
     // En modo "En vivo" los ticks se capturan cada ~30 s, pero entre sesiones (app apagada)
     // hay huecos de horas/días. Si dos ticks consecutivos distan más de esto, cortamos la
@@ -204,7 +205,8 @@
 
                 ctx.save();
                 ctx.font = '600 11px sans-serif';
-                ctx.fillStyle = ds.borderColor;
+                // En velas la línea es transparente; usa $valueColor para la etiqueta (HV-041).
+                ctx.fillStyle = ds.$valueColor || ds.borderColor;
 
                 // Flechita apuntando al nivel de precio (hacia la izquierda, dentro del margen).
                 ctx.beginPath();
@@ -230,6 +232,41 @@
                 ctx.fillText(text, axisLeft + w / 2, y);
                 ctx.restore();
             });
+        }
+    };
+
+    // Plugin: velas japonesas (HV-041). Dibuja, por categoría, la mecha (máx→mín) y el cuerpo
+    // (apertura↔cierre) en verde (cierre≥apertura) o rojo. Lee chart.$ohlc (alineado a labels)
+    // y solo actúa si chart.$candleMode. Usa el eje de categorías, así respeta HV-038 (sin huecos).
+    const candlePlugin = {
+        id: 'candles',
+        afterDatasetsDraw: function (chart) {
+            if (!chart.$candleMode) return;
+            const oc = chart.$ohlc;
+            const x = chart.scales.x, y = chart.scales.y, area = chart.chartArea, ctx = chart.ctx;
+            if (!oc || !x || !y || !area) return;
+            const n = oc.length;
+            const slot = n > 1 ? Math.abs(x.getPixelForValue(1) - x.getPixelForValue(0)) : (area.right - area.left);
+            const bw = Math.max(1, Math.min(16, slot * 0.6));
+            const UP = '#198754', DOWN = '#dc3545';
+            ctx.save();
+            for (let i = 0; i < n; i++) {
+                const d = oc[i];
+                if (!d) continue;
+                const cx = x.getPixelForValue(i);
+                const col = d.c >= d.o ? UP : DOWN;
+                ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 1;
+                // Mecha (máximo → mínimo).
+                ctx.beginPath();
+                ctx.moveTo(cx, y.getPixelForValue(d.h));
+                ctx.lineTo(cx, y.getPixelForValue(d.l));
+                ctx.stroke();
+                // Cuerpo (apertura ↔ cierre); altura mínima 1px para que un doji sea visible.
+                const yo = y.getPixelForValue(d.o), yc = y.getPixelForValue(d.c);
+                const top = Math.min(yo, yc), bh = Math.max(1, Math.abs(yc - yo));
+                ctx.fillRect(cx - bw / 2, top, bw, bh);
+            }
+            ctx.restore();
         }
     };
 
@@ -403,10 +440,14 @@
             const map = {};
             (s.points || []).forEach(function (p) {
                 const t = new Date(p.timestamp).getTime();
-                const y = Number(p.price);
-                if (!Number.isFinite(t) || !Number.isFinite(y)) return;
+                const c = Number(p.price);   // cierre
+                if (!Number.isFinite(t) || !Number.isFinite(c)) return;
                 const k = keyOf(t);
-                map[k] = { y: y, v: Number(p.volume) || 0 };
+                // OHLC para velas (HV-041); si falta un componente, cae al cierre (vela plana).
+                const o = Number(p.open) > 0 ? Number(p.open) : c;
+                const h = Number(p.high) > 0 ? Number(p.high) : c;
+                const l = Number(p.low) > 0 ? Number(p.low) : c;
+                map[k] = { y: c, v: Number(p.volume) || 0, o: o, h: h, l: l, c: c };
                 keySet[k] = true;
             });
             if (Object.keys(map).length) perSeries.push({ symbol: s.symbol, map: map, idx: idx });
@@ -424,6 +465,13 @@
         const labels = cats.map(function (t) { return fmt.short(t); });
         const labelsFull = cats.map(function (t) { return fmt.full(t); });
 
+        // Modo velas (HV-041): solo con un único símbolo (varias velas superpuestas serían
+        // ilegibles); con "Todos" cae a línea. Las velas las dibuja candlePlugin desde $ohlc.
+        const candle = chartType === 'candle' && perSeries.length === 1;
+        const ohlc = candle
+            ? cats.map(function (t) { const e = perSeries[0].map[t]; return e ? { o: e.o, h: e.h, l: e.l, c: e.c } : null; })
+            : null;
+
         // Datasets de precio + volumen alineados por índice de categoría. Un símbolo que no
         // cotice en una categoría concreta queda a null (spanGaps:false corta su línea ahí).
         const priceDatasets = [];
@@ -432,9 +480,12 @@
         perSeries.forEach(function (ps) {
             const color = COLORS[ps.idx % COLORS.length];
             const priceArr = cats.map(function (t) { const e = ps.map[t]; return e ? e.y : null; });
+            // En velas la línea se oculta (borderColor transparente) pero se conserva el dataset
+            // para el escalado del eje y el hover; la etiqueta de valor usa $valueColor.
             priceDatasets.push({
                 label: ps.symbol, data: priceArr, spanGaps: false,
-                borderColor: color, backgroundColor: 'transparent',
+                borderColor: candle ? 'transparent' : color, backgroundColor: 'transparent',
+                $valueColor: color,
                 tension: 0.1, pointRadius: 0, borderWidth: 2, yAxisID: 'y', order: 0
             });
             // Volumen: verde si el precio sube respecto a la cotización previa (alcista), rojo si baja.
@@ -469,15 +520,24 @@
         // margen relativo al precio (selector HV-040) para que la línea no quede pegada a los
         // bordes. 0 = ajustado (máxima extensión); mayor = más compresión.
         let hi = -Infinity, lo = Infinity;
-        priceDatasets.forEach(function (ds) {
-            ds.data.forEach(function (v) {
-                if (v === null || v === undefined) return;
-                const n = Number(v);
-                if (!Number.isFinite(n)) return;
-                if (n > hi) hi = n;
-                if (n < lo) lo = n;
+        if (candle && ohlc) {
+            // En velas el techo/suelo son el máximo de máximos y el mínimo de mínimos.
+            ohlc.forEach(function (d) {
+                if (!d) return;
+                if (d.h > hi) hi = d.h;
+                if (d.l < lo) lo = d.l;
             });
-        });
+        } else {
+            priceDatasets.forEach(function (ds) {
+                ds.data.forEach(function (v) {
+                    if (v === null || v === undefined) return;
+                    const n = Number(v);
+                    if (!Number.isFinite(n)) return;
+                    if (n > hi) hi = n;
+                    if (n < lo) lo = n;
+                });
+            });
+        }
         const hasHiLo = Number.isFinite(hi) && Number.isFinite(lo);
         let yMin, yMax;
         if (hasHiLo) {
@@ -495,7 +555,7 @@
             priceChart = new Chart(ctx, {
                 type: 'line',
                 data: { labels: labels, datasets: datasets },
-                plugins: [currentValuePlugin, highLowLinesPlugin],
+                plugins: [candlePlugin, highLowLinesPlugin, currentValuePlugin],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -542,25 +602,40 @@
                                     return arr[items[0].dataIndex] || '';
                                 },
                                 label: function (ctx) {
-                                    return ctx.dataset.isVolume
-                                        ? 'Volumen: ' + volFmt(ctx.parsed.y)
-                                        : ctx.dataset.label + ': ' + priceFmt(ctx.parsed.y);
+                                    if (ctx.dataset.isVolume) return 'Volumen: ' + volFmt(ctx.parsed.y);
+                                    const oc = ctx.chart.$ohlc;
+                                    if (ctx.chart.$candleMode && oc && oc[ctx.dataIndex]) {
+                                        const d = oc[ctx.dataIndex];
+                                        return [ctx.dataset.label,
+                                            'Apert.: ' + priceFmt(d.o), 'Máx: ' + priceFmt(d.h),
+                                            'Mín: ' + priceFmt(d.l), 'Cierre: ' + priceFmt(d.c)];
+                                    }
+                                    return ctx.dataset.label + ': ' + priceFmt(ctx.parsed.y);
                                 }
                             }
                         }
                     }
                 }
             });
+            // Los plugins (velas, techo/suelo, etiqueta de valor) leen estas props; hay que
+            // fijarlas antes de dibujar. Tras crear, un update() las aplica al primer render.
+            priceChart.$labelsFull = labelsFull;
+            priceChart.$hiLo = hasHiLo ? { high: hi, low: lo } : null;
+            priceChart.$candleMode = candle;
+            priceChart.$ohlc = ohlc;
+            priceChart.update();
         } else {
             priceChart.data.labels = labels;
             priceChart.data.datasets = datasets;
             if (priceChart.options.scales.yVol) priceChart.options.scales.yVol.max = volMax;
             priceChart.options.scales.y.min = yMin;
             priceChart.options.scales.y.max = yMax;
+            priceChart.$labelsFull = labelsFull;   // título del tooltip (fecha/hora completa)
+            priceChart.$hiLo = hasHiLo ? { high: hi, low: lo } : null;   // techo/suelo (HV-039)
+            priceChart.$candleMode = candle;       // velas japonesas (HV-041)
+            priceChart.$ohlc = ohlc;
             priceChart.update();
         }
-        priceChart.$labelsFull = labelsFull;   // para el título del tooltip (fecha/hora completa)
-        priceChart.$hiLo = hasHiLo ? { high: hi, low: lo } : null;   // techo/suelo para el plugin (HV-039)
     }
 
     // Coloca la cuenta atrás justo debajo de la etiqueta de valor de la serie activa.
@@ -812,6 +887,19 @@
             yMarginPct = Y_MARGIN_ALLOWED.indexOf(next) !== -1 ? next : 0.02;
             try { localStorage.setItem('chartYMargin', String(yMarginPct)); } catch (e) { }
             if (lastRenderedSeries) renderChart(lastRenderedSeries);   // recalcula el eje sin refetch
+        });
+    }
+
+    // ── Switch línea / velas japonesas (HV-041) ─────────────────────────────────
+    function initCandleControl() {
+        try { if (localStorage.getItem('chartType') === 'candle') chartType = 'candle'; } catch (e) { }
+        const sw = document.getElementById('candleSwitch');
+        if (!sw) return;
+        sw.checked = chartType === 'candle';
+        sw.addEventListener('change', function () {
+            chartType = sw.checked ? 'candle' : 'line';
+            try { localStorage.setItem('chartType', chartType); } catch (e) { }
+            if (lastRenderedSeries) renderChart(lastRenderedSeries);   // re-render sin refetch
         });
     }
 
@@ -1344,6 +1432,7 @@
     initSymbolControl();
     initHistoryControl();
     initYMarginControl();
+    initCandleControl();
     initRangeBar();
     initInstrumentSearch();
     initRemoveSymbol();

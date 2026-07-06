@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-041 Switch de gráfico línea ↔ velas japonesas (OHLC) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: `_duran/specs/HV-041.md`
+- **Resumen**: Nuevo **switch "🕯️ Velas"** para alternar el gráfico de precios entre **lineal** y **velas japonesas** (OHLC). Backend: `PricePoint` gana `Open/High/Low` (default 0; `Price`=cierre) y `YahooHistoryProvider`/`TwelveDataHistoryProvider` parsean OHLC (fallback al cierre si falta). Frontend: **plugin propio `candlePlugin`** dibuja mecha (máx→mín) + cuerpo (apertura↔cierre) verde/rojo por categoría — sin librería externa, respetando el eje de categorías de HV-038 (sin huecos de findes). En velas la línea se oculta, techo/suelo usan máx/mín, tooltip muestra Apert./Máx/Mín/Cierre; solo con un único símbolo (con "Todos" cae a línea). `chartType` persistido en localStorage. 2 tests nuevos de parseo OHLC. 156 verdes. Smoke Playwright: velas ON → 21 velas en 1M, línea transparente, techo/suelo 1725/1060; OFF → línea restaurada; persistencia OK; 0 errores.
+
 #### HV-040 Selector de margen del eje Y (compresión/extensión) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: `_duran/specs/HV-040.md`

@@ -18,6 +18,9 @@ public class YahooHistoryProviderTests
             "timestamp": [1700000000, 1700000300, 1700000600],
             "indicators": { "quote": [ {
               "close":  [100.0, null, 102.0],
+              "open":   [99.0, null, 101.5],
+              "high":   [100.5, null, 103.0],
+              "low":    [98.5, null, 101.0],
               "volume": [1000, 2000, 3000]
             } ] }
           } ], "error": null }
@@ -52,5 +55,28 @@ public class YahooHistoryProviderTests
         Assert.Single(points);
         Assert.Equal(50m, points[0].Price);
         Assert.Equal(0m, points[0].Volume);
+        // Sin arrays OHLC → open/high/low caen al cierre (vela plana), no cero (HV-041).
+        Assert.Equal(50m, points[0].Open);
+        Assert.Equal(50m, points[0].High);
+        Assert.Equal(50m, points[0].Low);
+    }
+
+    [Fact]
+    public async Task GetHistoryAsync_ParseaOHLC_ParaVelas()
+    {
+        var provider = NewProvider(MockHttpMessageHandler.Json(Json));
+
+        var points = await provider.GetHistoryAsync("AAPL", "1D");
+
+        // 1ª barra: OHLC completo alineado con el cierre.
+        Assert.Equal(99.0m, points[0].Open);
+        Assert.Equal(100.5m, points[0].High);
+        Assert.Equal(98.5m, points[0].Low);
+        Assert.Equal(100.0m, points[0].Price);   // cierre
+        // 2ª barra devuelta (3ª del array; la del medio se descartó por cierre nulo).
+        Assert.Equal(101.5m, points[1].Open);
+        Assert.Equal(103.0m, points[1].High);
+        Assert.Equal(101.0m, points[1].Low);
+        Assert.Equal(102.0m, points[1].Price);
     }
 }

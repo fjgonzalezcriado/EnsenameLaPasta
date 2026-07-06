@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.27.1-margen-selector-derecha",
+                   "version_actual":  "1.28.0-velas-japonesas",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-041",
+                                               "titulo":  "Switch de grafico linea a velas japonesas (OHLC)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-07-06",
+                                               "fechaInicio":  "2026-07-06",
+                                               "fechaCompletado":  "2026-07-06",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-041.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Switch Velas para alternar el grafico de precios entre lineal y velas japonesas (OHLC). Backend: PricePoint gana Open/High/Low (default 0; Price=cierre; anadidos al final del record, no rompe llamadas); YahooHistoryProvider y TwelveDataHistoryProvider parsean OHLC de indicators.quote[0] y values[] (fallback al cierre si falta). 2 tests nuevos de parseo OHLC. Frontend: switch candleSwitch, estado chartType (line|candle) persistido en localStorage; plugin propio candlePlugin dibuja mecha (max->min) y cuerpo (apertura<->cierre) verde/rojo por categoria, sin libreria externa, respetando el eje de categorias de HV-038 (sin huecos de findes). En velas la linea se oculta (borderColor transparente, se conserva para escalado/hover; etiqueta de valor usa $valueColor), techo/suelo con max de maximos y min de minimos, tooltip Apert./Max/Min/Cierre; solo con un unico simbolo (con Todos cae a linea). 156 verdes. Smoke Playwright: velas ON -> 21 velas en 1M, linea transparente, techo/suelo 1725/1060; OFF -> linea #0d6efd restaurada; persistencia tras reload; 0 errores. Recompilar obligatorio (cambia .cshtml y C#). Rama feature/HV-041-velas."
+                                           },
                                            {
                                                "codigo":  "HV-040",
                                                "titulo":  "Selector de margen del eje Y (compresion/extension)",
@@ -985,7 +1002,7 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037 (variacion del rango + eliminar En vivo), HV-038 (eje de categorias: findes/festivos ya no aparecen), HV-039 (lineas de techo/suelo) y HV-040 (selector de margen del eje Y relativo al precio, compresion/extension). Todo solo frontend, sin migracion. 154 tests verdes; smokes Playwright OK con Yahoo activo.",
+                         "resumenSesion":  "HV-037 (variacion del rango + eliminar En vivo), HV-038 (eje de categorias sin findes/festivos), HV-039 (techo/suelo), HV-040 (selector de margen del eje Y) y HV-041 (switch linea/velas japonesas OHLC). Backend solo tocado en HV-041 (OHLC en PricePoint + proveedores). 156 tests verdes; smokes Playwright OK con Yahoo activo.",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
                                                      "_duran/METRICAS.json"
@@ -994,10 +1011,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (154 tests verdes; HV-040 selector de margen del eje Y relativo al precio, compresion/extension; solo frontend, sin migracion; smoke Playwright verde)",
+                     "ultimo_build":  "2026-07-06 OK (156 tests verdes; HV-041 switch linea/velas japonesas OHLC: PricePoint+proveedores con Open/High/Low + plugin propio de velas sobre eje de categorias; smoke Playwright verde con Yahoo)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  40
+                     "evolutivos_completados_mes":  41
                  },
     "alertas":  {
                     "activas":  [

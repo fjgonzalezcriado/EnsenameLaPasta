@@ -116,7 +116,11 @@ public sealed class TwelveDataHistoryProvider : IMarketHistoryProvider
             decimal volume = 0m;
             if (!string.IsNullOrWhiteSpace(v.Volume))
                 decimal.TryParse(v.Volume, NumberStyles.Any, CultureInfo.InvariantCulture, out volume);
-            points.Add(new PricePoint(DateTime.SpecifyKind(ts, DateTimeKind.Utc), close, volume));
+            // OHLC para velas japonesas (HV-041); si falta un componente, cae al cierre.
+            static decimal ParseOr(string? s, decimal fallback)
+                => (!string.IsNullOrWhiteSpace(s) && decimal.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var d) && d > 0) ? d : fallback;
+            points.Add(new PricePoint(DateTime.SpecifyKind(ts, DateTimeKind.Utc), close, volume,
+                Open: ParseOr(v.Open, close), High: ParseOr(v.High, close), Low: ParseOr(v.Low, close)));
         }
 
         // Twelve Data devuelve los valores del más reciente al más antiguo; ordenar ascendente.
@@ -144,5 +148,8 @@ public sealed class TwelveDataHistoryProvider : IMarketHistoryProvider
     private sealed record TimeSeriesValue(
         [property: JsonPropertyName("datetime")] string? Datetime,
         [property: JsonPropertyName("close")] string? Close,
-        [property: JsonPropertyName("volume")] string? Volume);
+        [property: JsonPropertyName("volume")] string? Volume,
+        [property: JsonPropertyName("open")] string? Open = null,
+        [property: JsonPropertyName("high")] string? High = null,
+        [property: JsonPropertyName("low")] string? Low = null);
 }
