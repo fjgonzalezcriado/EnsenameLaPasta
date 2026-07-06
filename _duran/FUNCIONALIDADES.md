@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-035 Fix: el histórico no rompe con símbolos no válidos (404) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Bugfix
+- **Spec**: `_duran/specs/HV-035.md`
+- **Resumen**: Al cambiar a Twelve Data el programa paraba con `HttpRequestException 404`: el frontend recargaba el histórico del símbolo estilo Yahoo (`^GSPC`/`HY9H.F`), que no existe en TD → 404 → `EnsureSuccessStatusCode` lanzaba y `History` solo capturaba `ArgumentException`. Fix: `TwelveDataHistoryProvider`/`YahooHistoryProvider` degradan a **serie vacía** en no-éxito/error (log, no lanzan); `DashboardController.History` con `catch` amplio → serie vacía. 2 tests (404→vacío, error→vacío). 153 verdes. Smoke real: con TD, `^GSPC`/`HY9H.F` → 200 vacío; `AAPL` → 100 puntos; sin crash.
+
 #### HV-034 Buscador de instrumentos vía Twelve Data (selector) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-034.md`

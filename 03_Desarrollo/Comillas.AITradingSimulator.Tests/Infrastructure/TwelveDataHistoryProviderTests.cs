@@ -51,12 +51,21 @@ public class TwelveDataHistoryProviderTests
     }
 
     [Fact]
-    public async Task GetHistoryAsync_RespuestaError_Lanza()
+    public async Task GetHistoryAsync_RespuestaError_DevuelveVacio()
     {
         const string err = """{"code":404,"message":"symbol not found","status":"error"}""";
         var provider = NewProvider(MockHttpMessageHandler.Json(err));
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => provider.GetHistoryAsync("XXXX", "1M"));
+        Assert.Empty(await provider.GetHistoryAsync("XXXX", "1M"));
+    }
+
+    [Fact]
+    public async Task GetHistoryAsync_Http404_DevuelveVacio()
+    {
+        // Símbolo estilo Yahoo (p.ej. HY9H.F, ^GSPC) no válido en Twelve Data → 404.
+        var provider = NewProvider(MockHttpMessageHandler.Status(System.Net.HttpStatusCode.NotFound));
+
+        Assert.Empty(await provider.GetHistoryAsync("HY9H.F", "1D"));
     }
 
     [Fact]

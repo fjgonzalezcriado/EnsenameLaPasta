@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.23.1-fix-historico-404] - 2026-07-06
+
+### Fixed
+- 🐛 **HV-035** Al cambiar a Twelve Data, la app paraba con `HttpRequestException 404` al recargar el histórico de un símbolo estilo Yahoo (`^GSPC`/`HY9H.F`) que no existe en TD. Ahora los proveedores de histórico degradan a **serie vacía** ante 404/error (no lanzan) y `DashboardController.History` blinda con `catch` amplio. El gráfico muestra "sin datos" en vez de romper.
+
+### Métricas
+- 153 tests verdes (152 + 1). Smoke real: `^GSPC`/`HY9H.F` en TD → 200 vacío; `AAPL` → 100 puntos.
+
+---
+
 ## [1.23.0-buscador-td] - 2026-07-06
 
 ### Added

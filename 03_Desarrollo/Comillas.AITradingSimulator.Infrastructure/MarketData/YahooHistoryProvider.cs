@@ -49,7 +49,14 @@ public sealed class YahooHistoryProvider : IMarketHistoryProvider
         var response = await client.GetAsync(
             $"/v8/finance/chart/{Uri.EscapeDataString(yahooSymbol)}?range={r.Range}&interval={r.Interval}",
             cancellationToken);
-        response.EnsureSuccessStatusCode();
+
+        // Símbolo no válido → 404. Degradamos a "sin datos" en vez de romper el gráfico.
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Yahoo histórico {Symbol} {Range}: HTTP {Code}; sin datos.",
+                yahooSymbol, range, (int)response.StatusCode);
+            return [];
+        }
 
         var payload = await response.Content.ReadFromJsonAsync<ChartResponse>(cancellationToken: cancellationToken)
             ?? throw new InvalidOperationException("Yahoo Finance: respuesta vacía o no deserializable.");

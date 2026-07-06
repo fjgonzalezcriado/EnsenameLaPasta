@@ -8,11 +8,13 @@ public sealed class DashboardController : Controller
 {
     private readonly IDashboardService _service;
     private readonly IMarketHistoryProvider _history;
+    private readonly ILogger<DashboardController> _logger;
 
-    public DashboardController(IDashboardService service, IMarketHistoryProvider history)
+    public DashboardController(IDashboardService service, IMarketHistoryProvider history, ILogger<DashboardController> logger)
     {
         _service = service;
         _history = history;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -49,6 +51,13 @@ public sealed class DashboardController : Controller
         catch (ArgumentException ex)
         {
             return BadRequest(ex.Message);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // Fallo del proveedor (p.ej. símbolo no válido para el proveedor activo, red…):
+            // devolvemos serie vacía para que el gráfico muestre "sin datos" sin romper.
+            _logger.LogWarning(ex, "Histórico {Symbol} {Range}: fallo del proveedor; se devuelve vacío.", symbol, range);
+            return Json(new PriceSeriesDto(symbol, []));
         }
     }
 }

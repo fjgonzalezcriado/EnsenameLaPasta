@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.23.0-buscador-td",
+                   "version_actual":  "1.23.1-fix-historico-404",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-035",
+                                               "titulo":  "Fix: el historico no rompe con simbolos no validos (404)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "alta",
+                                               "fechaCreacion":  "2026-07-06",
+                                               "fechaInicio":  "2026-07-06",
+                                               "fechaCompletado":  "2026-07-06",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "bugfix",
+                                               "specFile":  "_duran/specs/HV-035.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Al cambiar a Twelve Data la app paraba con HttpRequestException 404: el frontend recargaba el historico del simbolo estilo Yahoo (^GSPC/HY9H.F) que no existe en TD -> EnsureSuccessStatusCode lanzaba y History solo capturaba ArgumentException. Fix: TwelveDataHistoryProvider/YahooHistoryProvider degradan a serie vacia en no-exito/error (log, no lanzan); DashboardController.History con catch amplio -> serie vacia. El feed en vivo ya toleraba errores por simbolo. 2 tests (404->vacio, error->vacio; test previo adaptado). 153 verdes. Smoke real: con TD, ^GSPC/HY9H.F -> 200 vacio, AAPL -> 100 puntos, sin crash. Rama feature/HV-035-fix-historico-404."
+                                           },
+                                           {
                                                "codigo":  "HV-034",
                                                "titulo":  "Buscador de instrumentos via Twelve Data (selector)",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-034.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "El buscador usa el proveedor activo. TwelveDataInstrumentSearchProvider (/symbol_search) devuelve simbolos con la convencion de TD; SelectableInstrumentSearchProvider delega por IMarketProviderState. Resuelve la limitacion de HV-032 (simbolos Yahoo no resuelven en TD): con TD activo, buscar el instrumento y anadir su simbolo TD. 3 tests. 152 verdes. Smoke real: con TD, q=apple -> AAPL(NASDAQ)/APC(XETR)/AAPL.USD(SIX); hallazgo: SK hynix Frankfurt en TD = HY9H (no HY9H.F), tambien 000660 (KRX); S&P500 indice suele ser SPX segun plan. API key en user-secrets (no en repo). Rama feature/HV-034-buscador-twelvedata."
+                                               "notas":  "El buscador usa el proveedor activo. TwelveDataInstrumentSearchProvider (/symbol_search) devuelve simbolos con la convencion de TD; SelectableInstrumentSearchProvider delega por IMarketProviderState. Resuelve la limitacion de HV-032 (simbolos Yahoo no resuelven en TD): con TD activo, buscar el instrumento y anadir su simbolo TD. 3 tests. 152 verdes. Smoke real: con TD, q=apple -\u003e AAPL(NASDAQ)/APC(XETR)/AAPL.USD(SIX); hallazgo: SK hynix Frankfurt en TD = HY9H (no HY9H.F), tambien 000660 (KRX); S\u0026P500 indice suele ser SPX segun plan. API key en user-secrets (no en repo). Rama feature/HV-034-buscador-twelvedata."
                                            },
                                            {
                                                "codigo":  "HV-033",
@@ -886,17 +903,16 @@
                          "resumenSesion":  "HV-015..HV-023 (rentabilidad %, por posicion, historico valor cuenta, importar CSV, divisa por instrumento, conversion FX a base, divisa por movimiento de caja, PnL convertido por fila, refrescar FX en background). GitHub privado; HV-020..023 via ramas feature merge --no-ff. 135 tests verdes; smokes reales OK.",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
-                                                     "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 19 evolutivos completados. Feed real requiere Internet. Migracion nueva AddTrackedSymbolCurrency (se auto-aplica al arrancar)."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (152 tests verdes; HV-034 buscador de instrumentos via Twelve Data /symbol_search + selector; smoke real con key valida en user-secrets). API key Twelve Data en user-secrets (no en repo)",
+                     "ultimo_build":  "2026-07-06 OK (153 tests verdes; HV-035 fix: el historico degrada a vacio en 404/error - antes la app paraba con HttpRequestException al cambiar a Twelve Data con simbolos estilo Yahoo; smoke real ^GSPC/HY9H.F->200 vacio, AAPL->100)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  34
+                     "evolutivos_completados_mes":  35
                  },
     "alertas":  {
                     "activas":  [
