@@ -59,8 +59,11 @@ public static class DependencyInjection
         services.AddSingleton<TwelveDataHistoryProvider>();
         services.AddSingleton<IMarketHistoryProvider, SelectableMarketHistoryProvider>();
 
-        // Búsqueda de instrumentos (nombre / ISIN / ticker) vía Yahoo /v1/finance/search.
-        services.AddSingleton<IInstrumentSearchProvider, YahooInstrumentSearchProvider>();
+        // Búsqueda de instrumentos: ambos proveedores + selector por proveedor activo,
+        // para que los resultados usen la convención de símbolos del feed en uso (HV-034).
+        services.AddSingleton<YahooInstrumentSearchProvider>();
+        services.AddSingleton<TwelveDataInstrumentSearchProvider>();
+        services.AddSingleton<IInstrumentSearchProvider, SelectableInstrumentSearchProvider>();
 
         // Conversión de divisas (totales en divisa base). Usa el HttpClient de Yahoo.
         services.AddOptions<FxOptions>()

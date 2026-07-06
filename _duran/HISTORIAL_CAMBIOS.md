@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.23.0-buscador-td] - 2026-07-06
+
+### Added
+- ✅ **HV-034** Buscador de instrumentos vía **Twelve Data** (`/symbol_search`) cuando es el proveedor activo. `TwelveDataInstrumentSearchProvider` + `SelectableInstrumentSearchProvider` (delega por proveedor activo). Permite dar de alta símbolos con la convención de TD (p.ej. SK hynix Frankfurt = `HY9H`).
+
+### Métricas
+- 152 tests verdes (149 + 3). Smoke real: buscador TD OK con key válida (en user-secrets).
+
+---
+
 ## [1.22.0-selector-proveedor] - 2026-07-06
 
 ### Added

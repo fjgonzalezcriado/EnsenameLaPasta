@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-034 Buscador de instrumentos vía Twelve Data (selector) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-034.md`
+- **Resumen**: El buscador usa el proveedor activo. `TwelveDataInstrumentSearchProvider` (`/symbol_search`) → símbolos con la convención de TD; `SelectableInstrumentSearchProvider` delega por `IMarketProviderState`. Resuelve la limitación de HV-032 (símbolos Yahoo no resuelven en TD). 3 tests. 152 verdes. Smoke real: con TD, `q=apple` → AAPL/APC…; y hallazgo: SK hynix Frankfurt en TD = `HY9H`. Key en user-secrets (no en repo).
+
 #### HV-033 Selector de proveedor de datos en la interfaz (cambio en caliente) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-033.md`
