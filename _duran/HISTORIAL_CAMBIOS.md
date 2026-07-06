@@ -18,6 +18,13 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.27.1-margen-selector-derecha] - 2026-07-06
+
+### Changed
+- 💅 Ajuste UI: el selector **Margen Y** se alinea al extremo derecho de la fila de rangos (`ms-auto`); la barra de rangos y el hint quedan a la izquierda. Solo `.cshtml`, sin lógica.
+
+---
+
 ## [1.27.0-margen-eje-y] - 2026-07-06
 
 ### Changed

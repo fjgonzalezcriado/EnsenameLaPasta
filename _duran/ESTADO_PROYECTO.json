@@ -1,4 +1,4 @@
-﻿{
+{
     "_comentario":  "Este archivo mantiene el estado actual del proyecto. Claude lo lee automaticamente.",
     "ecosistema":  {
                        "nombre":  "STIC.IA",
@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.27.0-margen-eje-y",
+                   "version_actual":  "1.27.1-margen-selector-derecha",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -315,7 +315,7 @@
                                                "specFile":  "_duran/specs/HV-040.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Sustituye el margen fijo de HV-039 (+-20 absoluto) por un selector yMarginSelect en el grafico: Ajustado (0 por ciento, maxima extension), +-1/+-2/+-5/+-10/+-20 por ciento (mas compresion). El margen es relativo al precio medio del rango (margin = ((techo+suelo)/2) x pct), asi vale para cualquier instrumento (1400 o 3). Ajustado deja la linea pegada a los bordes (epsilon minimo si los datos son planos). yMarginPct (default 0.02) persistido en localStorage (chartYMargin); el cambio recalcula el eje sin refetch (re-render con lastRenderedSeries). Se mantienen las lineas de techo/suelo. Solo JS/cshtml, sin migracion. 154 verdes. Smoke Playwright: 1M (techo 1700/suelo 1120) -> Ajustado 1120-1700, +-5 1049,5-1770,5, +-20 838-1982, +-2 1091,8-1728,2; persistencia tras reload = 0.02; 0 errores. Nota: tocar la vista Razor (.cshtml) obliga a recompilar (con --no-build no se refleja). Rama feature/HV-040-margen-eje-y."
+                                               "notas":  "Sustituye el margen fijo de HV-039 (+-20 absoluto) por un selector yMarginSelect en el grafico: Ajustado (0 por ciento, maxima extension), +-1/+-2/+-5/+-10/+-20 por ciento (mas compresion). El margen es relativo al precio medio del rango (margin = ((techo+suelo)/2) x pct), asi vale para cualquier instrumento (1400 o 3). Ajustado deja la linea pegada a los bordes (epsilon minimo si los datos son planos). yMarginPct (default 0.02) persistido en localStorage (chartYMargin); el cambio recalcula el eje sin refetch (re-render con lastRenderedSeries). Se mantienen las lineas de techo/suelo. Solo JS/cshtml, sin migracion. 154 verdes. Smoke Playwright: 1M (techo 1700/suelo 1120) -\u003e Ajustado 1120-1700, +-5 1049,5-1770,5, +-20 838-1982, +-2 1091,8-1728,2; persistencia tras reload = 0.02; 0 errores. Nota: tocar la vista Razor (.cshtml) obliga a recompilar (con --no-build no se refleja). Rama feature/HV-040-margen-eje-y."
                                            },
                                            {
                                                "codigo":  "HV-039",

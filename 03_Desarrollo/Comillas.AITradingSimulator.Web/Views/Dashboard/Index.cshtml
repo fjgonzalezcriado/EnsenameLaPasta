@@ -128,7 +128,8 @@
                             <button type="button" class="btn btn-outline-secondary" data-range="3A">3A</button>
                             <button type="button" class="btn btn-outline-secondary" data-range="5A">5A</button>
                         </div>
-                        <label class="d-flex align-items-center gap-1 mb-0 small" title="Margen del eje Y por encima del techo y por debajo del suelo: menos margen = línea más ampliada (extensión); más margen = línea más comprimida">
+                        <span id="rangeHint" class="text-muted small"></span>
+                        <label class="d-flex align-items-center gap-1 mb-0 small ms-auto" title="Margen del eje Y por encima del techo y por debajo del suelo: menos margen = línea más ampliada (extensión); más margen = línea más comprimida">
                             <span class="text-muted">Margen Y:</span>
                             <select id="yMarginSelect" class="form-select form-select-sm w-auto py-0">
                                 <option value="0">Ajustado</option>
@@ -139,7 +140,6 @@
                                 <option value="0.20">±20 %</option>
                             </select>
                         </label>
-                        <span id="rangeHint" class="text-muted small"></span>
                     </div>
                 </div>
             </div>
