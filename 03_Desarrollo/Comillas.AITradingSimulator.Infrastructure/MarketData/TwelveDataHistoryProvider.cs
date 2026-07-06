@@ -83,13 +83,23 @@ public sealed class TwelveDataHistoryProvider : IMarketHistoryProvider
         var response = await client.GetAsync(
             $"/time_series?symbol={Uri.EscapeDataString(tdSymbol)}&interval={interval}&outputsize={outputSize}&timezone=UTC&apikey={Uri.EscapeDataString(apiKey)}",
             cancellationToken);
-        response.EnsureSuccessStatusCode();
 
-        var payload = await response.Content.ReadFromJsonAsync<TimeSeriesResponse>(cancellationToken: cancellationToken)
-            ?? throw new InvalidOperationException("Twelve Data: respuesta vacía o no deserializable.");
+        // Símbolo no válido para Twelve Data (p.ej. convención Yahoo) → 404. No es un fallo
+        // del programa: degradamos a "sin datos" para no romper el gráfico.
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Twelve Data histórico {Symbol} {Range}: HTTP {Code}; sin datos.",
+                tdSymbol, range, (int)response.StatusCode);
+            return [];
+        }
 
-        if (string.Equals(payload.Status, "error", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException($"Twelve Data: error de histórico para '{symbol}': {payload.Message} (code {payload.Code}).");
+        var payload = await response.Content.ReadFromJsonAsync<TimeSeriesResponse>(cancellationToken: cancellationToken);
+        if (payload is null || string.Equals(payload.Status, "error", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogWarning("Twelve Data histórico {Symbol} {Range}: {Message}; sin datos.",
+                tdSymbol, range, payload?.Message ?? "respuesta no deserializable");
+            return [];
+        }
 
         if (payload.Values is null || payload.Values.Count == 0)
             return [];
