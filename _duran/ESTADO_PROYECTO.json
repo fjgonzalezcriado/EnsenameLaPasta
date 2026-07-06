@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.18.0-volumen",
+                   "version_actual":  "1.19.0-volumen-color",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-030",
+                                               "titulo":  "Barras de volumen coloreadas por direccion (verde/rojo)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-07-06",
+                                               "fechaInicio":  "2026-07-06",
+                                               "fechaCompletado":  "2026-07-06",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-030.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Refinamiento de HV-029. Las barras de volumen pasan de color unico a verde (precio sube en la barra, alcista) / rojo (baja, bajista), convencion financiera estandar. backgroundColor como array por barra: up = precio[i] >= precio[i-1] -> #198754@0.5 / #dc3545@0.5; primera barra alcista. Solo JS. Verificado con Playwright: barras coherentes con la linea de precio, sin errores de consola. Rama feature/HV-030-volumen-color."
+                                           },
                                            {
                                                "codigo":  "HV-029",
                                                "titulo":  "Volumen de negociacion en el grafico de precios",
@@ -801,17 +818,16 @@
                          "resumenSesion":  "HV-015..HV-023 (rentabilidad %, por posicion, historico valor cuenta, importar CSV, divisa por instrumento, conversion FX a base, divisa por movimiento de caja, PnL convertido por fila, refrescar FX en background). GitHub privado; HV-020..023 via ramas feature merge --no-ff. 135 tests verdes; smokes reales OK.",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
-                                                     "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 19 evolutivos completados. Feed real requiere Internet. Migracion nueva AddTrackedSymbolCurrency (se auto-aplica al arrancar)."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (137 tests verdes; HV-029 volumen de negociacion en el grafico de precios: PricePoint.Volume mas parseo en YahooHistoryProvider mas barras en eje secundario; verificado con Playwright)",
+                     "ultimo_build":  "2026-07-06 OK (build limpio; HV-030 barras de volumen verde subida / rojo bajada - fix solo JS verificado con Playwright). 137 tests C# sin cambios",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  29
+                     "evolutivos_completados_mes":  30
                  },
     "alertas":  {
                     "activas":  [
