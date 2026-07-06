@@ -82,12 +82,10 @@
 
     // ── Estado del feed (proveedor + en vivo) ───────────────────────────────
     function renderStatus(d) {
-        const badge = document.getElementById('providerBadge');
-        if (badge) {
-            const labels = { 'YahooFinance': 'Yahoo Finance (real)', 'TwelveData': 'Twelve Data (real)' };
-            const known = Object.prototype.hasOwnProperty.call(labels, d.providerType);
-            badge.textContent = known ? labels[d.providerType] : (d.providerType || 'RandomWalk (simulado)');
-            badge.className = 'badge ' + (known ? 'text-bg-success' : 'text-bg-secondary');
+        // Sincroniza el selector de proveedor con el activo (sin pisar una selección en curso).
+        const provSel = document.getElementById('providerSelect');
+        if (provSel && d.providerType && document.activeElement !== provSel && provSel.value !== d.providerType) {
+            provSel.value = d.providerType;
         }
         const tickCount = document.getElementById('tickCount');
         if (tickCount) tickCount.textContent = new Intl.NumberFormat('es-ES').format(d.totalTicks || 0);
@@ -1114,6 +1112,42 @@
         }
     }
 
+    // ── Selector de proveedor de datos (HV-033): cambio en caliente ────────────
+    function initProviderControl() {
+        const sel = document.getElementById('providerSelect');
+        const hint = document.getElementById('providerHint');
+        if (!sel) return;
+
+        function refreshInfo() {
+            fetch('/api/provider').then(function (r) { return r.ok ? r.json() : null; }).then(function (info) {
+                if (!info) return;
+                if (info.current) sel.value = info.current;
+                if (hint) hint.textContent = (info.current === 'TwelveData' && !info.twelveDataKeyConfigured)
+                    ? '⚠ sin API key' : '';
+            }).catch(function () { });
+        }
+        refreshInfo();
+
+        sel.addEventListener('change', function () {
+            sel.disabled = true;
+            fetch('/api/provider', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ provider: sel.value })
+            }).then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            }).then(function () {
+                refreshInfo();
+                fetchAndRender(true);                                 // refresca estado/datos
+                if (chartMode !== 'LIVE') loadHistory(chartMode);     // recarga histórico con el nuevo proveedor
+            }).catch(function () {
+                if (hint) hint.textContent = 'Error al cambiar';
+            }).finally(function () { sel.disabled = false; });
+        });
+    }
+
+    initProviderControl();
     initChartRefreshControl();
     initSymbolControl();
     initHistoryControl();

@@ -18,6 +18,19 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.22.0-selector-proveedor] - 2026-07-06
+
+### Added
+- ✅ **HV-033** **Selector de proveedor en la UI** (cambio en caliente Yahoo ↔ Twelve Data). `IMarketProviderState` conmutable + persistido (`App_Data/active-provider.txt`) + wrappers `Selectable*Provider` que delegan en el activo por llamada. `ProviderController` (`GET`/`POST /api/provider`). Selector en la cabecera con aviso "sin API key".
+
+### Changed
+- El proveedor ya no se fija en el arranque: se registran ambos concretos y el activo se resuelve en runtime. `DashboardService` reporta el proveedor activo (no el de config).
+
+### Métricas
+- 149 tests verdes (146 + 3). Smoke real: switch por API + Playwright del selector.
+
+---
+
 ## [1.21.0-twelvedata-hist] - 2026-07-06
 
 ### Added

@@ -45,8 +45,7 @@ public sealed class PortfolioSnapshotServiceTests : IDisposable
         var services = new ServiceCollection();
         services.AddDbContext<TradingDbContext>(o => o.UseSqlite(_connection));
         services.AddScoped<ITradingDbContext>(sp => sp.GetRequiredService<TradingDbContext>());
-        services.AddSingleton<IOptionsMonitor<MarketDataOptions>>(
-            new StaticOptionsMonitor<MarketDataOptions>(new MarketDataOptions { ProviderType = "YahooFinance" }));
+        services.AddSingleton<IMarketProviderState>(new StaticProviderState());
         // FX identidad (rate 1) para el snapshot.
         services.AddSingleton<IFxRateProvider, IdentityFxRateProvider>();
         services.AddSingleton<IOptions<FxOptions>>(Options.Create(new FxOptions { BaseCurrency = "EUR" }));
@@ -79,6 +78,13 @@ public sealed class PortfolioSnapshotServiceTests : IDisposable
     {
         public Task<decimal> GetRateAsync(string from, string to, CancellationToken cancellationToken = default)
             => Task.FromResult(1m);
+    }
+
+    private sealed class StaticProviderState : IMarketProviderState
+    {
+        public string Current => "YahooFinance";
+        public IReadOnlyList<string> Available { get; } = new[] { "YahooFinance", "TwelveData" };
+        public void Set(string provider) { }
     }
 
     private sealed class StaticOptionsMonitor<T> : IOptionsMonitor<T>

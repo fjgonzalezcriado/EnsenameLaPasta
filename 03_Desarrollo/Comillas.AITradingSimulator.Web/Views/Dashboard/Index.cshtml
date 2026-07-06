@@ -7,10 +7,14 @@
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
         <h1 class="h3 mb-0">🤖 AI Trading Simulator</h1>
         <div class="d-flex flex-wrap align-items-center gap-3 small text-muted">
-            <span>
-                <span class="me-1">Proveedor:</span>
-                <span id="providerBadge" class="badge text-bg-secondary">—</span>
-            </span>
+            <label class="d-flex align-items-center gap-1 mb-0" title="Proveedor de datos de mercado (feed en vivo e histórico). Se cambia en caliente.">
+                <span>Proveedor:</span>
+                <select id="providerSelect" class="form-select form-select-sm w-auto py-0">
+                    <option value="YahooFinance">Yahoo Finance</option>
+                    <option value="TwelveData">Twelve Data</option>
+                </select>
+                <span id="providerHint" class="text-danger small"></span>
+            </label>
             <span>Ticks: <strong id="tickCount" class="text-body">—</strong></span>
             <span>BD: <strong id="dbSize" class="text-body">—</strong></span>
             <span>
