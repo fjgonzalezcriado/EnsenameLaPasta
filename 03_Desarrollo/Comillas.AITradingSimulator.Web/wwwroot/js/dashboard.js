@@ -12,7 +12,7 @@
     let lastSeries = [];         // última priceSeries recibida (para re-render al cambiar de símbolo)
     let historyPoints = 50;      // nº de puntos de histórico a pedir por símbolo
     const HISTORY_ALLOWED = [50, 250, 1000, 5000];
-    let chartMode = 'LIVE';      // 'LIVE' (ticks simulados) | rango Yahoo ('1D','1M',…)
+    let chartMode = '1D';        // arranca en el diario real de Yahoo; 'LIVE' = ticks locales | rango Yahoo ('1D','1M',…)
     let baseCurrency = 'EUR';    // divisa base de los totales (HV-020); para el PnL convertido por fila (HV-022)
 
     // ── Formateadores (es-ES) ──────────────────────────────────────────────
@@ -1060,7 +1060,11 @@
     initCashModal();
     initImportModal();
     initAccountHistoryControl();
-    fetchAndRender(true); // primer pintado completo (incluye gráfico)
+    // Primer pintado completo; el gráfico de precios arranca en el rango diario real de
+    // Yahoo (1D), no en los ticks locales "En vivo". Cargamos el histórico tras tener símbolos.
+    fetchAndRender(true).then(function () {
+        if (chartMode !== 'LIVE') loadHistory(chartMode);
+    });
     fetchAccountHistory(); // histórico del valor de cuenta (refresco propio, los snapshots son cada pocos min)
     metricsTimer = setInterval(function () { fetchAndRender(false); }, METRICS_MS);
     setInterval(fetchAccountHistory, 60000);

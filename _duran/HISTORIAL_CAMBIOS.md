@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.16.0-chart-default-1d] - 2026-07-06
+
+### Changed
+- ✅ **HV-027** El gráfico de precios **arranca en 1D** (intradía real de Yahoo) en vez de "En vivo" (ticks locales dispersos). `chartMode` inicial `'1D'`, botón 1D activo, y el arranque carga el histórico tras el primer render. "En vivo" sigue disponible.
+
+### Métricas
+- Build limpio (solo JS/cshtml). Verificado con Playwright.
+
+---
+
 ## [1.15.0-account-range] - 2026-07-06
 
 ### Added
