@@ -1,4 +1,4 @@
-{
+﻿{
     "_comentario":  "Este archivo mantiene el estado actual del proyecto. Claude lo lee automaticamente.",
     "ecosistema":  {
                        "nombre":  "STIC.IA",
@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.23.2-td-error-claro",
+                   "version_actual":  "1.24.0-variacion-rango",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-037",
+                                               "titulo":  "Variacion acumulada del rango en el grafico mas eliminar En vivo",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-07-06",
+                                               "fechaInicio":  "2026-07-06",
+                                               "fechaCompletado":  "2026-07-06",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-037.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "El grafico de precios pierde el modo En vivo (sin sentido desde HV-027) y gana la variacion acumulada del rango. Se quita el boton data-range=LIVE y los controles solo-vivo (refreshSelect Grafico cada, historySelect Historico N puntos, tickCountdown); el JS de LIVE queda inerte (guardas if(sel); initRangeBar valida el rango persistido contra los botones existentes). chartDelta en la cabecera: updateChartDelta(series) toma primer y ultimo cierre de la serie del simbolo y muestra rango: importe (porcentaje) con importe en la divisa del instrumento (money) y porcentaje acumulado (pctSigned), coloreado verde/rojo. symbolCurrency se alimenta de posiciones (openTrades/closedTrades) y de /api/instruments/tracked (arranque mas cada 60 s). Los flujos que forzaban LIVE (anadir/quitar simbolo, alta de posicion) recargan el historico del rango activo. Yahoo sigue activo. Solo JS/cshtml, sin migracion. 154 verdes. Smoke Playwright: sin En vivo; HY9H.F 1M +210,00 EUR (+18,03 por ciento) verde, 5D -145,00 EUR (-9,54 por ciento) rojo, 1D 0,00 EUR plano, 0 errores de consola. Rama feature/HV-037-variacion-rango."
+                                           },
+                                           {
                                                "codigo":  "HV-036",
                                                "titulo":  "Mensaje de error claro del proveedor (Twelve Data) mas log sin stack",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-036.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Con Twelve Data (plan free) el feed logueaba HttpRequestException 404 con stack por simbolo cada ciclo. TwelveDataProvider parsea el body de error (JSON status/message tambien en 4xx) y lanza el mensaje de TD (p.ej. available starting with the Grow plan); MarketTickGeneratorService loguea solo el mensaje (una linea, sin stack). 1 test (404 con cuerpo -> mensaje). 154 verdes. DIAGNOSTICO: el plan free de Twelve Data es solo mercado US; HY9H (Frankfurt), 000660 (Corea), NUCL.SW (Suiza) requieren plan Grow/Pro/Venture; los estilo Yahoo (HY9H.F, ^GSPC) no existen en TD. En free usar simbolos US (AAPL...) o mantener Yahoo (cubre la watchlist actual). Rama feature/HV-036-td-error-claro."
+                                               "notas":  "Con Twelve Data (plan free) el feed logueaba HttpRequestException 404 con stack por simbolo cada ciclo. TwelveDataProvider parsea el body de error (JSON status/message tambien en 4xx) y lanza el mensaje de TD (p.ej. available starting with the Grow plan); MarketTickGeneratorService loguea solo el mensaje (una linea, sin stack). 1 test (404 con cuerpo -\u003e mensaje). 154 verdes. DIAGNOSTICO: el plan free de Twelve Data es solo mercado US; HY9H (Frankfurt), 000660 (Corea), NUCL.SW (Suiza) requieren plan Grow/Pro/Venture; los estilo Yahoo (HY9H.F, ^GSPC) no existen en TD. En free usar simbolos US (AAPL...) o mantener Yahoo (cubre la watchlist actual). Rama feature/HV-036-td-error-claro."
                                            },
                                            {
                                                "codigo":  "HV-035",
@@ -916,20 +933,24 @@
                          "evolutivoActivo":  null,
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
-                         "proximoPaso":  "Opcional: editar divisa de un movimiento, PnL convertido por fila, refrescar FX en background, dashboard visor puro, importar trades cerrados, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-015..HV-023 (rentabilidad %, por posicion, historico valor cuenta, importar CSV, divisa por instrumento, conversion FX a base, divisa por movimiento de caja, PnL convertido por fila, refrescar FX en background). GitHub privado; HV-020..023 via ramas feature merge --no-ff. 135 tests verdes; smokes reales OK.",
+                         "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo<->TwelveData, AlphaVantage/Binance, ML.NET.",
+                         "resumenSesion":  "HV-037: el grafico de precios pierde el modo En vivo y muestra la variacion acumulada del rango (importe en la divisa del instrumento + porcentaje, coloreado). Solo JS/cshtml, sin migracion. 154 tests verdes; smoke Playwright OK con Yahoo activo.",
                          "archivosModificados":  [
-                                                     ".claude/settings.json",
-                                                     "_duran/METRICAS.json"
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Web/Views/Dashboard/Index.cshtml",
+                                                     "03_Desarrollo/Comillas.AITradingSimulator.Web/wwwroot/js/dashboard.js",
+                                                     "_duran/specs/HV-037.md",
+                                                     "_duran/FUNCIONALIDADES.md",
+                                                     "_duran/HISTORIAL_CAMBIOS.md",
+                                                     "_duran/ESTADO_PROYECTO.json"
                                                  ],
-                         "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 19 evolutivos completados. Feed real requiere Internet. Migracion nueva AddTrackedSymbolCurrency (se auto-aplica al arrancar)."
+                         "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 37 evolutivos completados. Proveedor activo = Yahoo. El codigo del modo LIVE queda inerte (no reactivar sin volver a anadir el boton)."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (154 tests verdes; HV-036 mensaje de error claro de Twelve Data + log sin stack; diagnostico: plan free de TD solo cubre US, simbolos EU/Asia requieren plan de pago)",
+                     "ultimo_build":  "2026-07-06 OK (154 tests verdes; HV-037 variacion acumulada del rango en el grafico + eliminado el modo En vivo; solo frontend, sin migracion; smoke Playwright verde con Yahoo activo)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  36
+                     "evolutivos_completados_mes":  37
                  },
     "alertas":  {
                     "activas":  [
