@@ -2,6 +2,9 @@
     'use strict';
 
     const REFRESH_MS = 3000;
+    // Margen visual (en unidades de precio) por encima del techo y por debajo del suelo del
+    // rango, para que la línea no quede pegada a los bordes del gráfico (HV-039).
+    const PRICE_Y_MARGIN = 20;
     const COLORS = ['#0d6efd', '#fd7e14', '#198754', '#dc3545', '#6f42c1', '#20c997'];
     // En modo "En vivo" los ticks se capturan cada ~30 s, pero entre sesiones (app apagada)
     // hay huecos de horas/días. Si dos ticks consecutivos distan más de esto, cortamos la
@@ -227,6 +230,40 @@
         }
     };
 
+    // Plugin: líneas discontinuas en el techo (máximo) y el suelo (mínimo) del rango (HV-039).
+    // Lee chart.$hiLo = { high, low } (fijado en renderChart) y las dibuja de lado a lado.
+    const highLowLinesPlugin = {
+        id: 'highLowLines',
+        afterDatasetsDraw: function (chart) {
+            const hl = chart.$hiLo;
+            if (!hl || !Number.isFinite(hl.high) || !Number.isFinite(hl.low)) return;
+            const y = chart.scales.y;
+            const area = chart.chartArea;
+            if (!y || !area) return;
+            const ctx = chart.ctx;
+            const color = isDarkTheme() ? 'rgba(233,241,255,0.55)' : 'rgba(33,37,41,0.50)';
+            [['Techo', hl.high, 'bottom'], ['Suelo', hl.low, 'top']].forEach(function (row) {
+                const py = y.getPixelForValue(row[1]);
+                if (!Number.isFinite(py)) return;
+                ctx.save();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1;
+                ctx.setLineDash([6, 4]);
+                ctx.beginPath();
+                ctx.moveTo(area.left, py);
+                ctx.lineTo(area.right, py);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.font = '600 10px sans-serif';
+                ctx.fillStyle = color;
+                ctx.textBaseline = row[2];
+                ctx.textAlign = 'left';
+                ctx.fillText(row[0] + ' ' + priceFmt(row[1]), area.left + 4, row[2] === 'bottom' ? py - 2 : py + 2);
+                ctx.restore();
+            });
+        }
+    };
+
     // Margen derecho: extiende el max del eje X ~12% para que la línea no quede
     // pegada al borde y se distinga el valor actual.
     function computeXBounds(datasets) {
@@ -424,12 +461,28 @@
         // El eje de volumen se escala para que las barras ocupen ~el 25% inferior del área.
         const volMax = maxVol > 0 ? maxVol * 4 : 1;
 
+        // Techo (máximo) y suelo (mínimo) del precio en el rango; el eje Y se fija con un
+        // margen de ±PRICE_Y_MARGIN para que la línea no quede pegada a los bordes (HV-039).
+        let hi = -Infinity, lo = Infinity;
+        priceDatasets.forEach(function (ds) {
+            ds.data.forEach(function (v) {
+                if (v === null || v === undefined) return;
+                const n = Number(v);
+                if (!Number.isFinite(n)) return;
+                if (n > hi) hi = n;
+                if (n < lo) lo = n;
+            });
+        });
+        const hasHiLo = Number.isFinite(hi) && Number.isFinite(lo);
+        const yMin = hasHiLo ? lo - PRICE_Y_MARGIN : undefined;
+        const yMax = hasHiLo ? hi + PRICE_Y_MARGIN : undefined;
+
         if (priceChart === null) {
             const ctx = document.getElementById('chartPrices').getContext('2d');
             priceChart = new Chart(ctx, {
                 type: 'line',
                 data: { labels: labels, datasets: datasets },
-                plugins: [currentValuePlugin],
+                plugins: [currentValuePlugin, highLowLinesPlugin],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -444,6 +497,8 @@
                         y: {
                             type: 'linear',
                             position: 'right',
+                            min: yMin,
+                            max: yMax,
                             grid: { display: true, color: function () { return gridColor(); } },
                             ticks: { callback: function (v) { return priceFmt(v); }, color: function () { return axisTextColor(); } }
                         },
@@ -487,9 +542,12 @@
             priceChart.data.labels = labels;
             priceChart.data.datasets = datasets;
             if (priceChart.options.scales.yVol) priceChart.options.scales.yVol.max = volMax;
+            priceChart.options.scales.y.min = yMin;
+            priceChart.options.scales.y.max = yMax;
             priceChart.update();
         }
         priceChart.$labelsFull = labelsFull;   // para el título del tooltip (fecha/hora completa)
+        priceChart.$hiLo = hasHiLo ? { high: hi, low: lo } : null;   // techo/suelo para el plugin (HV-039)
     }
 
     // Coloca la cuenta atrás justo debajo de la etiqueta de valor de la serie activa.

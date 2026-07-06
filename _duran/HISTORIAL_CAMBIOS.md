@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.26.0-techo-suelo] - 2026-07-06
+
+### Added
+- 📏 **HV-039** El gráfico de precios marca el **techo** (máximo) y el **suelo** (mínimo) del rango con **líneas discontinuas** etiquetadas, y el eje Y deja **20 unidades de margen** por encima y por debajo (antes arrancaba pegado a los datos).
+
+### Métricas
+- 154 tests verdes (solo frontend). Smoke Playwright: 1M eje 1100–1720 (techo 1700/suelo 1120); 5D eje 1170–1590; 0 errores de consola.
+
+---
+
 ## [1.25.0-eje-categorias] - 2026-07-06
 
 ### Changed

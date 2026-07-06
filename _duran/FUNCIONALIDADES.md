@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-039 Líneas de techo/suelo + margen en el eje Y del gráfico de precios ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: `_duran/specs/HV-039.md`
+- **Resumen**: El eje Y auto-escalaba pegado a los datos (p.ej. 1350–1380) sin referencia del máximo/mínimo. Ahora `renderChart` calcula el **techo** (máx) y **suelo** (mín) del rango y fija el eje con `min = suelo − 20` / `max = techo + 20` (`PRICE_Y_MARGIN = 20`), como margen visual. Nuevo plugin `highLowLinesPlugin` dibuja dos **líneas discontinuas** horizontales en techo y suelo, etiquetadas ("Techo …" / "Suelo …"), leyendo `chart.$hiLo`. Color según tema; el gráfico de valor de cuenta no cambia. Solo JS, sin migración. 154 verdes. Smoke Playwright: 1M techo 1700/suelo 1120 → eje 1100–1720; 5D 1190/1570 → 1170/1590; 0 errores; screenshot con "Suelo 1190,00" y margen aplicado.
+
 #### HV-038 Gráfico de precios sin huecos de fin de semana/festivos (eje de categorías) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Bugfix/mejora
 - **Spec**: `_duran/specs/HV-038.md`
