@@ -46,14 +46,15 @@ public sealed class TwelveDataProvider : IMarketDataProvider
         var response = await client.GetAsync(
             $"/quote?symbol={Uri.EscapeDataString(symbol)}&apikey={Uri.EscapeDataString(apiKey)}",
             cancellationToken);
-        response.EnsureSuccessStatusCode();
 
+        // Twelve Data devuelve el error como JSON { status, code, message } tanto con 200
+        // como con 4xx (p.ej. símbolo no disponible en el plan). Lo parseamos igualmente y
+        // lanzamos un mensaje claro (no un "404 Not Found" genérico con stack).
         var quote = await response.Content.ReadFromJsonAsync<TwelveQuote>(cancellationToken: cancellationToken)
-            ?? throw new InvalidOperationException("Twelve Data: respuesta vacía o no deserializable.");
+            ?? throw new InvalidOperationException($"Twelve Data: respuesta vacía para '{symbol}' (HTTP {(int)response.StatusCode}).");
 
-        // Ante error, Twelve Data responde 200 con { status: "error", code, message }.
         if (string.Equals(quote.Status, "error", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException($"Twelve Data: error para '{symbol}': {quote.Message} (code {quote.Code}).");
+            throw new InvalidOperationException($"Twelve Data '{symbol}': {quote.Message}");
 
         if (string.IsNullOrWhiteSpace(quote.Close)
             || !decimal.TryParse(quote.Close, NumberStyles.Any, CultureInfo.InvariantCulture, out var price)

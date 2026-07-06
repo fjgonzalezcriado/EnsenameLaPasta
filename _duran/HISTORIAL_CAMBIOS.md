@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.23.2-td-error-claro] - 2026-07-06
+
+### Changed
+- 🔧 **HV-036** Con Twelve Data, el feed ya no loguea un `404` genérico con stack por símbolo cada ciclo: `TwelveDataProvider` lanza el **mensaje de Twelve Data** (p.ej. "available starting with the Grow plan") y el generador loguea solo el mensaje (una línea). Diagnóstico: el plan free de TD es solo US; los símbolos EU/Asia del usuario requieren plan de pago.
+
+### Métricas
+- 154 tests verdes (153 + 1). Smoke real: log limpio con el mensaje de TD (0 stacks).
+
+---
+
 ## [1.23.1-fix-historico-404] - 2026-07-06
 
 ### Fixed

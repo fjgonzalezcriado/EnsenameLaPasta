@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.23.1-fix-historico-404",
+                   "version_actual":  "1.23.2-td-error-claro",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-036",
+                                               "titulo":  "Mensaje de error claro del proveedor (Twelve Data) mas log sin stack",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-07-06",
+                                               "fechaInicio":  "2026-07-06",
+                                               "fechaCompletado":  "2026-07-06",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "mejora",
+                                               "specFile":  "_duran/specs/HV-036.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Con Twelve Data (plan free) el feed logueaba HttpRequestException 404 con stack por simbolo cada ciclo. TwelveDataProvider parsea el body de error (JSON status/message tambien en 4xx) y lanza el mensaje de TD (p.ej. available starting with the Grow plan); MarketTickGeneratorService loguea solo el mensaje (una linea, sin stack). 1 test (404 con cuerpo -> mensaje). 154 verdes. DIAGNOSTICO: el plan free de Twelve Data es solo mercado US; HY9H (Frankfurt), 000660 (Corea), NUCL.SW (Suiza) requieren plan Grow/Pro/Venture; los estilo Yahoo (HY9H.F, ^GSPC) no existen en TD. En free usar simbolos US (AAPL...) o mantener Yahoo (cubre la watchlist actual). Rama feature/HV-036-td-error-claro."
+                                           },
+                                           {
                                                "codigo":  "HV-035",
                                                "titulo":  "Fix: el historico no rompe con simbolos no validos (404)",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-035.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Al cambiar a Twelve Data la app paraba con HttpRequestException 404: el frontend recargaba el historico del simbolo estilo Yahoo (^GSPC/HY9H.F) que no existe en TD -> EnsureSuccessStatusCode lanzaba y History solo capturaba ArgumentException. Fix: TwelveDataHistoryProvider/YahooHistoryProvider degradan a serie vacia en no-exito/error (log, no lanzan); DashboardController.History con catch amplio -> serie vacia. El feed en vivo ya toleraba errores por simbolo. 2 tests (404->vacio, error->vacio; test previo adaptado). 153 verdes. Smoke real: con TD, ^GSPC/HY9H.F -> 200 vacio, AAPL -> 100 puntos, sin crash. Rama feature/HV-035-fix-historico-404."
+                                               "notas":  "Al cambiar a Twelve Data la app paraba con HttpRequestException 404: el frontend recargaba el historico del simbolo estilo Yahoo (^GSPC/HY9H.F) que no existe en TD -\u003e EnsureSuccessStatusCode lanzaba y History solo capturaba ArgumentException. Fix: TwelveDataHistoryProvider/YahooHistoryProvider degradan a serie vacia en no-exito/error (log, no lanzan); DashboardController.History con catch amplio -\u003e serie vacia. El feed en vivo ya toleraba errores por simbolo. 2 tests (404-\u003evacio, error-\u003evacio; test previo adaptado). 153 verdes. Smoke real: con TD, ^GSPC/HY9H.F -\u003e 200 vacio, AAPL -\u003e 100 puntos, sin crash. Rama feature/HV-035-fix-historico-404."
                                            },
                                            {
                                                "codigo":  "HV-034",
@@ -909,10 +926,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (153 tests verdes; HV-035 fix: el historico degrada a vacio en 404/error - antes la app paraba con HttpRequestException al cambiar a Twelve Data con simbolos estilo Yahoo; smoke real ^GSPC/HY9H.F->200 vacio, AAPL->100)",
+                     "ultimo_build":  "2026-07-06 OK (154 tests verdes; HV-036 mensaje de error claro de Twelve Data + log sin stack; diagnostico: plan free de TD solo cubre US, simbolos EU/Asia requieren plan de pago)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  35
+                     "evolutivos_completados_mes":  36
                  },
     "alertas":  {
                     "activas":  [
