@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.21.0-twelvedata-hist] - 2026-07-06
+
+### Added
+- ✅ **HV-032** Histórico vía **Twelve Data** (`/time_series`) cuando es el proveedor activo. `TwelveDataHistoryProvider : IMarketHistoryProvider` (precio+volumen, orden ascendente, mapa de rangos incl. YTD, normalización de símbolos cripto). El selector de DI (`useTwelveData`) unifica feed en vivo + histórico (Yahoo default | TwelveData).
+
+### Métricas
+- 146 tests verdes (142 + 4). Smoke real: histórico Yahoo default OK; arranque TwelveData sin errores de DI.
+
+---
+
 ## [1.20.0-twelvedata] - 2026-07-06
 
 ### Added
