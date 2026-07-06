@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.17.0-persist-range] - 2026-07-06
+
+### Added
+- ✅ **HV-028** El **rango del gráfico de precios** se persiste en `localStorage` (`chartRange`) y se restaura entre sesiones. Completa la persistencia de preferencias del panel (theme, chartSymbol, chartRefreshMs, historyPoints, accountRange, chartRange).
+
+### Métricas
+- Build limpio (solo JS). Verificado con Playwright (1D→5D→reload sigue en 5D).
+
+---
+
 ## [1.16.0-chart-default-1d] - 2026-07-06
 
 ### Changed
