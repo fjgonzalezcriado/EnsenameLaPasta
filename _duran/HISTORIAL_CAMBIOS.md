@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.15.0-account-range] - 2026-07-06
+
+### Added
+- ✅ **HV-026** Selector de **rango temporal** (1 día / 1 semana / 1 mes / Todo) en el gráfico "Evolución del valor de cuenta". Densifica la vista reciente; la ventana se ancla al último snapshot (no a la hora actual). Cambio de rango sin refetch (desde caché), persistido en localStorage.
+
+### Métricas
+- Build limpio (solo JS/cshtml). Verificado con Playwright.
+
+---
+
 ## [1.14.0-account-gaps] - 2026-07-06
 
 ### Fixed

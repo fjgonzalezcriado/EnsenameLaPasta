@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-026 Selector de rango temporal en el gráfico del valor de cuenta ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-026.md`
+- **Resumen**: Cierra la mejora opcional de HV-025. Sustituye "Puntos: Últimos N" por **"Rango: 1 día / 1 semana / 1 mes / Todo"**. `filterAccountByRange` filtra los snapshots a la ventana **anclada al último snapshot** (no a `Date.now()`, para que el zoom funcione aunque la app haya estado apagada). `fetchAccountHistory` cachea los puntos y el cambio de rango re-filtra sin refetch; rango persistido en localStorage. Solo JS/cshtml. Verificado con Playwright: rango "1 día" muestra el tramo reciente legible (eje en minutos, curva 28.306→26.711→~32.800), sin errores de consola.
+
 #### HV-025 Cortar huecos entre sesiones en el gráfico del valor de cuenta ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-025.md`
