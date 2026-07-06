@@ -254,19 +254,20 @@
         if (sel.value !== selectedSymbol) sel.value = selectedSymbol;
     }
 
-    // Inserta un punto nulo entre ticks separados por más de LIVE_GAP_MS para que
-    // Chart.js corte la línea sobre los huecos entre sesiones (evita la diagonal falsa).
-    function insertLiveGaps(points) {
+    // Inserta un punto nulo entre puntos separados por más de gapMs para que Chart.js
+    // corte la línea sobre los huecos entre sesiones (evita la diagonal/compresión falsa).
+    function insertGaps(points, gapMs) {
         if (points.length < 2) return points;
         const out = [];
         for (let i = 0; i < points.length; i++) {
-            if (i > 0 && (points[i].x - points[i - 1].x) > LIVE_GAP_MS) {
+            if (i > 0 && (points[i].x - points[i - 1].x) > gapMs) {
                 out.push({ x: points[i - 1].x + Math.floor((points[i].x - points[i - 1].x) / 2), y: null });
             }
             out.push(points[i]);
         }
         return out;
     }
+    function insertLiveGaps(points) { return insertGaps(points, LIVE_GAP_MS); }
 
     function renderChart(series) {
         if (typeof Chart === 'undefined') {
@@ -376,6 +377,9 @@
     let accountChart = null;
     let accountHistoryPoints = 200;
     const ACCOUNT_HISTORY_ALLOWED = [50, 200, 1000, 5000];
+    // Snapshots normales cada ~5 min; un salto mayor a esto es un hueco entre sesiones
+    // (app apagada) → cortar la línea para no comprimir el tramo reciente en un "pico" (HV-025).
+    const ACCOUNT_GAP_MS = 30 * 60 * 1000;
 
     function renderAccountChart(points) {
         if (typeof Chart === 'undefined') return;
@@ -394,16 +398,16 @@
             hint.textContent = data.length + ' snapshot(s) · último valor ' + eur(last.accountValue) + ' (' + pctSigned(last.returnPct) + ')';
         }
 
-        const accountData = data.map(function (p) { return { x: p.x, y: p.av }; });
-        const depositsData = data.map(function (p) { return { x: p.x, y: p.nd }; });
+        const accountData = insertGaps(data.map(function (p) { return { x: p.x, y: p.av }; }), ACCOUNT_GAP_MS);
+        const depositsData = insertGaps(data.map(function (p) { return { x: p.x, y: p.nd }; }), ACCOUNT_GAP_MS);
         const datasets = [
             {
-                label: 'Valor de cuenta', data: accountData,
+                label: 'Valor de cuenta', data: accountData, spanGaps: false,
                 borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.10)',
                 fill: true, tension: 0.15, pointRadius: 0, borderWidth: 2
             },
             {
-                label: 'Aportado neto', data: depositsData,
+                label: 'Aportado neto', data: depositsData, spanGaps: false,
                 borderColor: '#6c757d', backgroundColor: 'transparent',
                 borderDash: [5, 4], tension: 0, pointRadius: 0, borderWidth: 1.5
             }

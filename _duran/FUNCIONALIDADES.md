@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-025 Cortar huecos entre sesiones en el gráfico del valor de cuenta ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-025.md`
+- **Resumen**: Resuelve el hallazgo #2 de la revisión visual. El "pico" del gráfico de cuenta no era un outlier: la inspección de `/api/account/history` mostró datos legítimos (8 snapshots del 29-jun ~28.306 € + 4 del 06-jul con el movimiento real en ~20 min). El problema era el mismo que HV-024: la línea cruzaba un hueco de ~6,7 días comprimiendo el tramo reciente. Fix (solo JS): `insertLiveGaps` refactorizado a `insertGaps(points, gapMs)` genérico + `ACCOUNT_GAP_MS` (30 min) aplicado a ambas series del gráfico de cuenta con `spanGaps:false`. **Sin borrar datos** (son legítimos). Verificado con Playwright: desaparece la línea falsa. Residual honesto: el tramo de ~20 min se ve denso sobre un eje de días (mejora opcional: selector de rango temporal).
+
 #### HV-024 Cortar huecos entre sesiones en el gráfico de precios ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-024.md`
