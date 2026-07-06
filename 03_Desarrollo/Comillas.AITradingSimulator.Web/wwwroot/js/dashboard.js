@@ -178,11 +178,21 @@
                 if (ds.isVolume) return;   // la etiqueta de valor no aplica a las barras de volumen
                 const meta = chart.getDatasetMeta(i);
                 if (meta.hidden || !meta.data || meta.data.length === 0) return;
-                const last = meta.data[meta.data.length - 1];
-                const raw = ds.data[ds.data.length - 1];
-                if (!last || !raw || !Number.isFinite(last.y)) return;
+                // Último punto con valor. Con el eje de categorías (HV-038) los datos son
+                // numéricos y pueden acabar en null (huecos), así que buscamos el último válido.
+                let li = -1;
+                for (let k = ds.data.length - 1; k >= 0; k--) {
+                    const v = ds.data[k];
+                    const yv = (v && typeof v === 'object') ? v.y : v;
+                    if (v !== null && v !== undefined && Number.isFinite(Number(yv))) { li = k; break; }
+                }
+                if (li < 0) return;
+                const last = meta.data[li];
+                const rawv = ds.data[li];
+                const yval = (rawv && typeof rawv === 'object') ? rawv.y : rawv;
+                if (!last || !Number.isFinite(last.y)) return;
 
-                const text = priceFmt(raw.y);
+                const text = priceFmt(yval);
                 const y = Math.max(area.top + h / 2, Math.min(area.bottom - h / 2, last.y));
                 const w = Math.max(axisRight - axisLeft - 1, ctx.measureText(text).width + 8);
 
@@ -283,6 +293,27 @@
     }
     function insertLiveGaps(points) { return insertGaps(points, LIVE_GAP_MS); }
 
+    // Formateadores de etiquetas del eje de categorías (HV-038), elegidos por el span total.
+    // 'short' para el tick del eje; 'full' para el título del tooltip.
+    function labelFormatterFor(spanMs) {
+        const D = 86400000;
+        const mk = function (opts) { const f = new Intl.DateTimeFormat('es-ES', opts); return function (ms) { return f.format(new Date(ms)); }; };
+        if (spanMs <= 2 * D) {   // intradía (1D): hora
+            return { short: mk({ hour: '2-digit', minute: '2-digit' }),
+                     full: mk({ day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) };
+        }
+        if (spanMs <= 10 * D) {  // 5D (intradía multi-día): día + hora
+            const s = mk({ day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+            return { short: s, full: s };
+        }
+        if (spanMs <= 400 * D) { // diario: día y mes
+            return { short: mk({ day: '2-digit', month: 'short' }),
+                     full: mk({ day: '2-digit', month: 'short', year: 'numeric' }) };
+        }
+        const s = mk({ month: 'short', year: 'numeric' });   // semanal/largo: mes y año
+        return { short: s, full: s };
+    }
+
     // Variación acumulada del rango mostrado (HV-037): primer→último cierre de la serie
     // del símbolo seleccionado. Muestra el importe en la divisa del instrumento y el %.
     function updateChartDelta(series) {
@@ -315,55 +346,89 @@
         }
         updateChartDelta(series);
 
-        // Línea de precio (eje 'y') + barras de volumen (eje secundario 'yVol', HV-029).
+        // Eje de CATEGORÍAS (HV-038): las X son los instantes de cotización, sin huecos de
+        // fin de semana/festivos/nocturnos (el eje de tiempo los dejaba en blanco y unía los
+        // puntos con una diagonal recta engañosa). Para rangos diarios/semanales agrupamos por
+        // día (UTC) para que series de distintas bolsas casen en la misma fecha.
+        const DAILY_RANGES = ['1M', '3M', '6M', 'YTD', '1A', '3A', '5A'];
+        const snapDay = DAILY_RANGES.indexOf(chartMode) !== -1;
+        const keyOf = function (t) { return snapDay ? Math.floor(t / 86400000) * 86400000 : t; };
+
+        // Por serie: mapa clave(instante)->{ y: precio, v: volumen } + conjunto global de claves.
+        const perSeries = [];
+        const keySet = {};
+        (series || []).forEach(function (s, idx) {
+            if (!(selectedSymbol === 'ALL' || s.symbol === selectedSymbol)) return;
+            const map = {};
+            (s.points || []).forEach(function (p) {
+                const t = new Date(p.timestamp).getTime();
+                const y = Number(p.price);
+                if (!Number.isFinite(t) || !Number.isFinite(y)) return;
+                const k = keyOf(t);
+                map[k] = { y: y, v: Number(p.volume) || 0 };
+                keySet[k] = true;
+            });
+            if (Object.keys(map).length) perSeries.push({ symbol: s.symbol, map: map, idx: idx });
+        });
+
+        if (perSeries.length === 0) {
+            console.warn('[dashboard] Sin puntos de precio para graficar todavía.');
+            return;
+        }
+
+        // Categorías = instantes de cotización ordenados (sin fines de semana/festivos).
+        const cats = Object.keys(keySet).map(Number).sort(function (a, b) { return a - b; });
+        const span = cats.length > 1 ? (cats[cats.length - 1] - cats[0]) : 0;
+        const fmt = labelFormatterFor(span);
+        const labels = cats.map(function (t) { return fmt.short(t); });
+        const labelsFull = cats.map(function (t) { return fmt.full(t); });
+
+        // Datasets de precio + volumen alineados por índice de categoría. Un símbolo que no
+        // cotice en una categoría concreta queda a null (spanGaps:false corta su línea ahí).
         const priceDatasets = [];
         const volumeDatasets = [];
         let maxVol = 0;
-        (series || []).forEach(function (s, idx) {
-            if (!(selectedSymbol === 'ALL' || s.symbol === selectedSymbol)) return;
-            const pts = (s.points || [])
-                .map(function (p) { return { x: new Date(p.timestamp).getTime(), y: Number(p.price), v: Number(p.volume) || 0 }; })
-                .filter(function (p) { return Number.isFinite(p.x) && Number.isFinite(p.y); });
-            if (pts.length === 0) return;
-            const color = COLORS[idx % COLORS.length];
-            const priceXY = pts.map(function (p) { return { x: p.x, y: p.y }; });
+        perSeries.forEach(function (ps) {
+            const color = COLORS[ps.idx % COLORS.length];
+            const priceArr = cats.map(function (t) { const e = ps.map[t]; return e ? e.y : null; });
             priceDatasets.push({
-                label: s.symbol,
-                data: chartMode === 'LIVE' ? insertLiveGaps(priceXY) : priceXY,
-                spanGaps: false, borderColor: color, backgroundColor: 'transparent',
+                label: ps.symbol, data: priceArr, spanGaps: false,
+                borderColor: color, backgroundColor: 'transparent',
                 tension: 0.1, pointRadius: 0, borderWidth: 2, yAxisID: 'y', order: 0
             });
-            const volXY = pts.map(function (p) { if (p.v > maxVol) maxVol = p.v; return { x: p.x, y: p.v }; });
-            // Color por dirección de la barra: verde si el precio sube (alcista), rojo si baja
-            // (bajista). La primera barra se toma como alcista (sin previa con la que comparar).
-            const volColors = pts.map(function (p, i) {
-                const up = i === 0 ? true : p.y >= pts[i - 1].y;
-                return up ? hexToRgba('#198754', 0.5) : hexToRgba('#dc3545', 0.5);
+            // Volumen: verde si el precio sube respecto a la cotización previa (alcista), rojo si baja.
+            let prevY = null;
+            const volArr = [];
+            const volColors = [];
+            cats.forEach(function (t) {
+                const e = ps.map[t];
+                if (e) {
+                    if (e.v > maxVol) maxVol = e.v;
+                    const up = prevY === null ? true : e.y >= prevY;
+                    volColors.push(up ? hexToRgba('#198754', 0.5) : hexToRgba('#dc3545', 0.5));
+                    volArr.push(e.v);
+                    prevY = e.y;
+                } else {
+                    volArr.push(null);
+                    volColors.push('rgba(0,0,0,0)');
+                }
             });
             volumeDatasets.push({
-                label: s.symbol + ' · vol', data: volXY, type: 'bar', isVolume: true,
+                label: ps.symbol + ' · vol', data: volArr, type: 'bar', isVolume: true,
                 yAxisID: 'yVol', backgroundColor: volColors, borderWidth: 0,
                 order: 1, barPercentage: 1.0, categoryPercentage: 0.9, maxBarThickness: 10
             });
         });
         const datasets = priceDatasets.concat(volumeDatasets);
 
-        if (datasets.length === 0) {
-            console.warn('[dashboard] Sin puntos de precio para graficar todavía.');
-            return;
-        }
-
         // El eje de volumen se escala para que las barras ocupen ~el 25% inferior del área.
         const volMax = maxVol > 0 ? maxVol * 4 : 1;
-
-        const xb = computeXBounds(priceDatasets);
-        const unit = timeUnitFor(xb);
 
         if (priceChart === null) {
             const ctx = document.getElementById('chartPrices').getContext('2d');
             priceChart = new Chart(ctx, {
                 type: 'line',
-                data: { datasets: datasets },
+                data: { labels: labels, datasets: datasets },
                 plugins: [currentValuePlugin],
                 options: {
                     responsive: true,
@@ -372,12 +437,9 @@
                     interaction: { mode: 'nearest', intersect: false },
                     scales: {
                         x: {
-                            type: 'time',
-                            time: { unit: unit, displayFormats: DISPLAY_FORMATS },
+                            type: 'category',
                             grid: { display: true, color: function () { return gridColor(); } },
-                            ticks: { maxRotation: 0, autoSkip: true, color: function () { return axisTextColor(); } },
-                            min: xb ? xb.min : undefined,
-                            max: xb ? xb.max : undefined
+                            ticks: { maxRotation: 0, autoSkip: true, autoSkipPadding: 14, color: function () { return axisTextColor(); } }
                         },
                         y: {
                             type: 'linear',
@@ -406,6 +468,11 @@
                         },
                         tooltip: {
                             callbacks: {
+                                title: function (items) {
+                                    if (!items.length) return '';
+                                    const arr = items[0].chart.$labelsFull || [];
+                                    return arr[items[0].dataIndex] || '';
+                                },
                                 label: function (ctx) {
                                     return ctx.dataset.isVolume
                                         ? 'Volumen: ' + volFmt(ctx.parsed.y)
@@ -417,17 +484,12 @@
                 }
             });
         } else {
+            priceChart.data.labels = labels;
             priceChart.data.datasets = datasets;
-            priceChart.options.scales.x.time.unit = unit;
             if (priceChart.options.scales.yVol) priceChart.options.scales.yVol.max = volMax;
-            if (xb) {
-                priceChart.options.scales.x.min = xb.min;
-                priceChart.options.scales.x.max = xb.max;
-            }
             priceChart.update();
         }
-
-        positionCountdown();
+        priceChart.$labelsFull = labelsFull;   // para el título del tooltip (fecha/hora completa)
     }
 
     // Coloca la cuenta atrás justo debajo de la etiqueta de valor de la serie activa.
