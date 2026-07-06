@@ -57,6 +57,22 @@ public class TwelveDataProviderTests
     }
 
     [Fact]
+    public async Task GetLatestAsync_Http404ConCuerpoError_LanzaMensajeClaro()
+    {
+        // Símbolo no disponible en el plan → Twelve Data responde 404 con JSON de error.
+        var handler = new MockHttpMessageHandler(_ => new HttpResponseMessage(System.Net.HttpStatusCode.NotFound)
+        {
+            Content = new StringContent(
+                """{"code":404,"message":"This symbol is available starting with the Grow plan","status":"error"}""",
+                System.Text.Encoding.UTF8, "application/json")
+        });
+        var provider = NewProvider(handler);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => provider.GetLatestAsync("HY9H", BaseTime));
+        Assert.Contains("Grow plan", ex.Message);   // mensaje de TD, no "404 Not Found"
+    }
+
+    [Fact]
     public async Task GetLatestAsync_SinVolumen_UsaCero()
     {
         const string noVol = """{"close":"50.5","currency":"EUR"}""";

@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-036 Mensaje de error claro del proveedor (Twelve Data) + log sin stack ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Mejora
+- **Spec**: `_duran/specs/HV-036.md`
+- **Resumen**: Con Twelve Data (plan free) el feed logueaba `HttpRequestException 404` con stack cada ciclo. `TwelveDataProvider` ahora parsea el body de error (JSON `{status,message}` también en 4xx) y lanza el **mensaje de TD** ("available starting with the Grow plan"); el generador loguea solo el mensaje (una línea, sin stack). 1 test (404 con cuerpo → mensaje). 154 verdes. **Diagnóstico**: el plan free de Twelve Data es solo US; `HY9H`/`000660`/`NUCL.SW` requieren plan de pago → en free usar símbolos US o seguir con Yahoo.
+
 #### HV-035 Fix: el histórico no rompe con símbolos no válidos (404) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Bugfix
 - **Spec**: `_duran/specs/HV-035.md`

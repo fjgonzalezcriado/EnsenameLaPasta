@@ -91,7 +91,9 @@ public sealed class MarketTickGeneratorService : BackgroundService
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                _logger.LogWarning(ex, "Error obteniendo tick para {Symbol}, se omite este ciclo.", item.Symbol);
+                // Solo el mensaje (no el stack): suele ser un símbolo no disponible en el
+                // proveedor/plan y se repite cada ciclo; evita ruido en el log.
+                _logger.LogWarning("Tick {Symbol} omitido este ciclo: {Error}", item.Symbol, ex.Message);
             }
         }
 
