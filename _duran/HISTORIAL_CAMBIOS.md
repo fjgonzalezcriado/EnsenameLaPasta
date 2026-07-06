@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.18.0-volumen] - 2026-07-06
+
+### Added
+- ✅ **HV-029** **Volumen de negociación** en el gráfico de precios (barras en eje secundario bajo el precio, LIVE e histórico). `PricePoint.Volume` + parseo de `indicators.quote[0].volume` en `YahooHistoryProvider` + volumen en la serie LIVE (`MarketTick.Volume`). Eje `yVol` oculto (~25% inferior), volumen fuera de leyenda, tooltip entero.
+
+### Métricas
+- 137 tests verdes (135 + 2). Verificado con Playwright (barras de volumen en 1D).
+
+---
+
 ## [1.17.0-persist-range] - 2026-07-06
 
 ### Added

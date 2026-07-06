@@ -169,7 +169,7 @@ public sealed class DashboardService : IDashboardService
 
             var ordered = points
                 .OrderBy(t => t.Timestamp)
-                .Select(t => new PricePoint(t.Timestamp, t.Price))
+                .Select(t => new PricePoint(t.Timestamp, t.Price, t.Volume))
                 .ToList();
 
             priceSeries.Add(new PriceSeriesDto(symbol, ordered));

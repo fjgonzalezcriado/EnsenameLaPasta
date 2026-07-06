@@ -73,4 +73,4 @@ public sealed record ClosedTradeDto(
 
 public sealed record PriceSeriesDto(string Symbol, IReadOnlyList<PricePoint> Points);
 
-public sealed record PricePoint(DateTime Timestamp, decimal Price);
+public sealed record PricePoint(DateTime Timestamp, decimal Price, decimal Volume = 0);
