@@ -13,62 +13,6 @@
 
                                       },
                          "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-05-26 16:51:29"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-06-15 10:47:58"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-06-15 10:49:25"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-06-15 10:54:51"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
                          "fecha":  "2026-06-15 11:00:34"
                      },
                      {
@@ -701,6 +645,67 @@
                                       },
                          "versionProyecto":  "1.11.0-pnl-base",
                          "fecha":  "2026-06-29 15:11:03"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.12.0-fx-background",
+                         "fecha":  "2026-06-29 15:16:37"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.12.0-fx-background",
+                         "fecha":  "2026-06-29 15:27:57"
+                     },
+                     {
+                         "archivosModificados":  3,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          ".claude/settings.json",
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.12.0-fx-background",
+                         "fecha":  "2026-07-06 09:38:13"
+                     },
+                     {
+                         "archivosModificados":  3,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          ".claude/settings.json",
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.12.0-fx-background",
+                         "fecha":  "2026-07-06 09:56:35"
                      }
                  ]
 }
