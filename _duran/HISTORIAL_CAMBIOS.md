@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.19.0-volumen-color] - 2026-07-06
+
+### Changed
+- ✅ **HV-030** Las barras de volumen se colorean por dirección: **verde** si el precio sube en la barra (alcista), **rojo** si baja (bajista). Convención financiera estándar (`backgroundColor` por barra).
+
+### Métricas
+- Build limpio (solo JS). Verificado con Playwright.
+
+---
+
 ## [1.18.0-volumen] - 2026-07-06
 
 ### Added

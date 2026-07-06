@@ -304,9 +304,15 @@
                 tension: 0.1, pointRadius: 0, borderWidth: 2, yAxisID: 'y', order: 0
             });
             const volXY = pts.map(function (p) { if (p.v > maxVol) maxVol = p.v; return { x: p.x, y: p.v }; });
+            // Color por dirección de la barra: verde si el precio sube (alcista), rojo si baja
+            // (bajista). La primera barra se toma como alcista (sin previa con la que comparar).
+            const volColors = pts.map(function (p, i) {
+                const up = i === 0 ? true : p.y >= pts[i - 1].y;
+                return up ? hexToRgba('#198754', 0.5) : hexToRgba('#dc3545', 0.5);
+            });
             volumeDatasets.push({
                 label: s.symbol + ' · vol', data: volXY, type: 'bar', isVolume: true,
-                yAxisID: 'yVol', backgroundColor: hexToRgba(color, 0.16), borderWidth: 0,
+                yAxisID: 'yVol', backgroundColor: volColors, borderWidth: 0,
                 order: 1, barPercentage: 1.0, categoryPercentage: 0.9, maxBarThickness: 10
             });
         });

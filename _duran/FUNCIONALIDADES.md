@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-030 Barras de volumen coloreadas por dirección (verde/rojo) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-030.md`
+- **Resumen**: Refinamiento de HV-029. Las barras de volumen pasan de un color único a **verde** (precio sube en esa barra, alcista) / **rojo** (precio baja, bajista) — convención financiera estándar. `backgroundColor` como array por barra: `up = precio[i] >= precio[i-1]` → `#198754@0.5` / `#dc3545@0.5`; primera barra alcista. Solo JS. Verificado con Playwright: barras coherentes con la línea de precio, sin errores de consola.
+
 #### HV-029 Volumen de negociación en el gráfico de precios ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-029.md`
