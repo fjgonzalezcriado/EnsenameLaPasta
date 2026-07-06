@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.14.0-account-gaps] - 2026-07-06
+
+### Fixed
+- ✅ **HV-025** El gráfico "Evolución del valor de cuenta" ya no comprime el tramo reciente en un falso "pico": se aplica el corte de huecos (`insertGaps` genérico + `ACCOUNT_GAP_MS` 30 min + `spanGaps:false`) a las dos series. Resuelve el hallazgo #2 de la revisión con Playwright **sin borrar datos** (se inspeccionó `/api/account/history`: los snapshots eran legítimos, no había outlier).
+
+### Métricas
+- Build limpio (solo JS). Verificado con Playwright.
+
+---
+
 ## [1.13.0-chart-gaps] - 2026-07-06
 
 ### Fixed
