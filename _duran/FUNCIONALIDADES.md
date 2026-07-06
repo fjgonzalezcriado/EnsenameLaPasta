@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-027 El gráfico de precios arranca en el rango diario (1D) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-027.md`
+- **Resumen**: La vista "En vivo" (ticks locales dispersos) dejaba de tener sentido como estado inicial. Ahora el gráfico de precios **arranca en 1D** (intradía real de Yahoo): `chartMode` inicial `'1D'`, botón 1D activo por defecto, y en el arranque `fetchAndRender(true).then(loadHistory(chartMode))` dibuja el histórico tras cargar los símbolos. "En vivo" se conserva como opción. Solo JS/cshtml. Verificado con Playwright: al cargar muestra el intradía 1D (HY9H.F ~29 puntos, "Histórico Yahoo · 1D"), sin errores de consola.
+
 #### HV-026 Selector de rango temporal en el gráfico del valor de cuenta ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-026.md`

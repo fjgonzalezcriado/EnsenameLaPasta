@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.15.0-account-range",
+                   "version_actual":  "1.16.0-chart-default-1d",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-027",
+                                               "titulo":  "El grafico de precios arranca en el rango diario (1D)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-07-06",
+                                               "fechaInicio":  "2026-07-06",
+                                               "fechaCompletado":  "2026-07-06",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-027.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "La vista En vivo (ticks locales dispersos) no tenia sentido como estado inicial. Ahora el grafico de precios arranca en 1D (intradia real de Yahoo): chartMode inicial 1D, boton 1D activo por defecto, y en el arranque fetchAndRender(true).then(loadHistory(chartMode)) dibuja el historico tras cargar los simbolos. En vivo se conserva como opcion. Solo JS/cshtml. Verificado con Playwright: al cargar muestra el intradia 1D (HY9H.F ~29 puntos, Historico Yahoo 1D), sin errores de consola. Rama feature/HV-027-grafico-default-1d."
+                                           },
+                                           {
                                                "codigo":  "HV-026",
                                                "titulo":  "Selector de rango temporal en el grafico del valor de cuenta",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-026.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Cierra la mejora opcional de HV-025. Sustituye Puntos:Ultimos N por Rango: 1 dia/1 semana/1 mes/Todo. filterAccountByRange filtra los snapshots a la ventana anclada al ultimo snapshot (no a Date.now, para que el zoom funcione aunque la app haya estado apagada). fetchAccountHistory cachea y el cambio de rango re-filtra sin refetch; rango persistido en localStorage. Solo JS/cshtml. Verificado con Playwright: rango 1 dia muestra el tramo reciente legible (eje en minutos, curva 28306->26711->~32800), sin errores de consola. Rama feature/HV-026-rango-cuenta."
+                                               "notas":  "Cierra la mejora opcional de HV-025. Sustituye Puntos:Ultimos N por Rango: 1 dia/1 semana/1 mes/Todo. filterAccountByRange filtra los snapshots a la ventana anclada al ultimo snapshot (no a Date.now, para que el zoom funcione aunque la app haya estado apagada). fetchAccountHistory cachea y el cambio de rango re-filtra sin refetch; rango persistido en localStorage. Solo JS/cshtml. Verificado con Playwright: rango 1 dia muestra el tramo reciente legible (eje en minutos, curva 28306-\u003e26711-\u003e~32800), sin errores de consola. Rama feature/HV-026-rango-cuenta."
                                            },
                                            {
                                                "codigo":  "HV-025",
@@ -756,10 +773,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (build limpio; HV-026 selector de rango temporal en el grafico del valor de cuenta - fix solo JS verificado con Playwright). 135 tests C# sin cambios",
+                     "ultimo_build":  "2026-07-06 OK (build limpio; HV-027 el grafico de precios arranca en 1D - fix solo JS verificado con Playwright). 135 tests C# sin cambios",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  26
+                     "evolutivos_completados_mes":  27
                  },
     "alertas":  {
                     "activas":  [
