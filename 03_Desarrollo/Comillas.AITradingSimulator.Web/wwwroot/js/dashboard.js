@@ -2,9 +2,12 @@
     'use strict';
 
     const REFRESH_MS = 3000;
-    // Margen visual (en unidades de precio) por encima del techo y por debajo del suelo del
-    // rango, para que la línea no quede pegada a los bordes del gráfico (HV-039).
-    const PRICE_Y_MARGIN = 20;
+    // Margen del eje Y por encima del techo y por debajo del suelo, como fracción del precio
+    // (HV-039 fijo → HV-040 seleccionable). 0 = ajustado (máxima extensión); mayor = más
+    // compresión. Relativo al precio para que funcione igual en cualquier instrumento.
+    const Y_MARGIN_ALLOWED = [0, 0.01, 0.02, 0.05, 0.10, 0.20];
+    let yMarginPct = 0.02;
+    let lastRenderedSeries = null;   // última serie dibujada (para re-render al cambiar el margen)
     const COLORS = ['#0d6efd', '#fd7e14', '#198754', '#dc3545', '#6f42c1', '#20c997'];
     // En modo "En vivo" los ticks se capturan cada ~30 s, pero entre sesiones (app apagada)
     // hay huecos de horas/días. Si dos ticks consecutivos distan más de esto, cortamos la
@@ -381,6 +384,7 @@
             console.error('[dashboard] Chart.js no está cargado (¿CDN bloqueado o sin conexión?).');
             return;
         }
+        lastRenderedSeries = series;   // para re-render al cambiar el margen del eje (HV-040)
         updateChartDelta(series);
 
         // Eje de CATEGORÍAS (HV-038): las X son los instantes de cotización, sin huecos de
@@ -462,7 +466,8 @@
         const volMax = maxVol > 0 ? maxVol * 4 : 1;
 
         // Techo (máximo) y suelo (mínimo) del precio en el rango; el eje Y se fija con un
-        // margen de ±PRICE_Y_MARGIN para que la línea no quede pegada a los bordes (HV-039).
+        // margen relativo al precio (selector HV-040) para que la línea no quede pegada a los
+        // bordes. 0 = ajustado (máxima extensión); mayor = más compresión.
         let hi = -Infinity, lo = Infinity;
         priceDatasets.forEach(function (ds) {
             ds.data.forEach(function (v) {
@@ -474,8 +479,16 @@
             });
         });
         const hasHiLo = Number.isFinite(hi) && Number.isFinite(lo);
-        const yMin = hasHiLo ? lo - PRICE_Y_MARGIN : undefined;
-        const yMax = hasHiLo ? hi + PRICE_Y_MARGIN : undefined;
+        let yMin, yMax;
+        if (hasHiLo) {
+            const margin = ((hi + lo) / 2) * yMarginPct;   // margen simétrico relativo al precio medio
+            yMin = lo - margin;
+            yMax = hi + margin;
+            if (yMax - yMin < 1e-9) {   // datos planos + margen 0: evita un eje de rango nulo
+                const eps = Math.max(Math.abs(hi) * 0.005, 0.5);
+                yMin = lo - eps; yMax = hi + eps;
+            }
+        }
 
         if (priceChart === null) {
             const ctx = document.getElementById('chartPrices').getContext('2d');
@@ -783,6 +796,23 @@
                 fetchAndRender(true); // re-pedir con el nuevo histórico y redibujar
             });
         }
+    }
+
+    // ── Selector de margen del eje Y (compresión/extensión) (HV-040) ────────────
+    function initYMarginControl() {
+        try {
+            const saved = parseFloat(localStorage.getItem('chartYMargin'));
+            if (Y_MARGIN_ALLOWED.indexOf(saved) !== -1) yMarginPct = saved;
+        } catch (e) { }
+        const sel = document.getElementById('yMarginSelect');
+        if (!sel) return;
+        sel.value = String(yMarginPct);
+        sel.addEventListener('change', function () {
+            const next = parseFloat(sel.value);
+            yMarginPct = Y_MARGIN_ALLOWED.indexOf(next) !== -1 ? next : 0.02;
+            try { localStorage.setItem('chartYMargin', String(yMarginPct)); } catch (e) { }
+            if (lastRenderedSeries) renderChart(lastRenderedSeries);   // recalcula el eje sin refetch
+        });
     }
 
     // ── Barra de rango temporal: histórico real de Yahoo (/api/history) ─────────
@@ -1313,6 +1343,7 @@
     initChartRefreshControl();
     initSymbolControl();
     initHistoryControl();
+    initYMarginControl();
     initRangeBar();
     initInstrumentSearch();
     initRemoveSymbol();

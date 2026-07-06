@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.26.0-techo-suelo",
+                   "version_actual":  "1.27.0-margen-eje-y",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-040",
+                                               "titulo":  "Selector de margen del eje Y (compresion/extension)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-07-06",
+                                               "fechaInicio":  "2026-07-06",
+                                               "fechaCompletado":  "2026-07-06",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-040.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Sustituye el margen fijo de HV-039 (+-20 absoluto) por un selector yMarginSelect en el grafico: Ajustado (0 por ciento, maxima extension), +-1/+-2/+-5/+-10/+-20 por ciento (mas compresion). El margen es relativo al precio medio del rango (margin = ((techo+suelo)/2) x pct), asi vale para cualquier instrumento (1400 o 3). Ajustado deja la linea pegada a los bordes (epsilon minimo si los datos son planos). yMarginPct (default 0.02) persistido en localStorage (chartYMargin); el cambio recalcula el eje sin refetch (re-render con lastRenderedSeries). Se mantienen las lineas de techo/suelo. Solo JS/cshtml, sin migracion. 154 verdes. Smoke Playwright: 1M (techo 1700/suelo 1120) -> Ajustado 1120-1700, +-5 1049,5-1770,5, +-20 838-1982, +-2 1091,8-1728,2; persistencia tras reload = 0.02; 0 errores. Nota: tocar la vista Razor (.cshtml) obliga a recompilar (con --no-build no se refleja). Rama feature/HV-040-margen-eje-y."
+                                           },
+                                           {
                                                "codigo":  "HV-039",
                                                "titulo":  "Lineas de techo/suelo mas margen en el eje Y del grafico de precios",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-039.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "El eje Y auto-escalaba pegado a los datos (p.ej. 1350-1380) sin referencia del maximo/minimo. renderChart calcula techo (max) y suelo (min) del rango y fija el eje con min = suelo - 20 y max = techo + 20 (PRICE_Y_MARGIN = 20) como margen visual, al crear y al actualizar. Nuevo plugin highLowLinesPlugin (junto a currentValuePlugin) dibuja dos lineas discontinuas horizontales en techo y suelo, etiquetadas (Techo .../Suelo ...), leyendo chart.hiLo fijado por renderChart. Color segun tema; el grafico de valor de cuenta no cambia. Solo JS, sin migracion. 154 verdes. Smoke Playwright: 1M techo 1700/suelo 1120 -> eje 1100-1720; 5D 1190/1570 -> 1170/1590; 0 errores; screenshot con Suelo 1190,00 y margen. Nota: margen fijo (20 en la divisa del instrumento), pensado para precios ~1300-1700; para precios muy bajos convendria margen relativo (mejora futura). Rama feature/HV-039-techo-suelo."
+                                               "notas":  "El eje Y auto-escalaba pegado a los datos (p.ej. 1350-1380) sin referencia del maximo/minimo. renderChart calcula techo (max) y suelo (min) del rango y fija el eje con min = suelo - 20 y max = techo + 20 (PRICE_Y_MARGIN = 20) como margen visual, al crear y al actualizar. Nuevo plugin highLowLinesPlugin (junto a currentValuePlugin) dibuja dos lineas discontinuas horizontales en techo y suelo, etiquetadas (Techo .../Suelo ...), leyendo chart.hiLo fijado por renderChart. Color segun tema; el grafico de valor de cuenta no cambia. Solo JS, sin migracion. 154 verdes. Smoke Playwright: 1M techo 1700/suelo 1120 -\u003e eje 1100-1720; 5D 1190/1570 -\u003e 1170/1590; 0 errores; screenshot con Suelo 1190,00 y margen. Nota: margen fijo (20 en la divisa del instrumento), pensado para precios ~1300-1700; para precios muy bajos convendria margen relativo (mejora futura). Rama feature/HV-039-techo-suelo."
                                            },
                                            {
                                                "codigo":  "HV-038",
@@ -968,7 +985,7 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037 (variacion del rango + eliminar En vivo), HV-038 (eje de categorias: findes/festivos ya no aparecen) y HV-039 (lineas de techo/suelo + margen +-20 en el eje Y). Todo solo frontend, sin migracion. 154 tests verdes; smokes Playwright OK con Yahoo activo.",
+                         "resumenSesion":  "HV-037 (variacion del rango + eliminar En vivo), HV-038 (eje de categorias: findes/festivos ya no aparecen), HV-039 (lineas de techo/suelo) y HV-040 (selector de margen del eje Y relativo al precio, compresion/extension). Todo solo frontend, sin migracion. 154 tests verdes; smokes Playwright OK con Yahoo activo.",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
                                                      "_duran/METRICAS.json"
@@ -977,10 +994,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (154 tests verdes; HV-039 lineas de techo/suelo + margen +-20 en el eje Y del grafico de precios; solo frontend, sin migracion; smoke Playwright verde)",
+                     "ultimo_build":  "2026-07-06 OK (154 tests verdes; HV-040 selector de margen del eje Y relativo al precio, compresion/extension; solo frontend, sin migracion; smoke Playwright verde)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  39
+                     "evolutivos_completados_mes":  40
                  },
     "alertas":  {
                     "activas":  [
