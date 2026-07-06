@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.13.0-chart-gaps] - 2026-07-06
+
+### Fixed
+- ✅ **HV-024** El gráfico de precios "En vivo" ya no dibuja una diagonal recta engañosa a través de los huecos entre sesiones. `insertLiveGaps` inserta un punto nulo entre ticks con Δt > 5 min y `spanGaps:false` corta la línea. Solo en modo LIVE (el histórico de Yahoo es contiguo). Hallazgo de una revisión visual con Playwright.
+
+### Notas
+- Revisión visual del dashboard con Playwright (Chrome headless). Hallazgo abierto #2: el gráfico "Evolución del valor de cuenta" tiene una discontinuidad por mezclar snapshots pre-FX/pre-posiciones con los nuevos (se auto-corrige al acumular snapshots comparables).
+
+---
+
 ## [1.12.0-fx-background] - 2026-06-29
 
 ### Added

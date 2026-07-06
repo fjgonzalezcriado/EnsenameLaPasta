@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-024 Cortar huecos entre sesiones en el gráfico de precios ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-024.md`
+- **Resumen**: Revisión visual con **Playwright** (Chrome headless). El gráfico "En vivo" unía ticks de sesiones separadas por días con una diagonal recta engañosa. Fix (solo JS): `insertLiveGaps` inserta un punto nulo entre ticks con Δt > `LIVE_GAP_MS` (5 min) y `spanGaps:false` corta la línea sobre el hueco; solo en modo LIVE (el histórico Yahoo no se toca). Verificado con Playwright: desaparece la diagonal falsa, sin errores de consola. Hallazgo abierto (#2): discontinuidad del gráfico de valor de cuenta por snapshots pre-FX (se auto-corrige; purga opcional).
+
 #### HV-023 Refrescar FX en background ✅
 - **Estado**: ✅ Completado · **Período**: 2026-06-29 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-023.md`

@@ -16,6 +16,13 @@
 
 ---
 
+## Revisión visual con Playwright (2026-07-06)
+- [x] **HV-024**: revisados los gráficos con Playwright (Chrome headless sobre `localhost:5177`). El gráfico de precios "En vivo" dibujaba una **diagonal falsa** uniendo ticks de sesiones separadas por días → arreglado con `insertLiveGaps` + `spanGaps:false` (corta la línea en huecos > 5 min; solo LIVE). Verificado: la diagonal desaparece, sin errores de consola. Rama `feature/HV-024-gaps-grafico`.
+- [ ] **Hallazgo #2 abierto**: el gráfico "Evolución del valor de cuenta" tiene una discontinuidad por mezclar snapshots pre-FX/pre-posiciones USD-CHF con los nuevos. Se auto-corrige al acumular snapshots comparables; purga opcional (borra histórico → requiere confirmación).
+- Multidivisa confirmado en vivo: MBOT (USD) y NUCL.SW (CHF) muestran `≈ €` por fila (HV-019/022) correctamente.
+
+---
+
 ## Control de versiones (2026-06-29)
 - [x] Proyecto bajo **Git** e inicializado; commit base de todo (HV-001..HV-019) + `.gitattributes`; excluidos binarios SQLite.
 - [x] Subido a **GitHub (repo privado)** `github.com/fjgonzalezcriado/EnsenameLaPasta` (rama `main`). Resuelto un cruce de credenciales (cuenta `RemitiraLaLluvia` cacheada por error) y merge del init remoto conservando nuestro `.gitignore`.

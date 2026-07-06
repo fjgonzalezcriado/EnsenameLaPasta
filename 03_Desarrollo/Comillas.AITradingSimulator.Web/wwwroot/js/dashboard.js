@@ -3,6 +3,10 @@
 
     const REFRESH_MS = 3000;
     const COLORS = ['#0d6efd', '#fd7e14', '#198754', '#dc3545', '#6f42c1', '#20c997'];
+    // En modo "En vivo" los ticks se capturan cada ~30 s, pero entre sesiones (app apagada)
+    // hay huecos de horas/días. Si dos ticks consecutivos distan más de esto, cortamos la
+    // línea (punto nulo) para no dibujar una diagonal recta engañosa sobre el hueco.
+    const LIVE_GAP_MS = 5 * 60 * 1000;
     let priceChart = null;
     let selectedSymbol = null;   // símbolo activo en el gráfico, o 'ALL'
     let lastSeries = [];         // última priceSeries recibida (para re-render al cambiar de símbolo)
@@ -250,6 +254,20 @@
         if (sel.value !== selectedSymbol) sel.value = selectedSymbol;
     }
 
+    // Inserta un punto nulo entre ticks separados por más de LIVE_GAP_MS para que
+    // Chart.js corte la línea sobre los huecos entre sesiones (evita la diagonal falsa).
+    function insertLiveGaps(points) {
+        if (points.length < 2) return points;
+        const out = [];
+        for (let i = 0; i < points.length; i++) {
+            if (i > 0 && (points[i].x - points[i - 1].x) > LIVE_GAP_MS) {
+                out.push({ x: points[i - 1].x + Math.floor((points[i].x - points[i - 1].x) / 2), y: null });
+            }
+            out.push(points[i]);
+        }
+        return out;
+    }
+
     function renderChart(series) {
         if (typeof Chart === 'undefined') {
             console.error('[dashboard] Chart.js no está cargado (¿CDN bloqueado o sin conexión?).');
@@ -262,7 +280,8 @@
                 .filter(function (pt) { return Number.isFinite(pt.x) && Number.isFinite(pt.y); });
             return {
                 label: s.symbol,
-                data: data,
+                data: chartMode === 'LIVE' ? insertLiveGaps(data) : data,
+                spanGaps: false,   // no unir a través de puntos nulos (huecos entre sesiones)
                 borderColor: COLORS[idx % COLORS.length],
                 backgroundColor: 'transparent',
                 tension: 0.1,
