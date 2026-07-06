@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-029 Volumen de negociación en el gráfico de precios ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-029.md`
+- **Resumen**: Muestra el **volumen** como barras en un eje secundario bajo la línea de precio (patrón financiero). Viene de Yahoo por el mismo endpoint (`indicators.quote[0].volume`). `PricePoint.Volume` (default 0), `YahooHistoryProvider` parsea el array de volumen, `DashboardService` pasa `MarketTick.Volume` a la serie LIVE. Frontend: dataset `type:'bar'` en eje oculto `yVol` (`max=maxVol×4`, ~25% inferior), color de la serie al 16 %, fuera de leyenda, tooltip entero. Sin migración. 2 tests del parseo. 137 verdes. Verificado con Playwright: barras visibles en 1D bajo el precio, sin errores de consola.
+
 #### HV-028 Persistir el rango del gráfico de precios entre sesiones ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-028.md`

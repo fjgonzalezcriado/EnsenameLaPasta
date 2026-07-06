@@ -56,7 +56,9 @@ public sealed class YahooHistoryProvider : IMarketHistoryProvider
 
         var result = payload.Chart?.Result?.FirstOrDefault();
         var timestamps = result?.Timestamp;
-        var closes = result?.Indicators?.Quote?.FirstOrDefault()?.Close;
+        var quote = result?.Indicators?.Quote?.FirstOrDefault();
+        var closes = quote?.Close;
+        var volumes = quote?.Volume;   // array de volumen en paralelo al de cierre
         if (timestamps is null || closes is null)
             return [];
 
@@ -67,7 +69,10 @@ public sealed class YahooHistoryProvider : IMarketHistoryProvider
             var close = closes[i];
             if (close is null or <= 0) continue; // Yahoo intercala nulos (sesiones sin cierre)
             var ts = DateTimeOffset.FromUnixTimeSeconds(timestamps[i]).UtcDateTime;
-            points.Add(new PricePoint(ts, (decimal)close.Value));
+            var volume = (volumes is not null && i < volumes.Count && volumes[i].HasValue)
+                ? (decimal)volumes[i]!.Value
+                : 0m;
+            points.Add(new PricePoint(ts, (decimal)close.Value, volume));
         }
 
         _logger.LogDebug("Yahoo histórico {Symbol} {Range}: {Count} puntos.", yahooSymbol, range, points.Count);
@@ -97,5 +102,6 @@ public sealed class YahooHistoryProvider : IMarketHistoryProvider
         [property: JsonPropertyName("quote")] List<ChartQuote>? Quote);
 
     private sealed record ChartQuote(
-        [property: JsonPropertyName("close")] List<double?>? Close);
+        [property: JsonPropertyName("close")] List<double?>? Close,
+        [property: JsonPropertyName("volume")] List<long?>? Volume);
 }

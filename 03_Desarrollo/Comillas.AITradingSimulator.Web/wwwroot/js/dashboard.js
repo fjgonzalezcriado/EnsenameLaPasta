@@ -39,6 +39,15 @@
         return num(n);
     }
     function priceFmt(v) { return PRICE.format(Number(v) || 0); }
+    const VOL = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
+    function volFmt(v) { return VOL.format(Number(v) || 0); }
+    // #rrggbb -> rgba(r,g,b,a) para las barras de volumen (color de la serie, tenue).
+    function hexToRgba(hex, a) {
+        const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+        if (!m) return 'rgba(108,117,125,' + a + ')';
+        const n = parseInt(m[1], 16);
+        return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+    }
     function fmtBytes(b) {
         b = Number(b) || 0;
         if (b >= 1048576) return (b / 1048576).toFixed(1) + ' MB';
@@ -162,6 +171,7 @@
             const axisRight = chart.width;        // borde derecho del canvas
             const h = 18;
             chart.data.datasets.forEach(function (ds, i) {
+                if (ds.isVolume) return;   // la etiqueta de valor no aplica a las barras de volumen
                 const meta = chart.getDatasetMeta(i);
                 if (meta.hidden || !meta.data || meta.data.length === 0) return;
                 const last = meta.data[meta.data.length - 1];
@@ -275,31 +285,42 @@
             return;
         }
 
-        const datasets = (series || []).map(function (s, idx) {
-            const data = (s.points || [])
-                .map(function (p) { return { x: new Date(p.timestamp).getTime(), y: Number(p.price) }; })
-                .filter(function (pt) { return Number.isFinite(pt.x) && Number.isFinite(pt.y); });
-            return {
+        // Línea de precio (eje 'y') + barras de volumen (eje secundario 'yVol', HV-029).
+        const priceDatasets = [];
+        const volumeDatasets = [];
+        let maxVol = 0;
+        (series || []).forEach(function (s, idx) {
+            if (!(selectedSymbol === 'ALL' || s.symbol === selectedSymbol)) return;
+            const pts = (s.points || [])
+                .map(function (p) { return { x: new Date(p.timestamp).getTime(), y: Number(p.price), v: Number(p.volume) || 0 }; })
+                .filter(function (p) { return Number.isFinite(p.x) && Number.isFinite(p.y); });
+            if (pts.length === 0) return;
+            const color = COLORS[idx % COLORS.length];
+            const priceXY = pts.map(function (p) { return { x: p.x, y: p.y }; });
+            priceDatasets.push({
                 label: s.symbol,
-                data: chartMode === 'LIVE' ? insertLiveGaps(data) : data,
-                spanGaps: false,   // no unir a través de puntos nulos (huecos entre sesiones)
-                borderColor: COLORS[idx % COLORS.length],
-                backgroundColor: 'transparent',
-                tension: 0.1,
-                pointRadius: 0,
-                borderWidth: 2
-            };
-        }).filter(function (ds) {
-            // Filtra por símbolo seleccionado (o todos), descartando series vacías.
-            return ds.data.length > 0 && (selectedSymbol === 'ALL' || ds.label === selectedSymbol);
+                data: chartMode === 'LIVE' ? insertLiveGaps(priceXY) : priceXY,
+                spanGaps: false, borderColor: color, backgroundColor: 'transparent',
+                tension: 0.1, pointRadius: 0, borderWidth: 2, yAxisID: 'y', order: 0
+            });
+            const volXY = pts.map(function (p) { if (p.v > maxVol) maxVol = p.v; return { x: p.x, y: p.v }; });
+            volumeDatasets.push({
+                label: s.symbol + ' · vol', data: volXY, type: 'bar', isVolume: true,
+                yAxisID: 'yVol', backgroundColor: hexToRgba(color, 0.16), borderWidth: 0,
+                order: 1, barPercentage: 1.0, categoryPercentage: 0.9, maxBarThickness: 10
+            });
         });
+        const datasets = priceDatasets.concat(volumeDatasets);
 
         if (datasets.length === 0) {
             console.warn('[dashboard] Sin puntos de precio para graficar todavía.');
             return;
         }
 
-        const xb = computeXBounds(datasets);
+        // El eje de volumen se escala para que las barras ocupen ~el 25% inferior del área.
+        const volMax = maxVol > 0 ? maxVol * 4 : 1;
+
+        const xb = computeXBounds(priceDatasets);
         const unit = timeUnitFor(xb);
 
         if (priceChart === null) {
@@ -327,13 +348,33 @@
                             position: 'right',
                             grid: { display: true, color: function () { return gridColor(); } },
                             ticks: { callback: function (v) { return priceFmt(v); }, color: function () { return axisTextColor(); } }
+                        },
+                        yVol: {
+                            type: 'linear',
+                            position: 'left',
+                            display: false,          // eje oculto: las barras solo aportan contexto de volumen
+                            min: 0,
+                            max: volMax,
+                            grid: { display: false }
                         }
                     },
                     plugins: {
-                        legend: { position: 'top' },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                filter: function (item, data) {
+                                    const ds = data.datasets[item.datasetIndex];
+                                    return !(ds && ds.isVolume);   // ocultar las series de volumen de la leyenda
+                                }
+                            }
+                        },
                         tooltip: {
                             callbacks: {
-                                label: function (ctx) { return ctx.dataset.label + ': ' + priceFmt(ctx.parsed.y); }
+                                label: function (ctx) {
+                                    return ctx.dataset.isVolume
+                                        ? 'Volumen: ' + volFmt(ctx.parsed.y)
+                                        : ctx.dataset.label + ': ' + priceFmt(ctx.parsed.y);
+                                }
                             }
                         }
                     }
@@ -342,6 +383,7 @@
         } else {
             priceChart.data.datasets = datasets;
             priceChart.options.scales.x.time.unit = unit;
+            if (priceChart.options.scales.yVol) priceChart.options.scales.yVol.max = volMax;
             if (xb) {
                 priceChart.options.scales.x.min = xb.min;
                 priceChart.options.scales.x.max = xb.max;
