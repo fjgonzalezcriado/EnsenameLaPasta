@@ -18,6 +18,19 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.20.0-twelvedata] - 2026-07-06
+
+### Added
+- ✅ **HV-031** Segundo proveedor de datos en vivo: **Twelve Data**. `TwelveDataProvider : IMarketDataProvider` (endpoint `/quote`: precio+volumen+divisa) + `TwelveDataOptions` (BaseUrl/ApiKey/Timeout). Selector por `MarketData:ProviderType` ("TwelveData" | "YahooFinance" default) en DI. Badge de proveedor para Twelve Data. El histórico sigue en Yahoo.
+
+### Métricas
+- 142 tests verdes (137 + 5). Smoke real: selector Yahoo↔TwelveData por config; arranque OK.
+
+### Notas
+- Requiere API key de twelvedata.com (plan gratuito 8 req/min). `ApiKey` vacía en appsettings (no commitear con valor).
+
+---
+
 ## [1.19.0-volumen-color] - 2026-07-06
 
 ### Changed

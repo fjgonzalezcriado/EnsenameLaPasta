@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-031 Segundo proveedor de datos — Twelve Data ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-031.md`
+- **Resumen**: Añade **Twelve Data** como 2º proveedor en vivo (Fase 3), reutilizando `IMarketDataProvider`. `TwelveDataOptions` (`MarketData:TwelveData`: BaseUrl, ApiKey, TimeoutSeconds) + `TwelveDataProvider` (endpoint `/quote` → precio+volumen+divisa; parseo string→decimal; guardas de API key y de `status:"error"`). DI: HttpClient "TwelveData" siempre registrado + **selector** por `MarketData:ProviderType` ("TwelveData" | "YahooFinance" default). Badge de proveedor para Twelve Data. El histórico (barra de rangos) sigue en Yahoo. Sin migración. 5 tests. 142 verdes. Smoke real: default → `YahooFinance`; env `ProviderType=TwelveData` → `TwelveData`, arranca OK. Para usarlo: fijar `ProviderType=TwelveData` + `ApiKey` (twelvedata.com, plan gratuito 8 req/min).
+
 #### HV-030 Barras de volumen coloreadas por dirección (verde/rojo) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-030.md`
