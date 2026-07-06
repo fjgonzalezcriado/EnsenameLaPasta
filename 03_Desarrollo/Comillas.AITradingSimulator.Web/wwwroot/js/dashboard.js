@@ -375,11 +375,25 @@
 
     // ── Evolución del valor de cuenta (HV-017) ─────────────────────────────
     let accountChart = null;
-    let accountHistoryPoints = 200;
-    const ACCOUNT_HISTORY_ALLOWED = [50, 200, 1000, 5000];
+    let lastAccountHistory = [];       // snapshots crudos (para re-filtrar por rango sin refetch)
+    let accountRange = 'ALL';          // rango temporal: 1D | 1W | 1M | ALL (HV-026)
+    const ACCOUNT_RANGE_ALLOWED = ['1D', '1W', '1M', 'ALL'];
+    const ACCOUNT_RANGE_DAYS = { '1D': 1, '1W': 7, '1M': 30 };
+    const ACCOUNT_RANGE_LABEL = { '1D': '1 día', '1W': '1 semana', '1M': '1 mes', 'ALL': 'todo' };
     // Snapshots normales cada ~5 min; un salto mayor a esto es un hueco entre sesiones
     // (app apagada) → cortar la línea para no comprimir el tramo reciente en un "pico" (HV-025).
     const ACCOUNT_GAP_MS = 30 * 60 * 1000;
+
+    // Filtra los snapshots a la ventana temporal seleccionada, anclada al último snapshot
+    // disponible (no a la hora actual), para que la vista reciente siempre tenga datos.
+    function filterAccountByRange(points, range) {
+        if (range === 'ALL' || !points || points.length === 0) return points || [];
+        const days = ACCOUNT_RANGE_DAYS[range];
+        if (!days) return points;
+        const lastTs = new Date(points[points.length - 1].timestamp).getTime();
+        const cutoff = lastTs - days * 86400000;
+        return points.filter(function (p) { return new Date(p.timestamp).getTime() >= cutoff; });
+    }
 
     function renderAccountChart(points) {
         if (typeof Chart === 'undefined') return;
@@ -395,7 +409,8 @@
         }
         if (hint) {
             const last = points[points.length - 1];
-            hint.textContent = data.length + ' snapshot(s) · último valor ' + eur(last.accountValue) + ' (' + pctSigned(last.returnPct) + ')';
+            hint.textContent = data.length + ' snapshot(s) · rango ' + (ACCOUNT_RANGE_LABEL[accountRange] || 'todo')
+                + ' · último valor ' + eur(last.accountValue) + ' (' + pctSigned(last.returnPct) + ')';
         }
 
         const accountData = insertGaps(data.map(function (p) { return { x: p.x, y: p.av }; }), ACCOUNT_GAP_MS);
@@ -453,9 +468,10 @@
 
     async function fetchAccountHistory() {
         try {
-            const resp = await fetch('/api/account/history?points=' + accountHistoryPoints);
+            const resp = await fetch('/api/account/history?points=5000');
             if (!resp.ok) { console.warn('account history fetch failed:', resp.status); return; }
-            renderAccountChart(await resp.json());
+            lastAccountHistory = await resp.json();
+            renderAccountChart(filterAccountByRange(lastAccountHistory, accountRange));
         } catch (err) {
             console.error('account history fetch error', err);
         }
@@ -463,17 +479,18 @@
 
     function initAccountHistoryControl() {
         try {
-            const saved = parseInt(localStorage.getItem('accountHistoryPoints'), 10);
-            if (ACCOUNT_HISTORY_ALLOWED.indexOf(saved) !== -1) accountHistoryPoints = saved;
+            const saved = localStorage.getItem('accountRange');
+            if (ACCOUNT_RANGE_ALLOWED.indexOf(saved) !== -1) accountRange = saved;
         } catch (e) { }
-        const sel = document.getElementById('accountHistorySelect');
+        const sel = document.getElementById('accountRangeSelect');
         if (sel) {
-            sel.value = String(accountHistoryPoints);
+            sel.value = accountRange;
             sel.addEventListener('change', function () {
-                const next = parseInt(sel.value, 10);
-                accountHistoryPoints = ACCOUNT_HISTORY_ALLOWED.indexOf(next) !== -1 ? next : 200;
-                try { localStorage.setItem('accountHistoryPoints', String(accountHistoryPoints)); } catch (e) { }
-                fetchAccountHistory();
+                accountRange = ACCOUNT_RANGE_ALLOWED.indexOf(sel.value) !== -1 ? sel.value : 'ALL';
+                try { localStorage.setItem('accountRange', accountRange); } catch (e) { }
+                // Re-filtrar desde la caché (sin volver a pedir); si no hay caché, pedir.
+                if (lastAccountHistory.length) renderAccountChart(filterAccountByRange(lastAccountHistory, accountRange));
+                else fetchAccountHistory();
             });
         }
     }

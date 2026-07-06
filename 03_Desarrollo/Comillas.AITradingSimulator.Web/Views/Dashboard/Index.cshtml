@@ -158,13 +158,13 @@
                 <div class="card-body">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
                         <h5 class="card-title mb-0">📊 Evolución del valor de cuenta <small class="text-muted fw-normal">(snapshots)</small></h5>
-                        <label class="d-flex align-items-center gap-1 mb-0 small" title="Cuántos snapshots mostrar">
-                            <span class="text-muted">Puntos:</span>
-                            <select id="accountHistorySelect" class="form-select form-select-sm w-auto py-0">
-                                <option value="50">Últimos 50</option>
-                                <option value="200">Últimos 200</option>
-                                <option value="1000">Últimos 1.000</option>
-                                <option value="5000">Máx (5.000)</option>
+                        <label class="d-flex align-items-center gap-1 mb-0 small" title="Rango temporal a mostrar (relativo al último snapshot)">
+                            <span class="text-muted">Rango:</span>
+                            <select id="accountRangeSelect" class="form-select form-select-sm w-auto py-0">
+                                <option value="1D">1 día</option>
+                                <option value="1W">1 semana</option>
+                                <option value="1M">1 mes</option>
+                                <option value="ALL">Todo</option>
                             </select>
                         </label>
                     </div>
