@@ -84,9 +84,10 @@
     function renderStatus(d) {
         const badge = document.getElementById('providerBadge');
         if (badge) {
-            const yahoo = d.providerType === 'YahooFinance';
-            badge.textContent = yahoo ? 'Yahoo Finance (real)' : 'RandomWalk (simulado)';
-            badge.className = 'badge ' + (yahoo ? 'text-bg-success' : 'text-bg-secondary');
+            const labels = { 'YahooFinance': 'Yahoo Finance (real)', 'TwelveData': 'Twelve Data (real)' };
+            const known = Object.prototype.hasOwnProperty.call(labels, d.providerType);
+            badge.textContent = known ? labels[d.providerType] : (d.providerType || 'RandomWalk (simulado)');
+            badge.className = 'badge ' + (known ? 'text-bg-success' : 'text-bg-secondary');
         }
         const tickCount = document.getElementById('tickCount');
         if (tickCount) tickCount.textContent = new Intl.NumberFormat('es-ES').format(d.totalTicks || 0);

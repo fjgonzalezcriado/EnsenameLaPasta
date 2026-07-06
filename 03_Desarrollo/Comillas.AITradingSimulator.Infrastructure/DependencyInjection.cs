@@ -71,8 +71,25 @@ public static class DependencyInjection
         // Caja / efectivo (ingresos y retiradas).
         services.AddScoped<ICashService, CashService>();
 
-        // Feed EN VIVO: datos reales de Yahoo (la simulación RandomWalk se retiró).
-        services.AddSingleton<IMarketDataProvider, YahooFinanceProvider>();
+        // Segundo proveedor: Twelve Data (requiere API key). HttpClient siempre registrado;
+        // solo se usa si es el proveedor activo.
+        services.AddOptions<TwelveDataOptions>()
+            .Bind(configuration.GetSection(TwelveDataOptions.SectionName))
+            .ValidateOnStart();
+        services.AddHttpClient(TwelveDataProvider.HttpClientName, (sp, client) =>
+        {
+            var opts = sp.GetRequiredService<IOptions<TwelveDataOptions>>().Value;
+            client.BaseAddress = new Uri(opts.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(opts.TimeoutSeconds);
+        });
+
+        // Feed EN VIVO: proveedor real seleccionable por MarketData:ProviderType
+        // ("YahooFinance" por defecto | "TwelveData"). La simulación RandomWalk se retiró.
+        var providerType = configuration.GetSection(MarketDataOptions.SectionName)["ProviderType"];
+        if (string.Equals(providerType, "TwelveData", StringComparison.OrdinalIgnoreCase))
+            services.AddSingleton<IMarketDataProvider, TwelveDataProvider>();
+        else
+            services.AddSingleton<IMarketDataProvider, YahooFinanceProvider>();
         services.AddHostedService<MarketTickGeneratorService>();
 
         // Estrategia automática MA Crossover DESACTIVADA: el panel es ahora un visor

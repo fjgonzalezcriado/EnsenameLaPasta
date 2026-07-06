@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.19.0-volumen-color",
+                   "version_actual":  "1.20.0-twelvedata",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-031",
+                                               "titulo":  "Segundo proveedor de datos - Twelve Data",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-07-06",
+                                               "fechaInicio":  "2026-07-06",
+                                               "fechaCompletado":  "2026-07-06",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-031.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Anade Twelve Data como 2o proveedor en vivo (Fase 3) reutilizando IMarketDataProvider. TwelveDataOptions (MarketData:TwelveData: BaseUrl/ApiKey/TimeoutSeconds) mas TwelveDataProvider (endpoint /quote -> precio+volumen+divisa; parseo string->decimal; guardas de API key y de status error). DI: HttpClient TwelveData siempre registrado mas selector por MarketData:ProviderType (TwelveData | YahooFinance default). Badge de proveedor para Twelve Data. Historico (barra de rangos) sigue en Yahoo. Sin migracion. 5 tests. 142 verdes. Smoke real: default -> YahooFinance; env ProviderType=TwelveData -> TwelveData, arranca OK. Para usarlo: ProviderType=TwelveData mas ApiKey (twelvedata.com, gratis 8 req/min); ApiKey vacia en appsettings (no commitear con valor). Rama feature/HV-031-twelvedata."
+                                           },
+                                           {
                                                "codigo":  "HV-030",
                                                "titulo":  "Barras de volumen coloreadas por direccion (verde/rojo)",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-030.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Refinamiento de HV-029. Las barras de volumen pasan de color unico a verde (precio sube en la barra, alcista) / rojo (baja, bajista), convencion financiera estandar. backgroundColor como array por barra: up = precio[i] >= precio[i-1] -> #198754@0.5 / #dc3545@0.5; primera barra alcista. Solo JS. Verificado con Playwright: barras coherentes con la linea de precio, sin errores de consola. Rama feature/HV-030-volumen-color."
+                                               "notas":  "Refinamiento de HV-029. Las barras de volumen pasan de color unico a verde (precio sube en la barra, alcista) / rojo (baja, bajista), convencion financiera estandar. backgroundColor como array por barra: up = precio[i] \u003e= precio[i-1] -\u003e #198754@0.5 / #dc3545@0.5; primera barra alcista. Solo JS. Verificado con Playwright: barras coherentes con la linea de precio, sin errores de consola. Rama feature/HV-030-volumen-color."
                                            },
                                            {
                                                "codigo":  "HV-029",
@@ -824,10 +841,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (build limpio; HV-030 barras de volumen verde subida / rojo bajada - fix solo JS verificado con Playwright). 137 tests C# sin cambios",
+                     "ultimo_build":  "2026-07-06 OK (142 tests verdes; HV-031 segundo proveedor Twelve Data: TwelveDataProvider mas selector por ProviderType; smoke real Yahoo<->TwelveData por config)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  30
+                     "evolutivos_completados_mes":  31
                  },
     "alertas":  {
                     "activas":  [
