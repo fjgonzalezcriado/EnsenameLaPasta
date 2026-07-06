@@ -31,6 +31,10 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(MarketDataOptions.SectionName))
             .ValidateOnStart();
 
+        // Proveedor activo (feed en vivo e histórico): "YahooFinance" (default) | "TwelveData".
+        var providerType = configuration.GetSection(MarketDataOptions.SectionName)["ProviderType"];
+        var useTwelveData = string.Equals(providerType, "TwelveData", StringComparison.OrdinalIgnoreCase);
+
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ITickBus, ChannelTickBus>();
 
@@ -49,7 +53,11 @@ public static class DependencyInjection
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36");
         });
-        services.AddSingleton<IMarketHistoryProvider, YahooHistoryProvider>();
+        // Histórico (barra de rangos): mismo proveedor activo. Yahoo por defecto.
+        if (useTwelveData)
+            services.AddSingleton<IMarketHistoryProvider, TwelveDataHistoryProvider>();
+        else
+            services.AddSingleton<IMarketHistoryProvider, YahooHistoryProvider>();
 
         // Búsqueda de instrumentos (nombre / ISIN / ticker) vía Yahoo /v1/finance/search.
         services.AddSingleton<IInstrumentSearchProvider, YahooInstrumentSearchProvider>();
@@ -83,10 +91,9 @@ public static class DependencyInjection
             client.Timeout = TimeSpan.FromSeconds(opts.TimeoutSeconds);
         });
 
-        // Feed EN VIVO: proveedor real seleccionable por MarketData:ProviderType
+        // Feed EN VIVO: proveedor real según el ProviderType calculado arriba
         // ("YahooFinance" por defecto | "TwelveData"). La simulación RandomWalk se retiró.
-        var providerType = configuration.GetSection(MarketDataOptions.SectionName)["ProviderType"];
-        if (string.Equals(providerType, "TwelveData", StringComparison.OrdinalIgnoreCase))
+        if (useTwelveData)
             services.AddSingleton<IMarketDataProvider, TwelveDataProvider>();
         else
             services.AddSingleton<IMarketDataProvider, YahooFinanceProvider>();

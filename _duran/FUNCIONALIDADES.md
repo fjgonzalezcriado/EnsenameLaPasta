@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-032 Histórico de Twelve Data (/time_series) + mapeo de símbolos ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
+- **Spec**: `_duran/specs/HV-032.md`
+- **Resumen**: Cuando el proveedor activo es Twelve Data, el **histórico** también usa Twelve Data. `TwelveDataHistoryProvider : IMarketHistoryProvider` (`/time_series`): parsea `values[]` (close+volume, datetime UTC), invierte a orden ascendente, guardas de key/error. Mapa rango→(interval,outputsize) incl. YTD por días desde 1-ene. `NormalizeSymbol` (cripto Yahoo→barra TD). DI: `useTwelveData` unifica el selector de feed en vivo **y** de histórico (Yahoo default | TwelveData). Sin migración. 4 tests. 146 verdes. Smoke real: default `/api/history AAPL 1D`=79 pts con volumen; `ProviderType=TwelveData` arranca sin errores de DI. Limitación: símbolos estilo Yahoo (`HY9H.F`,`^GSPC`) pueden no resolver en TD (convención distinta).
+
 #### HV-031 Segundo proveedor de datos — Twelve Data ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido
 - **Spec**: `_duran/specs/HV-031.md`
