@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.22.0-selector-proveedor",
+                   "version_actual":  "1.23.0-buscador-td",
                    "ultima_actualizacion":  "2026-07-06",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-034",
+                                               "titulo":  "Buscador de instrumentos via Twelve Data (selector)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-07-06",
+                                               "fechaInicio":  "2026-07-06",
+                                               "fechaCompletado":  "2026-07-06",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-034.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "El buscador usa el proveedor activo. TwelveDataInstrumentSearchProvider (/symbol_search) devuelve simbolos con la convencion de TD; SelectableInstrumentSearchProvider delega por IMarketProviderState. Resuelve la limitacion de HV-032 (simbolos Yahoo no resuelven en TD): con TD activo, buscar el instrumento y anadir su simbolo TD. 3 tests. 152 verdes. Smoke real: con TD, q=apple -> AAPL(NASDAQ)/APC(XETR)/AAPL.USD(SIX); hallazgo: SK hynix Frankfurt en TD = HY9H (no HY9H.F), tambien 000660 (KRX); S&P500 indice suele ser SPX segun plan. API key en user-secrets (no en repo). Rama feature/HV-034-buscador-twelvedata."
+                                           },
+                                           {
                                                "codigo":  "HV-033",
                                                "titulo":  "Selector de proveedor de datos en la interfaz (cambio en caliente)",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-033.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Cambiar Yahoo <-> Twelve Data desde la UI en runtime (antes solo por config al arrancar). IMarketProviderState/MarketProviderState (conmutable + persistido en App_Data/active-provider.txt; inicial: fichero o MarketData:ProviderType) mas wrappers SelectableMarketDataProvider/SelectableMarketHistoryProvider que delegan en el activo por llamada. DI registra ambos concretos (live+historico) + wrappers + estado (fuera el selector de arranque). DashboardService reporta el proveedor activo. ProviderController GET/POST /api/provider (valida, 400 si desconocido). UI: badge -> selector en cabecera con aviso sin API key. 3 tests nuevos (MarketProviderState) + tests de Dashboard/snapshot adaptados al nuevo ctor. 149 verdes. Smoke real: GET current=Yahoo; POST TwelveData -> dashboard providerType=TwelveData; POST invalido -> 400; POST Yahoo -> vuelve; fichero persistido=YahooFinance. Playwright: selector renderizado con el activo. .gitignore excluye el fichero de estado. Rama feature/HV-033-selector-proveedor-ui."
+                                               "notas":  "Cambiar Yahoo \u003c-\u003e Twelve Data desde la UI en runtime (antes solo por config al arrancar). IMarketProviderState/MarketProviderState (conmutable + persistido en App_Data/active-provider.txt; inicial: fichero o MarketData:ProviderType) mas wrappers SelectableMarketDataProvider/SelectableMarketHistoryProvider que delegan en el activo por llamada. DI registra ambos concretos (live+historico) + wrappers + estado (fuera el selector de arranque). DashboardService reporta el proveedor activo. ProviderController GET/POST /api/provider (valida, 400 si desconocido). UI: badge -\u003e selector en cabecera con aviso sin API key. 3 tests nuevos (MarketProviderState) + tests de Dashboard/snapshot adaptados al nuevo ctor. 149 verdes. Smoke real: GET current=Yahoo; POST TwelveData -\u003e dashboard providerType=TwelveData; POST invalido -\u003e 400; POST Yahoo -\u003e vuelve; fichero persistido=YahooFinance. Playwright: selector renderizado con el activo. .gitignore excluye el fichero de estado. Rama feature/HV-033-selector-proveedor-ui."
                                            },
                                            {
                                                "codigo":  "HV-032",
@@ -869,16 +886,17 @@
                          "resumenSesion":  "HV-015..HV-023 (rentabilidad %, por posicion, historico valor cuenta, importar CSV, divisa por instrumento, conversion FX a base, divisa por movimiento de caja, PnL convertido por fila, refrescar FX en background). GitHub privado; HV-020..023 via ramas feature merge --no-ff. 135 tests verdes; smokes reales OK.",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
+                                                     "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 19 evolutivos completados. Feed real requiere Internet. Migracion nueva AddTrackedSymbolCurrency (se auto-aplica al arrancar)."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (149 tests verdes; HV-033 selector de proveedor en la UI: IMarketProviderState conmutable+persistido, wrappers Selectable*, ProviderController; smoke real switch por API + Playwright)",
+                     "ultimo_build":  "2026-07-06 OK (152 tests verdes; HV-034 buscador de instrumentos via Twelve Data /symbol_search + selector; smoke real con key valida en user-secrets). API key Twelve Data en user-secrets (no en repo)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  33
+                     "evolutivos_completados_mes":  34
                  },
     "alertas":  {
                     "activas":  [
