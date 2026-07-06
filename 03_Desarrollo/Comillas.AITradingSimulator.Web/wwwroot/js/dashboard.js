@@ -12,8 +12,11 @@
     let lastSeries = [];         // última priceSeries recibida (para re-render al cambiar de símbolo)
     let historyPoints = 50;      // nº de puntos de histórico a pedir por símbolo
     const HISTORY_ALLOWED = [50, 250, 1000, 5000];
-    let chartMode = '1D';        // arranca en el diario real de Yahoo; 'LIVE' = ticks locales | rango Yahoo ('1D','1M',…)
+    let chartMode = '1D';        // rango del gráfico de precios (histórico real Yahoo): '1D','5D','1M',…
     let baseCurrency = 'EUR';    // divisa base de los totales (HV-020); para el PnL convertido por fila (HV-022)
+    // Divisa de cotización por símbolo (HV-037): se alimenta de posiciones (openTrades) y de la
+    // watchlist (/api/instruments/tracked). Se usa para mostrar la variación del rango en su moneda.
+    const symbolCurrency = {};
 
     // ── Formateadores (es-ES) ──────────────────────────────────────────────
     const EUR = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
@@ -114,6 +117,7 @@
     }
 
     function renderOpenTrades(trades) {
+        (trades || []).forEach(function (t) { if (t.currency) symbolCurrency[t.symbol] = t.currency; });
         const tbody = document.getElementById('openTradesBody');
         if (!trades || trades.length === 0) {
             tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Sin posiciones abiertas</td></tr>';
@@ -140,6 +144,7 @@
     }
 
     function renderClosedTrades(trades) {
+        (trades || []).forEach(function (t) { if (t.currency) symbolCurrency[t.symbol] = t.currency; });
         const tbody = document.getElementById('closedTradesBody');
         if (!trades || trades.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Sin trades cerrados</td></tr>';
@@ -278,11 +283,37 @@
     }
     function insertLiveGaps(points) { return insertGaps(points, LIVE_GAP_MS); }
 
+    // Variación acumulada del rango mostrado (HV-037): primer→último cierre de la serie
+    // del símbolo seleccionado. Muestra el importe en la divisa del instrumento y el %.
+    function updateChartDelta(series) {
+        const el = document.getElementById('chartDelta');
+        if (!el) return;
+        let s = null;
+        const list = series || [];
+        if (selectedSymbol && selectedSymbol !== 'ALL') {
+            s = list.find(function (x) { return x.symbol === selectedSymbol; }) || null;
+        } else if (list.length === 1) {
+            s = list[0];   // "Todos" con una sola serie: es inequívoca
+        }
+        const pts = (s && s.points)
+            ? s.points.map(function (p) { return Number(p.price); }).filter(function (v) { return Number.isFinite(v); })
+            : [];
+        if (!s || pts.length < 2) { el.textContent = ''; el.className = 'small fw-semibold'; return; }
+        const first = pts[0], last = pts[pts.length - 1];
+        const delta = last - first;
+        const pct = first !== 0 ? (delta / first * 100) : 0;
+        const cur = symbolCurrency[s.symbol] || '';
+        const sign = delta > 0 ? '+' : '';   // money() ya antepone '−' en negativos
+        el.textContent = chartMode + ': ' + sign + money(delta, cur) + ' (' + pctSigned(pct) + ')';
+        el.className = 'small fw-semibold ' + signClass(delta);
+    }
+
     function renderChart(series) {
         if (typeof Chart === 'undefined') {
             console.error('[dashboard] Chart.js no está cargado (¿CDN bloqueado o sin conexión?).');
             return;
         }
+        updateChartDelta(series);
 
         // Línea de precio (eje 'y') + barras de volumen (eje secundario 'yVol', HV-029).
         const priceDatasets = [];
@@ -755,7 +786,8 @@
             if (modalEl && window.bootstrap) {
                 window.bootstrap.Modal.getOrCreateInstance(modalEl).hide();
             }
-            fetchAndRender(true);
+            refreshTrackedCurrencies();
+            fetchAndRender(true).then(function () { loadHistory(chartMode); });
         } catch (e) {
             if (btn) { btn.disabled = false; btn.textContent = '+ Añadir'; }
             alert('No se pudo añadir el símbolo: ' + e.message);
@@ -826,8 +858,7 @@
                 if (!resp.ok && resp.status !== 404) throw new Error('HTTP ' + resp.status);
                 selectedSymbol = 'ALL';
                 try { localStorage.setItem('chartSymbol', selectedSymbol); } catch (e) { }
-                chartMode = 'LIVE';
-                fetchAndRender(true);
+                fetchAndRender(true).then(function () { loadHistory(chartMode); });
             } catch (e) {
                 alert('No se pudo quitar el símbolo: ' + e.message);
             } finally {
@@ -946,8 +977,8 @@
                 form.reset();
                 selectedSymbol = symbol.toUpperCase();
                 try { localStorage.setItem('chartSymbol', selectedSymbol); } catch (e) { }
-                chartMode = 'LIVE';
-                fetchAndRender(true);
+                refreshTrackedCurrencies();
+                fetchAndRender(true).then(function () { loadHistory(chartMode); });
             } catch (err) {
                 showPosError('No se pudo crear la posición: ' + err.message);
             } finally {
@@ -1147,6 +1178,17 @@
         });
     }
 
+    // Divisas de los símbolos seguidos (HV-037): para mostrar la variación del rango
+    // en la moneda del instrumento aunque no tenga una posición abierta.
+    async function refreshTrackedCurrencies() {
+        try {
+            const resp = await fetch('/api/instruments/tracked');
+            if (!resp.ok) return;
+            const items = await resp.json();
+            (items || []).forEach(function (s) { if (s.currency) symbolCurrency[s.symbol] = s.currency; });
+        } catch (e) { }
+    }
+
     initProviderControl();
     initChartRefreshControl();
     initSymbolControl();
@@ -1160,12 +1202,13 @@
     initImportModal();
     initAccountHistoryControl();
     // Primer pintado completo; el gráfico de precios arranca en el rango diario real de
-    // Yahoo (1D), no en los ticks locales "En vivo". Cargamos el histórico tras tener símbolos.
-    fetchAndRender(true).then(function () {
-        if (chartMode !== 'LIVE') loadHistory(chartMode);
+    // Yahoo (1D). Cargamos las divisas primero para que la variación del rango salga en su
+    // moneda desde el primer render, y luego el histórico tras tener símbolos.
+    refreshTrackedCurrencies().finally(function () {
+        fetchAndRender(true).then(function () { loadHistory(chartMode); });
     });
     fetchAccountHistory(); // histórico del valor de cuenta (refresco propio, los snapshots son cada pocos min)
     metricsTimer = setInterval(function () { fetchAndRender(false); }, METRICS_MS);
     setInterval(fetchAccountHistory, 60000);
-    setInterval(tickCountdownLoop, 150);
+    setInterval(refreshTrackedCurrencies, 60000);
 })();

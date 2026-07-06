@@ -18,6 +18,19 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.24.0-variacion-rango] - 2026-07-06
+
+### Added
+- 📊 **HV-037** El gráfico de precios muestra la **variación acumulada del rango** seleccionado (1D/5D/1M/…) en la cabecera (`#chartDelta`): importe en la **divisa del instrumento** y **% acumulado**, coloreado verde/rojo.
+
+### Removed
+- 🗑️ **HV-037** Eliminado el modo **"En vivo"** del gráfico (sin sentido desde HV-027) y los controles solo-vivo: "Gráfico cada" (`#refreshSelect`), "Histórico: N puntos" (`#historySelect`) y la cuenta atrás (`#tickCountdown`).
+
+### Métricas
+- 154 tests verdes (solo frontend, sin cambios de test). Smoke Playwright: sin "En vivo"; `HY9H.F` → `1M +210,00 € (+18,03 %)` verde, `5D −145,00 € (−9,54 %)` rojo, `1D 0,00 € (+0,00 %)` plano, 0 errores de consola. Yahoo activo.
+
+---
+
 ## [1.23.2-td-error-claro] - 2026-07-06
 
 ### Changed

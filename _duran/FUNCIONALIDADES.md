@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-037 Variación acumulada del rango + eliminar "En vivo" ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: `_duran/specs/HV-037.md`
+- **Resumen**: El gráfico de precios pierde el modo **"En vivo"** (sin sentido desde HV-027) y gana la **variación acumulada del rango**. Se quita el botón `data-range="LIVE"` y los controles solo-vivo (`#refreshSelect` "Gráfico cada", `#historySelect` "Histórico: N puntos", `#tickCountdown`); el código JS de LIVE queda inerte. Nuevo `#chartDelta` en la cabecera: `updateChartDelta(series)` toma primer→último cierre de la serie del símbolo y muestra `‹rango›: Δimporte (Δ%)` con el **importe en la divisa del instrumento** (`money()`) y el **% acumulado** (`pctSigned()`), coloreado verde/rojo. `symbolCurrency` se alimenta de posiciones y de `/api/instruments/tracked` (arranque + cada 60 s). Los flujos que forzaban LIVE (añadir/quitar símbolo, alta de posición) ahora recargan el histórico del rango activo. Yahoo sigue como proveedor activo. Solo JS/cshtml, sin migración. 154 verdes. Smoke Playwright: sin "En vivo"; `HY9H.F` → `1M +210,00 € (+18,03 %)` verde, `5D −145,00 € (−9,54 %)` rojo, `1D 0,00 € (+0,00 %)` plano, 0 errores de consola.
+
 #### HV-036 Mensaje de error claro del proveedor (Twelve Data) + log sin stack ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Mejora
 - **Spec**: `_duran/specs/HV-036.md`
