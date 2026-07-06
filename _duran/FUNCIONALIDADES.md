@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-038 Gráfico de precios sin huecos de fin de semana/festivos (eje de categorías) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Bugfix/mejora
+- **Spec**: `_duran/specs/HV-038.md`
+- **Resumen**: En 5D/1M/… el eje de **tiempo** dejaba los sábados/domingos, festivos y noches como espacio en blanco y unía los puntos con una **diagonal recta** engañosa. `renderChart` pasa a eje de **categorías** (índice por instante de cotización): solo aparecen los instantes con datos → los findes/festivos **desaparecen**. Rangos diarios/semanales agrupan por **día UTC** (casan bolsas distintas); cada serie se alinea por índice y deja `null` (con `spanGaps:false`) donde no cotiza, sin inventar recta. Etiquetas por span (`labelFormatterFor`) y tooltip con fecha/hora completa (`chart.$labelsFull`); el `currentValuePlugin` se adapta a datos numéricos con `null`. Volumen verde/rojo y variación del rango (HV-037) intactos; el gráfico de valor de cuenta no cambia. Solo JS, sin migración. 154 verdes. Smoke Playwright: eje `category`, `HY9H.F` 5D 124 pts saltando el finde (`03 jul`→`06 jul`), 1M 21 días hábiles, 1D 59 intradía, 0 errores.
+
 #### HV-037 Variación acumulada del rango + eliminar "En vivo" ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: `_duran/specs/HV-037.md`

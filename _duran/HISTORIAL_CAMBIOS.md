@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.25.0-eje-categorias] - 2026-07-06
+
+### Changed
+- 📈 **HV-038** El gráfico de precios usa un **eje de categorías** en vez de tiempo: en 5D/1M/… ya **no aparecen** los sábados/domingos, festivos ni noches (antes salían como huecos con una diagonal recta engañosa). Rangos diarios/semanales se agrupan por día UTC; el tooltip muestra la fecha/hora completa. El gráfico de valor de cuenta no cambia.
+
+### Métricas
+- 154 tests verdes (solo frontend). Smoke Playwright: eje `category`; `HY9H.F` 5D 124 pts saltando el finde (`03 jul`→`06 jul`), 1M 21 días hábiles, 1D 59 intradía; 0 errores de consola.
+
+---
+
 ## [1.24.0-variacion-rango] - 2026-07-06
 
 ### Added
