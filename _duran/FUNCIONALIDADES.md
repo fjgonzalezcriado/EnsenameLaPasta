@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-044 ML.NET — clasificación sube/baja (SDCA + features técnicas) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo (Fase 3)
+- **Spec**: `_duran/specs/HV-044.md`
+- **Resumen**: Amplía ML.NET con un **clasificador binario de dirección** (¿sube el próximo periodo?). `IDirectionClassifier`/`MlDirectionClassifier` (regresión logística **SDCA**) con **7 features técnicas** (retorno, momentum 5p, ratio de medias, precio vs SMA, **RSI(14)**, volatilidad, volumen relativo); etiqueta `close[i+1]>close[i]`; **split cronológico 80/20** + evaluación honesta (accuracy/AUC en hold-out). Predice el último dato → **señal** Comprar/Vender/Mantener + P(sube). `GET /api/signal`. UI: el switch pasa a **"🔮 Señales ML"** y muestra dos badges — 🔮 pronóstico (SSA) + 📊 clasificación, con la **calidad del modelo en el tooltip**. Guardas: mín. 40 puntos, ambas clases en train, degrada sin lanzar. 3 tests nuevos. 178 verdes. Smoke real (Yahoo): `HY9H.F 6M` → Comprar (Sube 68%), accuracy 0,61 / AUC 0,64 (n=88). **Honestidad**: la dirección de precio ronda el azar; indicador educativo, no asesoramiento.
+
 #### HV-043 Señales con ML.NET — pronóstico de precio (SSA) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo (Fase 3)
 - **Spec**: `_duran/specs/HV-043.md`

@@ -71,6 +71,9 @@ public static class DependencyInjection
         // proveedor activo (IMarketHistoryProvider) como serie de entrada.
         services.AddSingleton<IPriceForecaster, SsaPriceForecaster>();
 
+        // Clasificación sube/baja con ML.NET (SDCA + features técnicas) (HV-044).
+        services.AddSingleton<IDirectionClassifier, MlDirectionClassifier>();
+
         // Conversión de divisas (totales en divisa base). Usa el HttpClient de Yahoo.
         services.AddOptions<FxOptions>()
             .Bind(configuration.GetSection(FxOptions.SectionName))

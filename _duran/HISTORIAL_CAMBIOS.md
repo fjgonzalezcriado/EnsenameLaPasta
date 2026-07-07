@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.31.0-ml-clasificacion] - 2026-07-07
+
+### Added
+- 📊 **HV-044** Clasificación **sube/baja** con ML.NET (SDCA + 7 features técnicas: retorno, momentum, medias, RSI, volatilidad, volumen). Split cronológico 80/20 con accuracy/AUC en hold-out (honestidad de calidad). `GET /api/signal` + badge 📊 (Comprar/Vender/Mantener + probabilidad) bajo el switch "🔮 Señales ML", con la calidad en el tooltip.
+
+### Métricas
+- 178 tests verdes (175 + 3). Smoke real (Yahoo): `HY9H.F 6M` → Comprar (Sube 68%), accuracy 0,61 / AUC 0,64 (n=88); `1D` → insuficiente. Nota: indicador educativo, no asesoramiento (la dirección de precio ronda el azar).
+
+---
+
 ## [1.30.0-mlnet-senales] - 2026-07-07
 
 ### Added

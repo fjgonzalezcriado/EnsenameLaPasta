@@ -12,6 +12,8 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.8" />
     <!-- ML.NET: pronóstico de series temporales (SSA) para señales (HV-043). -->
     <PackageReference Include="Microsoft.ML.TimeSeries" Version="4.0.2" />
+    <!-- ML.NET: clasificación binaria sube/baja con features técnicas (HV-044). Trae SDCA. -->
+    <PackageReference Include="Microsoft.ML" Version="4.0.2" />
   </ItemGroup>
 
   <PropertyGroup>
