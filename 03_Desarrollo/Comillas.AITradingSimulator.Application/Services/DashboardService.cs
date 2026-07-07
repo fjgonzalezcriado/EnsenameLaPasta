@@ -231,7 +231,7 @@ public sealed class DashboardService(
 
         snapshots.Reverse();
 
-        return snapshots.Select(s =>
+        return [.. snapshots.Select(s =>
         {
             var totalPnL = s.RealizedPnL + s.UnrealizedPnL;
             var netDeposits = s.Capital - totalPnL;
@@ -239,7 +239,7 @@ public sealed class DashboardService(
                 ? Math.Round(totalPnL / netDeposits * 100m, 2)
                 : 0m;
             return new AccountHistoryPointDto(s.Timestamp, s.Capital, netDeposits, totalPnL, returnPct);
-        }).ToList();
+        })];
     }
 
     public async Task<PortfolioMetricsDto> GetPortfolioMetricsAsync(CancellationToken cancellationToken = default)

@@ -18,6 +18,17 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.37.4-estilo-ampliado] - 2026-07-07
+
+### Changed
+- 🪝 Hook renombrado `dotnet-primary-ctor-guard.ps1` → **`dotnet-code-style-guard.ps1`** (v2.0.0) y generalizado del solo-IDE0290 a un conjunto de reglas de estilo .NET detectables textualmente: **IDE0290** (constructor primario), **IDE0300** (expresión de colección en arrays), **IDE0028** (expr. de colección en inicializadores), **IDE0063** (`using` simple) e **IDE0330** (`System.Threading.Lock`). Sigue WARN-first (exit 1, no bloquea). `settings.json` actualizado al nuevo nombre. Probado: 6 casos (5 avisan, caso limpio → exit 0). **Solo ASCII** en el código del hook (Windows PowerShell interpretaba la flecha Unicode `→` como comilla y rompía el parseo → se usa `->`).
+- 📏 Regla `.claude/rules/dotnet-code-style.md` ampliada: documenta el conjunto IDE0290/0300/0301/0305/0028/0090/0063/0330/0042/0270 con su tabla antes→después, el flujo `dotnet format style --severity info [--verify-no-changes]` (detectar todas / arreglar de una en una) y los límites (constructores con lógica, factories de dominio, IDE0330 solo net9+, inicializadores de propiedad que `dotnet format` no autoaplica → fix manual a `[...]`).
+
+### Fixed
+- 🎨 Resueltas **todas** las sugerencias de estilo IDE pendientes del proyecto (no aparecían en `dotnet build`, sí en `dotnet format style --verify-no-changes`): IDE0300 (9), IDE0028 (6), IDE0305 (5), IDE0042 (2), IDE0330 (1), IDE0063 (1). Arreglo mecánico con `dotnet format` conservando la convención de campos `_field`; 2 inicializadores de propiedad en helpers de test (`IReadOnlyList<string> Available { get; } = [...]`) corregidos a mano porque `dotnet format` no los tocaba. La migración `InitialCreate` recibió `new[] { ... }` → `[...]` en dos índices (semántica idéntica). **Build 0/0, 190 tests verdes.**
+
+---
+
 ## [1.37.3-hook-ide0290] - 2026-07-07
 
 ### Added

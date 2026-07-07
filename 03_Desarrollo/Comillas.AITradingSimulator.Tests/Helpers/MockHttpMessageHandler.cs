@@ -11,7 +11,7 @@ public sealed class MockHttpMessageHandler(Func<HttpRequestMessage, HttpResponse
 {
     private readonly Func<HttpRequestMessage, HttpResponseMessage> _responder = responder;
 
-    public List<HttpRequestMessage> ReceivedRequests { get; } = new();
+    public List<HttpRequestMessage> ReceivedRequests { get; } = [];
 
     /// <summary>Atajo: responde siempre con el JSON dado y el status indicado (default 200).</summary>
     public static MockHttpMessageHandler Json(string json, HttpStatusCode status = HttpStatusCode.OK)

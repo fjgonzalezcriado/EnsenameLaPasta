@@ -83,7 +83,7 @@ public sealed class PortfolioSnapshotServiceTests : IDisposable
     private sealed class StaticProviderState : IMarketProviderState
     {
         public string Current => "YahooFinance";
-        public IReadOnlyList<string> Available { get; } = new[] { "YahooFinance", "TwelveData" };
+        public IReadOnlyList<string> Available { get; } = ["YahooFinance", "TwelveData"];
         public void Set(string provider) { }
     }
 

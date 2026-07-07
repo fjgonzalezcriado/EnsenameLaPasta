@@ -81,14 +81,14 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
             };
 
             (string Name, ITransformer Model, double Acc, double Auc)? best = null;
-            foreach (var c in candidates)
+            foreach (var (Name, Pipe) in candidates)
             {
-                var model = c.Pipe.Fit(trainData);
+                var model = Pipe.Fit(trainData);
                 var m = ml.BinaryClassification.Evaluate(model.Transform(testData), labelColumnName: nameof(FeatureRow.Label));
                 var acc = double.IsNaN(m.Accuracy) ? 0 : m.Accuracy;
                 var auc = double.IsNaN(m.AreaUnderRocCurve) ? 0 : m.AreaUnderRocCurve;
                 if (best is null || auc > best.Value.Auc || (auc == best.Value.Auc && acc > best.Value.Acc))
-                    best = (c.Name, model, acc, auc);
+                    best = (Name, model, acc, auc);
             }
 
             var winner = best!.Value;
@@ -132,11 +132,11 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
         var macdHist = c[i] != 0 ? (macd[i] - signal[i]) / c[i] : 0;
         var pctB = BollingerPctB(c, i, 20);                       // ~0..1 (posición en las bandas)
         var stochK = StochasticK(c, i, 14);                       // 0..1
-        return new[]
-        {
+        return
+        [
             (float)ret1, (float)ret5, (float)ret10, (float)maRatio, (float)priceVsSma10, (float)priceVsSma20,
             (float)rsi, (float)vol, (float)volRatio, (float)macdHist, (float)pctB, (float)stochK
-        };
+        ];
     }
 
     private static double Change(double from, double to) => from != 0 ? (to - from) / from : 0;

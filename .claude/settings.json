@@ -1,6 +1,6 @@
 {
     "companyAnnouncements":  [
-                                 "STIC.IA v3.9.0 | AI Trading Simulator | modo: desarrollo\nMCPs: Roslyn, dotnet/skills | Falta: Context7\n/sos para ayuda rapida"
+                                 "STIC.IA v3.9.0 | AI Trading Simulator | rama: main | modo: desarrollo\nMCPs: dotnet/skills | Falta: Roslyn, Context7\n/sos para ayuda rapida"
                              ],
     "hooks":  {
                   "SessionStart":  [
@@ -56,7 +56,7 @@
                                                        },
                                                        {
                                                            "type":  "command",
-                                                           "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/dotnet-primary-ctor-guard.ps1\"",
+                                                           "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/dotnet-code-style-guard.ps1\"",
                                                            "timeout":  10
                                                        }
                                                    ]

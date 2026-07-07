@@ -514,7 +514,7 @@ public sealed class DashboardServiceTests : IDisposable
         {
             // Aportado neto constante (100) y PnL variable → índice de retorno 1 → 1.2 → 0.9 → 1.1.
             // Capital = 100 + PnL; unrealized = Capital − 100 ⇒ NetDeposits = 100 constante.
-            decimal[] caps = { 100m, 120m, 90m, 110m };
+            decimal[] caps = [100m, 120m, 90m, 110m];
             for (var i = 0; i < caps.Length; i++)
                 ctx.PortfolioSnapshots.Add(PortfolioSnapshot.Create(BaseTime.AddDays(i), caps[i], 0m, caps[i] - 100m, 0, 0));
             await ctx.SaveChangesAsync();
@@ -686,7 +686,7 @@ public sealed class DashboardServiceTests : IDisposable
     /// <summary>Stub de IFxRateProvider: rate 1 salvo los pares configurados.</summary>
     private sealed class StubFxRateProvider(Dictionary<(string, string), decimal>? rates = null) : IFxRateProvider
     {
-        private readonly Dictionary<(string, string), decimal> _rates = rates ?? new();
+        private readonly Dictionary<(string, string), decimal> _rates = rates ?? [];
 
         public Task<decimal> GetRateAsync(string from, string to, CancellationToken cancellationToken = default)
         {
@@ -701,7 +701,7 @@ public sealed class DashboardServiceTests : IDisposable
     private sealed class StaticProviderState(string current = "YahooFinance") : IMarketProviderState
     {
         public string Current { get; } = current;
-        public IReadOnlyList<string> Available { get; } = new[] { "YahooFinance", "TwelveData" };
+        public IReadOnlyList<string> Available { get; } = ["YahooFinance", "TwelveData"];
         public void Set(string provider) { }
     }
 }
