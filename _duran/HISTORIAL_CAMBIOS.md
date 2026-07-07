@@ -18,6 +18,13 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.37.6-ide0090] - 2026-07-07
+
+### Fixed
+- 🎨 **IDE0090** ("simplificar la expresión `new`"): 3 sitios resueltos con `dotnet format style --diagnostics IDE0090`. Eran **consecuencia directa** del fix CA1859 de 1.37.5: al pasar los `RangeMap` de `IReadOnlyDictionary<…>` a `Dictionary<…>`, el `new Dictionary<…>(StringComparer.OrdinalIgnoreCase)` de la derecha ya se simplifica a `new(StringComparer.OrdinalIgnoreCase)` (tipo inferido del campo) en los 3 History providers (Yahoo/TwelveData/AlphaVantage). Cambio mecánico, semántica idéntica. Build 0/0, 190 tests verdes. IDE0090 ya figuraba en la tabla de la regla; no se añade al hook (detección textual ambigua → alto falso positivo; se deja a `dotnet format style`, como IDE0042/0305/0270).
+
+---
+
 ## [1.37.5-rendimiento-ca] - 2026-07-07
 
 ### Fixed

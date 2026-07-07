@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual": "1.37.5-rendimiento-ca",
+                   "version_actual": "1.37.6-ide0090",
                    "ultima_actualizacion":  "2026-07-07",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -1163,7 +1163,7 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build": "2026-07-07 OK (190 tests verdes; CA rendimiento CA1859/CA1861/CA1822 resueltas, CA1873 no aplicada por criterio; hook v2.1.0 + regla con seccion rendimiento CA)",
+                     "ultimo_build": "2026-07-07 OK (190 tests verdes; IDE0090 resuelto en los 3 RangeMap tras CA1859; 0 IDE style / 0 CA salvo CA1873 por criterio)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
                      "evolutivos_completados_mes":  50
