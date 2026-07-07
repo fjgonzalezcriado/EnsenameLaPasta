@@ -8,8 +8,11 @@ namespace Comillas.AITradingSimulator.Tests.Infrastructure;
 public class MlDirectionClassifierTests
 {
     private static readonly DateTime BaseTime = new(2026, 7, 7, 9, 0, 0, DateTimeKind.Utc);
+    private static readonly string[] ValidSignals = ["Comprar", "Vender", "Mantener"];
+    private static readonly string[] ValidDirections = ["Sube", "Baja"];
+    private static readonly string[] ValidModels = ["SDCA", "FastTree"];
 
-    private static IReadOnlyList<PricePoint> Series(int n, Func<int, decimal> priceFn)
+    private static List<PricePoint> Series(int n, Func<int, decimal> priceFn)
     {
         var list = new List<PricePoint>(n);
         for (var i = 0; i < n; i++)
@@ -33,12 +36,12 @@ public class MlDirectionClassifierTests
 
         Assert.True(s.HasPrediction);
         Assert.InRange(s.Probability, 0.0, 1.0);
-        Assert.Contains(s.Signal, new[] { "Comprar", "Vender", "Mantener" });
-        Assert.Contains(s.Direction, new[] { "Sube", "Baja" });
+        Assert.Contains(s.Signal, ValidSignals);
+        Assert.Contains(s.Direction, ValidDirections);
         Assert.Equal(s.Direction, s.Probability >= 0.5 ? "Sube" : "Baja");
         Assert.True(s.TrainSamples > 0);
         Assert.Equal(12, s.FeatureCount);
-        Assert.Contains(s.ModelUsed, new[] { "SDCA", "FastTree" });   // selección de modelo (HV-045)
+        Assert.Contains(s.ModelUsed, ValidModels);   // selección de modelo (HV-045)
         Assert.InRange(s.Accuracy, 0.0, 1.0);
         Assert.InRange(s.Auc, 0.0, 1.0);
     }

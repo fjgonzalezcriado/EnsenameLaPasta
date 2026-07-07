@@ -6,6 +6,7 @@ namespace Comillas.AITradingSimulator.Tests.Infrastructure;
 public class ChannelTickBusTests
 {
     private static readonly DateTime BaseTime = new(2026, 5, 26, 10, 0, 0, DateTimeKind.Utc);
+    private static readonly string[] ExpectedOutcomes = ["cancelled", "completed"];
 
     [Fact]
     public async Task PublishYSubscribe_TickEntregadoAlSubscriber()
@@ -61,7 +62,7 @@ public class ChannelTickBusTests
         cts.Cancel();
 
         var outcome = await subscriberTask;
-        Assert.Contains(outcome, new[] { "cancelled", "completed" });
+        Assert.Contains(outcome, ExpectedOutcomes);
     }
 
     [Fact]

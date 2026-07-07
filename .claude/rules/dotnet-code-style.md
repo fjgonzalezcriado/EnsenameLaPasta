@@ -94,12 +94,53 @@ dotnet format style <solucion-o-proyecto> --diagnostics IDE0300 --severity info
 - **No** ejecutes `dotnet format style` sin `--diagnostics` en un repo grande sin revisar: arrastra
   todos los cambios de estilo a la vez y dificulta el review. Filtra por regla.
 
+## Reglas de RENDIMIENTO (analizadores CA)
+
+Además del estilo, esta regla cubre las **reglas de rendimiento** del análisis de código
+(`CAxxxx`, categoría *Performance*). A diferencia de las `IDExxxx`, las `CA` son **analizadores**
+que **sí pueden aparecer en `dotnet build`** (según `<AnalysisLevel>`/severidad); si el proyecto
+tiene `TreatWarningsAsErrors=true` y compila limpio, es que están a nivel *info/suggestion* — hay
+que detectarlas explícitamente. Selección de las que se disparan en la práctica y aportan valor:
+
+| Regla | Qué marca | Preferir |
+|---|---|---|
+| **CA1827/CA1829** | `.Count() == 0 / > 0`; `.Count()` sobre algo con `.Count`/`.Length` | `!Any()` / `Any()`; propiedad `.Count`/`.Length` |
+| **CA1820** | Comparar cadena con `""` | `string.IsNullOrEmpty(s)` o `s.Length == 0` |
+| **CA1834** | `StringBuilder.Append("x")` de 1 carácter | `Append('x')` (literal char) |
+| **CA1848 / CA1873** | Logging con interpolación `$"..."` / argumentos costosos (boxing) | Plantilla estructurada `"{Campo}"` + args; en hot paths `LoggerMessage` o guarda `IsEnabled` |
+| **CA1859** | Tipo declarado por interfaz donde vale el concreto | Tipo **concreto** en campos/retornos **privados** (devirtualización) |
+| **CA1861** | Array constante como argumento en llamada repetida | Campo `static readonly` (idealmente `= [...]`) |
+| **CA1822** | Miembro que no usa estado de instancia | Marcar `static` |
+| **CA1860** | `.Any()` cuando existe `.Count`/`.Length` | Propiedad `.Count > 0` |
+| **CA1862** | `.ToLower()`/`.ToUpper()` para comparar | Sobrecarga `StringComparison.OrdinalIgnoreCase` |
+
+### Cómo detectar / arreglar
+
+```bash
+# Detectar TODAS las CA de rendimiento a nivel info (no cambia nada):
+dotnet format analyzers <sln> --severity info --verify-no-changes
+# Arreglar una con fixer (CA1861, CA1822 lo tienen; CA1859 NO -> a mano):
+dotnet format analyzers <sln> --diagnostics CA1861 --severity info
+```
+
+- **CA1859** (tipo concreto): solo en miembros **privados** (campos, retornos de helpers). No cambiar
+  la firma pública de una interfaz por un concreto — pierde el contrato de inmutabilidad.
+- **CA1861** (array→`static readonly`): el auto-fixer genera nombres pésimos (`collection`,
+  `collection0`); **renómbralos** a descriptivos PascalCase y pásalos a `= [...]`.
+- **CA1873 es de criterio**: guardar cada `_logger.LogXxx(...)` con `if (_logger.IsEnabled(...))`
+  para evitar el boxing de tipos valor **solo compensa en hot paths**. En logging poco frecuente
+  (arranque, errores, poll lento) el coste es despreciable y el guard añade ruido → **no lo apliques
+  por sistema**; el arreglo correcto de alto rendimiento es `LoggerMessage` (CA1848), reservado a
+  rutas calientes. Documenta la decisión si lo dejas sin aplicar.
+
 ## Alcance del hook gemelo
 
 `.claude/hooks/dotnet-code-style-guard.ps1` (PreToolUse Write|Edit, **exit 1 = aviso, no bloquea**):
-avisa cuando el `.cs` que vas a escribir contiene un patrón de IDE0290/0300/0028/0063/0330. Es un
-recordatorio; el arreglo real y la cobertura completa la da `dotnet format style`.
+avisa cuando el `.cs` que vas a escribir contiene un patrón de **IDE0290/0300/0028/0063/0330** o de
+rendimiento textual **CA1827/CA1820/CA1834/CA1848**. Es un recordatorio; las CA que exigen análisis
+semántico (**CA1859** tipo concreto, **CA1861** array constante, **CA1822** miembro estático,
+**CA1873** boxing en logging estructurado) las detecta `dotnet format analyzers`, no el hook.
 
 ---
 
-*Regla condicional STIC.IA — estilo .NET. Autocontenida y portátil entre proyectos (regla + hook).*
+*Regla condicional STIC.IA — estilo y rendimiento .NET. Autocontenida y portátil entre proyectos (regla + hook).*
