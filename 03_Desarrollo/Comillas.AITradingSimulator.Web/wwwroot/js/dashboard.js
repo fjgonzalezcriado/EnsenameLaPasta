@@ -1642,6 +1642,101 @@
         } catch (e) { }
     }
 
+    // ── Dividendos (HV-050): registro que suma al PnL/efectivo ───────────────────
+    function initDividendModal() {
+        const modalEl = document.getElementById('dividendModal');
+        if (!modalEl) return;
+        const symInput = document.getElementById('divSymbol');
+        const amtInput = document.getElementById('divAmount');
+        const curInput = document.getElementById('divCurrency');
+        const dateInput = document.getElementById('divDate');
+        const errBox = document.getElementById('dividendError');
+        const body = document.getElementById('dividendBody');
+        const totalEl = document.getElementById('dividendTotal');
+        const form = document.getElementById('dividendForm');
+
+        function showErr(m) { if (errBox) { errBox.textContent = m; errBox.style.display = ''; } }
+        function clearErr() { if (errBox) { errBox.style.display = 'none'; errBox.textContent = ''; } }
+
+        async function load() {
+            if (!body) return;
+            try {
+                const resp = await fetch('/api/dividends');
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const items = await resp.json();
+                if (totalEl) {
+                    const byCcy = {};
+                    items.forEach(function (d) { const c = (d.currency || 'EUR').toUpperCase(); byCcy[c] = (byCcy[c] || 0) + (Number(d.amount) || 0); });
+                    const parts = Object.keys(byCcy).sort().map(function (c) { return money(byCcy[c], c); });
+                    totalEl.textContent = parts.length ? parts.join(' · ') : money(0, 'EUR');
+                }
+                if (!items.length) { body.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin dividendos</td></tr>'; return; }
+                body.innerHTML = items.map(function (d) {
+                    return '<tr>'
+                        + '<td><small>' + new Date(d.receivedAt).toLocaleString('es-ES') + '</small></td>'
+                        + '<td><strong>' + escapeHtml(d.symbol) + '</strong></td>'
+                        + '<td class="text-end text-success">' + money(d.amount, d.currency) + '</td>'
+                        + '<td class="text-end"><button type="button" class="btn btn-outline-danger btn-sm py-0" data-div-del="' + d.id + '" title="Eliminar">✕</button></td>'
+                        + '</tr>';
+                }).join('');
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error: ' + escapeHtml(e.message) + '</td></tr>';
+            }
+        }
+
+        modalEl.addEventListener('shown.bs.modal', function () {
+            clearErr();
+            if (dateInput && !dateInput.value) {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                dateInput.value = now.toISOString().slice(0, 16);
+            }
+            if (symInput && !symInput.value && selectedSymbol && selectedSymbol !== 'ALL') symInput.value = selectedSymbol;
+            load();
+            if (symInput) symInput.focus();
+        });
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            clearErr();
+            const symbol = (symInput.value || '').trim();
+            const amount = parseFloat(String(amtInput.value).replace(',', '.'));
+            const currency = ((curInput && curInput.value) || 'EUR').trim().toUpperCase() || 'EUR';
+            if (!symbol) { showErr('Indica un símbolo.'); return; }
+            if (!(amount > 0)) { showErr('El importe debe ser > 0.'); return; }
+            const receivedAt = (dateInput && dateInput.value) ? new Date(dateInput.value).toISOString() : null;
+            try {
+                const resp = await fetch('/api/dividends', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol: symbol, amount: amount, currency: currency, receivedAt: receivedAt })
+                });
+                if (!resp.ok) throw new Error((await resp.text()) || ('HTTP ' + resp.status));
+                amtInput.value = '';
+                await load();
+                fetchAndRender(false);   // el PnL/efectivo reflejan el dividendo
+                fetchBreakdown();        // aparece en el desglose por periodo
+            } catch (err) {
+                showErr('No se pudo registrar: ' + err.message);
+            }
+        });
+
+        if (body) {
+            body.addEventListener('click', async function (e) {
+                const del = e.target.closest('[data-div-del]');
+                if (!del) return;
+                if (!confirm('¿Eliminar este dividendo?')) return;
+                del.disabled = true;
+                try {
+                    const resp = await fetch('/api/dividends/' + encodeURIComponent(del.getAttribute('data-div-del')), { method: 'DELETE' });
+                    if (!resp.ok && resp.status !== 404) throw new Error('HTTP ' + resp.status);
+                    await load();
+                    fetchAndRender(false);
+                    fetchBreakdown();
+                } catch (e2) { del.disabled = false; alert('No se pudo eliminar: ' + e2.message); }
+            });
+        }
+    }
+
     // ── Modo visor puro (HV-046): solo lectura, oculta los controles de edición ──
     function initViewerMode() {
         try { if (localStorage.getItem('viewerMode') === '1') viewerMode = true; } catch (e) { }
@@ -1676,6 +1771,7 @@
     initPositionsActions();
     initPositionModal();
     initCashModal();
+    initDividendModal();
     initImportModal();
     initAccountHistoryControl();
     // Primer pintado completo; el gráfico de precios arranca en el rango diario real de

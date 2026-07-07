@@ -1,8 +1,10 @@
+using Comillas.AITradingSimulator.Application.Common.Options;
 using Comillas.AITradingSimulator.Application.Services;
 using Comillas.AITradingSimulator.Domain.Enums;
 using Comillas.AITradingSimulator.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Comillas.AITradingSimulator.Tests.Application;
 
@@ -24,8 +26,27 @@ public sealed class PositionServiceTests : IDisposable
 
     private TradingDbContext NewContext() => new(_options);
 
-    private static PositionService NewService(TradingDbContext ctx)
-        => new(ctx, new WatchlistService(ctx, TimeProvider.System), TimeProvider.System);
+    // fee 0 por defecto para no alterar las expectativas de los tests previos (comisión = HV-050).
+    private static PositionService NewService(TradingDbContext ctx, decimal fee = 0m)
+        => new(ctx, new WatchlistService(ctx, TimeProvider.System), TimeProvider.System,
+               Options.Create(new BrokerOptions { CommissionPerOrder = fee }));
+
+    [Fact]
+    public async Task OpenYClose_AplicaComisionPorOrden()
+    {
+        Guid id;
+        await using (var ctx = NewContext())
+            id = await NewService(ctx, 1m).OpenAsync("AAA", 100m, 10m, BaseTime);
+
+        await using (var ctx = NewContext())
+            Assert.Equal(1m, (await ctx.Trades.FirstAsync()).Commission);   // solo compra
+
+        await using (var ctx = NewContext())
+            await NewService(ctx, 1m).CloseAsync(id, 110m, BaseTime.AddHours(1));
+
+        await using (var v = NewContext())
+            Assert.Equal(2m, (await v.Trades.FirstAsync()).Commission);     // compra + venta
+    }
 
     [Fact]
     public async Task OpenAsync_CreaPosicionAbiertaYAnadeAWatchlist()

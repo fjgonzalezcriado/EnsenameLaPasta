@@ -1,19 +1,22 @@
 namespace Comillas.AITradingSimulator.Application.Common.Dtos;
 
 /// <summary>
-/// Desglose de trades cerrados por año y mes con el PnL sumado (HV-049). El PnL se convierte a la
-/// divisa base para poder sumar entre instrumentos de distintas divisas.
+/// Desglose por año y mes del resultado realizado (HV-049/050): PnL neto de trades cerrados
+/// (bruto − comisiones) + dividendos cobrados, todo convertido a divisa base. <c>PnLBase</c>
+/// incluye ya los dividendos; <c>DividendsBase</c> se expone aparte para transparencia.
 /// </summary>
 public sealed record ClosedTradesBreakdownDto(
     string BaseCurrency,
     decimal TotalPnLBase,
+    decimal TotalDividendsBase,
     int TotalTrades,
     IReadOnlyList<YearBreakdownDto> Years);
 
-/// <summary>Resumen anual: total y meses (ascendente). Años ordenados del más reciente al más antiguo.</summary>
+/// <summary>Resumen anual (meses ascendente). Años del más reciente al más antiguo.</summary>
 public sealed record YearBreakdownDto(
     int Year,
     decimal PnLBase,
+    decimal DividendsBase,
     int Trades,
     int Wins,
     int Losses,
@@ -24,6 +27,7 @@ public sealed record YearBreakdownDto(
 public sealed record MonthBreakdownDto(
     int Month,
     decimal PnLBase,
+    decimal DividendsBase,
     int Trades,
     int Wins,
     int Losses);

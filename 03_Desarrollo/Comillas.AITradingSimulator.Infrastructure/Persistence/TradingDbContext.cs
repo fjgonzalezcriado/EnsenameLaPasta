@@ -13,6 +13,7 @@ public sealed class TradingDbContext : DbContext, ITradingDbContext
     public DbSet<PortfolioSnapshot> PortfolioSnapshots => Set<PortfolioSnapshot>();
     public DbSet<TrackedSymbol> TrackedSymbols => Set<TrackedSymbol>();
     public DbSet<CashMovement> CashMovements => Set<CashMovement>();
+    public DbSet<Dividend> Dividends => Set<Dividend>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

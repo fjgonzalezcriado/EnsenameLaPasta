@@ -1,9 +1,11 @@
 using System.Globalization;
 using Comillas.AITradingSimulator.Application.Common.Dtos;
 using Comillas.AITradingSimulator.Application.Common.Interfaces;
+using Comillas.AITradingSimulator.Application.Common.Options;
 using Comillas.AITradingSimulator.Domain.Entities;
 using Comillas.AITradingSimulator.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Comillas.AITradingSimulator.Application.Services;
 
@@ -12,13 +14,17 @@ public sealed class PositionService : IPositionService
     private readonly ITradingDbContext _db;
     private readonly IWatchlistService _watchlist;
     private readonly TimeProvider _time;
+    private readonly IOptions<BrokerOptions> _broker;
 
-    public PositionService(ITradingDbContext db, IWatchlistService watchlist, TimeProvider time)
+    public PositionService(ITradingDbContext db, IWatchlistService watchlist, TimeProvider time, IOptions<BrokerOptions> broker)
     {
         _db = db;
         _watchlist = watchlist;
         _time = time;
+        _broker = broker;
     }
+
+    private decimal OrderFee => _broker.Value.CommissionPerOrder;
 
     public async Task<Guid> OpenAsync(string symbol, decimal entryPrice, decimal quantity, DateTime? openedAtUtc = null, CancellationToken cancellationToken = default)
     {
@@ -32,6 +38,7 @@ public sealed class PositionService : IPositionService
 
         var openedAt = openedAtUtc ?? _time.GetUtcNow().UtcDateTime;
         var trade = Trade.Open(normalized, entryPrice, quantity, openedAt);
+        trade.AddCommission(OrderFee);   // comisión por orden de compra (HV-050)
         _db.Trades.Add(trade);
         await _db.SaveChangesAsync(cancellationToken);
         return trade.Id;
@@ -44,6 +51,7 @@ public sealed class PositionService : IPositionService
             return false;
 
         trade.Close(exitPrice, closedAtUtc ?? _time.GetUtcNow().UtcDateTime);
+        trade.AddCommission(OrderFee);   // comisión por orden de venta (HV-050)
         await _db.SaveChangesAsync(cancellationToken);
         return true;
     }

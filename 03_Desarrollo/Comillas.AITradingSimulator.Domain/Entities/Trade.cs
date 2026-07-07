@@ -13,7 +13,18 @@ public sealed class Trade
     public DateTime CreatedAt { get; private set; }
     public DateTime? ClosedAt { get; private set; }
 
+    /// <summary>Comisiones acumuladas del trade (apertura + cierre) en divisa base (HV-050).</summary>
+    public decimal Commission { get; private set; }
+
     private Trade() { }
+
+    /// <summary>Suma una comisión (p.ej. la tarifa por orden del bróker). No negativa.</summary>
+    public void AddCommission(decimal fee)
+    {
+        if (fee < 0)
+            throw new ArgumentOutOfRangeException(nameof(fee), "La comisión no puede ser negativa.");
+        Commission += fee;
+    }
 
     public static Trade Open(string symbol, decimal entryPrice, decimal quantity, DateTime createdAtUtc)
     {

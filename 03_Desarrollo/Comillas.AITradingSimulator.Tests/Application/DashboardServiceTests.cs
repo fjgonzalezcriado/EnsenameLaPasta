@@ -634,6 +634,53 @@ public sealed class DashboardServiceTests : IDisposable
         Assert.Empty(bd.Years);
     }
 
+    [Fact]
+    public async Task GetSnapshot_ComisionesYDividendos_AjustanElPnL()
+    {
+        await using (var ctx = NewContext())
+        {
+            var t = Trade.Open("A", 100m, 10m, BaseTime);
+            t.Close(110m, BaseTime.AddHours(1));   // bruto +100
+            t.AddCommission(2m);                   // compra + venta
+            ctx.Trades.Add(t);
+            ctx.Dividends.Add(Dividend.Create("A", 30m, BaseTime, "EUR"));   // dividendo +30
+            await ctx.SaveChangesAsync();
+        }
+
+        await using var ctx2 = NewContext();
+        var snap = await NewService(ctx2).GetSnapshotAsync();
+
+        Assert.Equal(128m, snap.RealizedPnL);    // 100 − 2 + 30
+        Assert.Equal(0m, snap.UnrealizedPnL);
+        Assert.Equal(128m, snap.TotalPnL);
+        Assert.Equal(128m, snap.Cash);           // 0 aportado − 0 invertido − 0 comisiones abiertas + 128
+        Assert.Equal(128m, snap.AccountValue);   // invariante: cash + valor cartera (0)
+    }
+
+    [Fact]
+    public async Task GetClosedTradesBreakdown_IncluyeDividendosPorPeriodo()
+    {
+        await using (var ctx = NewContext())
+        {
+            var t = Trade.Open("A", 100m, 10m, new DateTime(2026, 5, 10, 0, 0, 0, DateTimeKind.Utc));
+            t.Close(110m, new DateTime(2026, 5, 15, 0, 0, 0, DateTimeKind.Utc));   // +100 en mayo 2026
+            ctx.Trades.Add(t);
+            ctx.Dividends.Add(Dividend.Create("A", 30m, new DateTime(2026, 5, 20, 0, 0, 0, DateTimeKind.Utc), "EUR"));
+            await ctx.SaveChangesAsync();
+        }
+
+        await using var ctx2 = NewContext();
+        var bd = await NewService(ctx2).GetClosedTradesBreakdownAsync();
+
+        Assert.Equal(130m, bd.TotalPnLBase);       // 100 (trade) + 30 (dividendo)
+        Assert.Equal(30m, bd.TotalDividendsBase);
+        var may = bd.Years[0].Months[0];
+        Assert.Equal(5, may.Month);
+        Assert.Equal(130m, may.PnLBase);
+        Assert.Equal(30m, may.DividendsBase);
+        Assert.Equal(1, may.Trades);               // el dividendo no cuenta como trade
+    }
+
     public void Dispose() => _connection.Dispose();
 
     /// <summary>Stub de IFxRateProvider: rate 1 salvo los pares configurados.</summary>

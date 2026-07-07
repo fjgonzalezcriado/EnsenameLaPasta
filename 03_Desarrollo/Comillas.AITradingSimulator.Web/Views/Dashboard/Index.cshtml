@@ -99,6 +99,9 @@
         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#cashModal">
             💰 Caja
         </button>
+        <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#dividendModal">
+            💵 Dividendos
+        </button>
     </div>
 
     <!-- Gráfico -->
@@ -221,7 +224,7 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-                        <h5 class="card-title mb-0">🗓️ Resultados por periodo <small class="text-muted fw-normal">(trades cerrados, PnL en divisa base)</small></h5>
+                        <h5 class="card-title mb-0">🗓️ Resultados por periodo <small class="text-muted fw-normal">(neto de comisiones + dividendos, en divisa base)</small></h5>
                         <span id="breakdownTotal" class="small fw-semibold"></span>
                     </div>
                     <div class="table-responsive">
@@ -466,6 +469,62 @@ AAPL,180.5,10,2026-05-20,195.3,2026-06-10   (trade cerrado)</pre>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-primary" id="importSubmit">Importar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Dividendos (HV-050) -->
+<div class="modal fade" id="dividendModal" tabindex="-1" aria-labelledby="dividendModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dividendModalLabel">💵 Dividendos cobrados</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-2">Los dividendos suman al PnL realizado y al efectivo (se convierten a divisa base por su divisa).</p>
+                <form id="dividendForm" class="row g-2 align-items-end mb-2" autocomplete="off">
+                    <div class="col-6 col-sm-3">
+                        <label for="divSymbol" class="form-label">Símbolo</label>
+                        <input type="text" id="divSymbol" class="form-control text-uppercase" list="trackedSymbolsList" maxlength="20" required />
+                    </div>
+                    <div class="col-6 col-sm-2">
+                        <label for="divAmount" class="form-label">Importe</label>
+                        <input type="number" id="divAmount" class="form-control" min="0.01" step="any" required />
+                    </div>
+                    <div class="col-6 col-sm-2">
+                        <label for="divCurrency" class="form-label">Divisa</label>
+                        <input type="text" id="divCurrency" class="form-control text-uppercase" maxlength="3" value="EUR" placeholder="EUR" />
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <label for="divDate" class="form-label">Fecha</label>
+                        <input type="datetime-local" id="divDate" class="form-control" />
+                    </div>
+                    <div class="col-12 col-sm-2 d-flex">
+                        <button type="submit" id="divSubmit" class="btn btn-info flex-fill">＋ Registrar</button>
+                    </div>
+                </form>
+                <div id="dividendError" class="text-danger small mb-2" style="display:none;"></div>
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Dividendos</span>
+                    <span>Total: <strong id="dividendTotal" class="text-body">—</strong></span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Símbolo</th>
+                                <th class="text-end">Importe</th>
+                                <th class="text-end"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="dividendBody">
+                            <tr><td colspan="4" class="text-center text-muted">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

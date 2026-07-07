@@ -91,6 +91,14 @@ public static class DependencyInjection
         // Caja / efectivo (ingresos y retiradas).
         services.AddScoped<ICashService, CashService>();
 
+        // Dividendos cobrados (HV-050): suman al PnL y al efectivo.
+        services.AddScoped<IDividendService, DividendService>();
+
+        // Bróker (comisión por orden; Trade Republic 1 €). La aplica PositionService al abrir/cerrar.
+        services.AddOptions<BrokerOptions>()
+            .Bind(configuration.GetSection(BrokerOptions.SectionName))
+            .ValidateOnStart();
+
         // Segundo proveedor: Twelve Data (requiere API key). HttpClient siempre registrado;
         // solo se usa si es el proveedor activo.
         services.AddOptions<TwelveDataOptions>()
