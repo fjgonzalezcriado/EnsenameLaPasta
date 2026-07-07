@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-049 Desglose de trades cerrados por año/mes con PnL sumado ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: `_duran/specs/HV-049.md`
+- **Resumen**: Tarjeta "🗓️ Resultados por periodo": trades cerrados agrupados por **año** (desc) y **mes** (asc) según `ClosedAt`, con el **PnL realizado sumado y convertido a divisa base** (reutiliza `RateOf`/`currencyBySymbol` del dashboard), nº de trades y ganados/perdidos por periodo + total global. `DashboardService.GetClosedTradesBreakdownAsync` + `GET /api/account/closed-breakdown`. UI: tabla con fila de año (negrita) + meses indentados, PnL coloreado. 2 tests nuevos. 187 verdes. Smoke end-to-end en **BD temporal aislada** (sin tocar la cartera real): Total 100 €/4 trades → 2026 80 € (may 50 [1G/1P], jun 30), 2025 20 € (dic).
+
 #### HV-048 Métricas avanzadas de cartera (drawdown, Sharpe, volatilidad, profit factor) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: `_duran/specs/HV-048.md`

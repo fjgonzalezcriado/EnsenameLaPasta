@@ -316,4 +316,48 @@ public sealed class DashboardService : IDashboardService
             sharpe, volPct, profitFactor, pfInfinite, closedCount,
             hasEnough ? null : $"Sharpe/volatilidad necesitan ≥ 11 días de snapshots (hay {daily.Count}).");
     }
+
+    public async Task<ClosedTradesBreakdownDto> GetClosedTradesBreakdownAsync(CancellationToken cancellationToken = default)
+    {
+        var closed = await _db.Trades
+            .Where(t => t.Status == TradeStatus.Closed && t.ClosedAt != null && t.ExitPrice != null)
+            .ToListAsync(cancellationToken);
+
+        var currencyBySymbol = await _db.TrackedSymbols
+            .ToDictionaryAsync(t => t.Symbol, t => t.Currency, cancellationToken);
+        var baseCurrency = (_fxOptions.Value.BaseCurrency ?? "EUR").Trim().ToUpperInvariant();
+        string Norm(string? c) { var v = (c ?? string.Empty).Trim().ToUpperInvariant(); return v.Length == 0 ? baseCurrency : v; }
+        string CcyOf(string symbol) => Norm(currencyBySymbol.GetValueOrDefault(symbol, string.Empty));
+
+        // Tipos de cambio de las divisas presentes → base.
+        var rateByCcy = new Dictionary<string, decimal>();
+        foreach (var ccy in closed.Select(t => CcyOf(t.Symbol)).Distinct())
+            rateByCcy[ccy] = await _fx.GetRateAsync(ccy, baseCurrency, cancellationToken);
+        decimal RateOf(string symbol) => rateByCcy.GetValueOrDefault(CcyOf(symbol), 1m);
+
+        // PnL realizado convertido a base + fecha de cierre.
+        var rows = closed
+            .Select(t => new { Pnl = (t.ExitPrice!.Value - t.EntryPrice) * t.Quantity * RateOf(t.Symbol), When = t.ClosedAt!.Value })
+            .ToList();
+
+        var years = rows
+            .GroupBy(r => r.When.Year)
+            .OrderByDescending(g => g.Key)
+            .Select(yg =>
+            {
+                var months = yg
+                    .GroupBy(r => r.When.Month)
+                    .OrderBy(mg => mg.Key)
+                    .Select(mg => new MonthBreakdownDto(
+                        mg.Key, Math.Round(mg.Sum(r => r.Pnl), 2), mg.Count(),
+                        mg.Count(r => r.Pnl > 0m), mg.Count(r => r.Pnl < 0m)))
+                    .ToList();
+                return new YearBreakdownDto(
+                    yg.Key, Math.Round(yg.Sum(r => r.Pnl), 2), yg.Count(),
+                    yg.Count(r => r.Pnl > 0m), yg.Count(r => r.Pnl < 0m), months);
+            })
+            .ToList();
+
+        return new ClosedTradesBreakdownDto(baseCurrency, Math.Round(rows.Sum(r => r.Pnl), 2), rows.Count, years);
+    }
 }

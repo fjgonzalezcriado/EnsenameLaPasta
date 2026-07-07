@@ -818,6 +818,48 @@
         } catch (e) { /* silencioso */ }
     }
 
+    // ── Resultados por periodo: trades cerrados por año/mes (HV-049) ──────────────
+    const MONTHS_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    async function fetchBreakdown() {
+        const body = document.getElementById('breakdownBody');
+        const totalEl = document.getElementById('breakdownTotal');
+        if (!body) return;
+        try {
+            const r = await fetch('/api/account/closed-breakdown');
+            if (!r.ok) return;
+            const d = await r.json();
+            const cur = d.baseCurrency || baseCurrency;
+            if (totalEl) {
+                totalEl.textContent = 'Total: ' + money(d.totalPnLBase, cur) + ' · ' + d.totalTrades + ' trades';
+                totalEl.className = 'small fw-semibold ' + signClass(d.totalPnLBase);
+            }
+            if (!d.years || d.years.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin trades cerrados</td></tr>';
+                return;
+            }
+            const wl = function (w, l) { return '<span class="text-success">' + w + '</span> / <span class="text-danger">' + l + '</span>'; };
+            let html = '';
+            d.years.forEach(function (y) {
+                // Fila de año (resumen, en negrita).
+                html += '<tr class="table-light fw-semibold">'
+                    + '<td>' + y.year + '</td>'
+                    + '<td class="text-end ' + signClass(y.pnLBase) + '">' + money(y.pnLBase, cur) + '</td>'
+                    + '<td class="text-end">' + y.trades + '</td>'
+                    + '<td class="text-end">' + wl(y.wins, y.losses) + '</td>'
+                    + '</tr>';
+                (y.months || []).forEach(function (m) {
+                    html += '<tr>'
+                        + '<td class="ps-4 text-muted">' + (MONTHS_ES[m.month - 1] || m.month) + '</td>'
+                        + '<td class="text-end ' + signClass(m.pnLBase) + '">' + money(m.pnLBase, cur) + '</td>'
+                        + '<td class="text-end">' + m.trades + '</td>'
+                        + '<td class="text-end">' + wl(m.wins, m.losses) + '</td>'
+                        + '</tr>';
+                });
+            });
+            body.innerHTML = html;
+        } catch (e) { /* silencioso */ }
+    }
+
     async function fetchAccountHistory() {
         try {
             const resp = await fetch('/api/account/history?points=5000');
@@ -1644,8 +1686,10 @@
     });
     fetchAccountHistory(); // histórico del valor de cuenta (refresco propio, los snapshots son cada pocos min)
     fetchMetrics();        // métricas avanzadas (HV-048)
+    fetchBreakdown();      // resultados por periodo (HV-049)
     metricsTimer = setInterval(function () { fetchAndRender(false); }, METRICS_MS);
     setInterval(fetchAccountHistory, 60000);
     setInterval(fetchMetrics, 60000);
+    setInterval(fetchBreakdown, 60000);
     setInterval(refreshTrackedCurrencies, 60000);
 })();

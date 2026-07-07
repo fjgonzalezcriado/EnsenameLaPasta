@@ -22,4 +22,10 @@ public interface IDashboardService
     /// Sharpe y volatilidad anualizados (retornos diarios) y profit factor de los trades cerrados.
     /// </summary>
     Task<PortfolioMetricsDto> GetPortfolioMetricsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Desglose de trades cerrados por año/mes (según ClosedAt) con el PnL realizado sumado y
+    /// convertido a divisa base (HV-049). Años del más reciente al más antiguo.
+    /// </summary>
+    Task<ClosedTradesBreakdownDto> GetClosedTradesBreakdownAsync(CancellationToken cancellationToken = default);
 }
