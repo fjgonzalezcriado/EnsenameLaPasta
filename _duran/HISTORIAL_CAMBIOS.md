@@ -18,6 +18,19 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.37.0-comisiones-dividendos] - 2026-07-07
+
+### Added
+- 💵 **HV-050** Comisiones del bróker (**Trade Republic**: 1 € fijo/orden, `Broker:CommissionPerOrder`) y **dividendos** en el PnL. `Trade.Commission` (aplicada al abrir/cerrar), entidad `Dividend` + modal "Dividendos" (`/api/dividends`). El PnL/efectivo/desglose/profit factor reflejan comisiones y dividendos; invariante `accountValue = netDeposits + totalPnL` preservado.
+
+### Changed
+- 🗃️ Migración `AddCommissionAndDividends` (columna `Trade.Commission` default 0 + tabla `Dividend`).
+
+### Métricas
+- 190 tests verdes (187 + 3). Smoke end-to-end (BD temporal): trade con 2 € comisión + dividendo 30 € → PnL realizado 128 (100−2+30), cash/accountValue 128; desglose mayo-2026 128 (98 neto + 30 div).
+
+---
+
 ## [1.36.0-desglose-periodo] - 2026-07-07
 
 ### Added

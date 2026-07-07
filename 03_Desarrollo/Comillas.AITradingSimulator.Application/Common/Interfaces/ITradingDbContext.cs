@@ -10,6 +10,7 @@ public interface ITradingDbContext
     DbSet<PortfolioSnapshot> PortfolioSnapshots { get; }
     DbSet<TrackedSymbol> TrackedSymbols { get; }
     DbSet<CashMovement> CashMovements { get; }
+    DbSet<Dividend> Dividends { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

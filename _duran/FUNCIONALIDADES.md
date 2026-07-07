@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-050 Comisiones (Trade Republic) y dividendos en el PnL ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: `_duran/specs/HV-050.md`
+- **Resumen**: Refleja en el PnL las **comisiones** (Trade Republic: **1 € fijo/orden**, `BrokerOptions`) y los **dividendos**. `Trade.Commission` + `PositionService` aplica la tarifa al abrir y cerrar (round-trip = 2 €; el import HV-047 también). Nueva entidad `Dividend` + `DividendService` + `DividendsController` + modal "💵 Dividendos". `DashboardService`: `realizedPnL = ventas − comisiones(cerradas) + dividendos`, `unrealizedPnL = abiertas − comisiones(compra)`, `cash`/`accountValue` ajustados **preservando el invariante** `accountValue = netDeposits + totalPnL`. El desglose por periodo (HV-049) queda neto de comisiones + dividendos (`DividendsBase`), y el profit factor (HV-048) neto. Migración `AddCommissionAndDividends` (default 0, no rompe posiciones previas). 3 tests nuevos. 190 verdes. Smoke end-to-end (BD temporal): trade con 2 € comisión + dividendo 30 € → PnL 128 (100−2+30), invariante OK.
+
 #### HV-049 Desglose de trades cerrados por año/mes con PnL sumado ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: `_duran/specs/HV-049.md`

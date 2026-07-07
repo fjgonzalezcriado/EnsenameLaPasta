@@ -19,6 +19,7 @@ internal sealed class TradeConfiguration : IEntityTypeConfiguration<Trade>
         builder.Property(t => t.EntryPrice).HasConversion<string>();
         builder.Property(t => t.ExitPrice).HasConversion<string?>();
         builder.Property(t => t.Quantity).HasConversion<string>();
+        builder.Property(t => t.Commission).HasConversion<string>();   // HV-050 (decimal→TEXT)
         builder.Property(t => t.Status).HasConversion<int>();
 
         builder.HasIndex(t => new { t.Symbol, t.CreatedAt });

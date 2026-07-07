@@ -77,10 +77,16 @@ public sealed class DashboardService : IDashboardService
             .Select(m => new { m.Amount, m.Currency })
             .ToListAsync(cancellationToken);
 
+        // Dividendos cobrados con su divisa (HV-050): suman al PnL realizado y al efectivo.
+        var dividends = await _db.Dividends
+            .Select(d => new { d.Amount, d.Currency })
+            .ToListAsync(cancellationToken);
+
         var distinctCcy = openTrades.Select(t => t.Symbol)
             .Concat(allClosed.Select(t => t.Symbol))
             .Select(CcyOf)
             .Concat(cashMovements.Select(m => Norm(m.Currency)))
+            .Concat(dividends.Select(d => Norm(d.Currency)))
             .Distinct()
             .ToList();
 
@@ -114,22 +120,32 @@ public sealed class DashboardService : IDashboardService
             return new OpenTradeDto(t.Id, t.Symbol, t.EntryPrice, current, t.Quantity, unrealized, pct, currency, unrealized * RateOf(t.Symbol), t.CreatedAt);
         }).ToList();
 
+        // Comisiones del bróker (HV-050), ya en divisa base (se cobran en EUR). Las cerradas llevan
+        // 2× (compra+venta); las abiertas 1× (compra). Los dividendos (base) suman a lo realizado.
+        var commissionsClosed = allClosed.Sum(t => t.Commission);
+        var commissionsOpen = openTrades.Sum(t => t.Commission);
+        var dividendsBase = dividends.Sum(d => d.Amount * rateByCcy.GetValueOrDefault(Norm(d.Currency), 1m));
+
         // Agregados convertidos a base (sin redondear, para preservar el invariante exacto).
-        var realizedPnL = allClosed
+        var realizedGross = allClosed
             .Where(t => t.ExitPrice.HasValue)
             .Sum(t => (t.ExitPrice!.Value - t.EntryPrice) * t.Quantity * RateOf(t.Symbol));
+        // Realizado neto = bruto de ventas − comisiones de cerradas + dividendos cobrados.
+        var realizedPnL = realizedGross - commissionsClosed + dividendsBase;
 
-        var unrealizedPnL = openDtos.Sum(o => o.UnrealizedPnL * RateOf(o.Symbol));
+        // No realizado neto = bruto de abiertas − comisiones de compra ya pagadas.
+        var unrealizedGross = openDtos.Sum(o => o.UnrealizedPnL * RateOf(o.Symbol));
+        var unrealizedPnL = unrealizedGross - commissionsOpen;
 
         // Capital derivado de las posiciones abiertas (cartera real, sin capital ficticio).
         var invested = openTrades.Sum(t => t.EntryPrice * t.Quantity * RateOf(t.Symbol));      // coste base (en divisa base)
         var marketValue = openDtos.Sum(o => o.CurrentPrice * o.Quantity * RateOf(o.Symbol));   // valor a precio real (en divisa base)
 
-        // Caja: aportaciones netas + efecto de operaciones.
-        // cash = aportado − invertido(abiertas) + realizado(cerradas)   (las ventas devuelven coste+PnL)
-        // Cada aportación se convierte a la divisa base por su propia divisa (HV-021).
+        // Caja: aportaciones netas + efecto de operaciones (comisiones y dividendos incluidos).
+        // cash = aportado − invertido(abiertas) − comisiones de compra + realizado(neto de cerradas+dividendos).
+        // Invariante preservado: accountValue = netDeposits + totalPnL.
         var netDeposits = cashMovements.Sum(m => m.Amount * rateByCcy.GetValueOrDefault(Norm(m.Currency), 1m));
-        var cash = netDeposits - invested + realizedPnL;
+        var cash = netDeposits - invested - commissionsOpen + realizedPnL;
         var accountValue = cash + marketValue;
 
         // Rentabilidad sobre el aportado neto. Por el invariante accountValue = netDeposits + totalPnL,
@@ -248,7 +264,8 @@ public sealed class DashboardService : IDashboardService
         var closedTrades = await _db.Trades
             .Where(t => t.Status == TradeStatus.Closed)
             .ToListAsync(cancellationToken);
-        var closedPnls = closedTrades.Select(t => t.RealizedPnL ?? 0m).ToList();
+        // PnL neto de comisiones por trade (HV-050).
+        var closedPnls = closedTrades.Select(t => (t.RealizedPnL ?? 0m) - t.Commission).ToList();
         var gains = closedPnls.Where(p => p > 0m).Sum();
         var losses = closedPnls.Where(p => p < 0m).Sum(p => -p);
         var pfInfinite = losses == 0m && gains > 0m;
@@ -329,35 +346,59 @@ public sealed class DashboardService : IDashboardService
         string Norm(string? c) { var v = (c ?? string.Empty).Trim().ToUpperInvariant(); return v.Length == 0 ? baseCurrency : v; }
         string CcyOf(string symbol) => Norm(currencyBySymbol.GetValueOrDefault(symbol, string.Empty));
 
-        // Tipos de cambio de las divisas presentes → base.
+        var dividends = await _db.Dividends
+            .Select(d => new { d.Amount, d.Currency, d.ReceivedAt })
+            .ToListAsync(cancellationToken);
+
+        // Tipos de cambio de las divisas presentes (trades + dividendos) → base.
+        var ccys = closed.Select(t => CcyOf(t.Symbol)).Concat(dividends.Select(d => Norm(d.Currency))).Distinct();
         var rateByCcy = new Dictionary<string, decimal>();
-        foreach (var ccy in closed.Select(t => CcyOf(t.Symbol)).Distinct())
+        foreach (var ccy in ccys)
             rateByCcy[ccy] = await _fx.GetRateAsync(ccy, baseCurrency, cancellationToken);
         decimal RateOf(string symbol) => rateByCcy.GetValueOrDefault(CcyOf(symbol), 1m);
 
-        // PnL realizado convertido a base + fecha de cierre.
-        var rows = closed
-            .Select(t => new { Pnl = (t.ExitPrice!.Value - t.EntryPrice) * t.Quantity * RateOf(t.Symbol), When = t.ClosedAt!.Value })
-            .ToList();
+        // Acumulador por (año, mes): PnL neto de trades (bruto − comisión) y dividendos (base).
+        var acc = new Dictionary<(int Year, int Month), (decimal Trades, decimal Div, int Count, int Wins, int Losses)>();
+        (decimal, decimal, int, int, int) Get((int, int) k) => acc.TryGetValue(k, out var v) ? v : (0m, 0m, 0, 0, 0);
 
-        var years = rows
-            .GroupBy(r => r.When.Year)
+        foreach (var t in closed)
+        {
+            var net = (t.ExitPrice!.Value - t.EntryPrice) * t.Quantity * RateOf(t.Symbol) - t.Commission;
+            var k = (t.ClosedAt!.Value.Year, t.ClosedAt!.Value.Month);
+            var v = Get(k);
+            acc[k] = (v.Item1 + net, v.Item2, v.Item3 + 1, v.Item4 + (net > 0m ? 1 : 0), v.Item5 + (net < 0m ? 1 : 0));
+        }
+        foreach (var d in dividends)
+        {
+            var div = d.Amount * rateByCcy.GetValueOrDefault(Norm(d.Currency), 1m);
+            var k = (d.ReceivedAt.Year, d.ReceivedAt.Month);
+            var v = Get(k);
+            acc[k] = (v.Item1, v.Item2 + div, v.Item3, v.Item4, v.Item5);
+        }
+
+        var years = acc
+            .GroupBy(kv => kv.Key.Year)
             .OrderByDescending(g => g.Key)
             .Select(yg =>
             {
                 var months = yg
-                    .GroupBy(r => r.When.Month)
-                    .OrderBy(mg => mg.Key)
-                    .Select(mg => new MonthBreakdownDto(
-                        mg.Key, Math.Round(mg.Sum(r => r.Pnl), 2), mg.Count(),
-                        mg.Count(r => r.Pnl > 0m), mg.Count(r => r.Pnl < 0m)))
+                    .OrderBy(kv => kv.Key.Month)
+                    .Select(kv => new MonthBreakdownDto(
+                        kv.Key.Month, Math.Round(kv.Value.Trades + kv.Value.Div, 2), Math.Round(kv.Value.Div, 2),
+                        kv.Value.Count, kv.Value.Wins, kv.Value.Losses))
                     .ToList();
                 return new YearBreakdownDto(
-                    yg.Key, Math.Round(yg.Sum(r => r.Pnl), 2), yg.Count(),
-                    yg.Count(r => r.Pnl > 0m), yg.Count(r => r.Pnl < 0m), months);
+                    yg.Key,
+                    Math.Round(yg.Sum(kv => kv.Value.Trades + kv.Value.Div), 2),
+                    Math.Round(yg.Sum(kv => kv.Value.Div), 2),
+                    yg.Sum(kv => kv.Value.Count), yg.Sum(kv => kv.Value.Wins), yg.Sum(kv => kv.Value.Losses),
+                    months);
             })
             .ToList();
 
-        return new ClosedTradesBreakdownDto(baseCurrency, Math.Round(rows.Sum(r => r.Pnl), 2), rows.Count, years);
+        var totalPnl = acc.Values.Sum(v => v.Trades + v.Div);
+        var totalDiv = acc.Values.Sum(v => v.Div);
+        var totalTrades = acc.Values.Sum(v => v.Count);
+        return new ClosedTradesBreakdownDto(baseCurrency, Math.Round(totalPnl, 2), Math.Round(totalDiv, 2), totalTrades, years);
     }
 }
