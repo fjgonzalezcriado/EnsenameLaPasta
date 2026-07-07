@@ -32,10 +32,10 @@ public sealed class DashboardServiceTests : IDisposable
     private TradingDbContext NewContext() => new(_options);
 
     // FX por defecto: identidad (rate 1) → los tests sin divisa no cambian.
-    private DashboardService NewService(TradingDbContext ctx)
+    private static DashboardService NewService(TradingDbContext ctx)
         => NewService(ctx, new StubFxRateProvider());
 
-    private DashboardService NewService(TradingDbContext ctx, IFxRateProvider fx)
+    private static DashboardService NewService(TradingDbContext ctx, IFxRateProvider fx)
         => new(ctx, new StaticProviderState(), fx,
             Microsoft.Extensions.Options.Options.Create(new FxOptions { BaseCurrency = "EUR" }));
 

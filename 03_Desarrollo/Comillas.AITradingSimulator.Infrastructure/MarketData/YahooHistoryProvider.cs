@@ -16,7 +16,7 @@ public sealed class YahooHistoryProvider(IHttpClientFactory httpFactory, ILogger
     private readonly ILogger<YahooHistoryProvider> _logger = logger;
 
     // Rango de la UI -> (range, interval) de Yahoo.
-    private static readonly IReadOnlyDictionary<string, (string Range, string Interval)> RangeMap =
+    private static readonly Dictionary<string, (string Range, string Interval)> RangeMap =
         new Dictionary<string, (string, string)>(StringComparer.OrdinalIgnoreCase)
         {
             ["1D"] = ("1d", "5m"),

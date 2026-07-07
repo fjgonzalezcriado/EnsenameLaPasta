@@ -25,7 +25,7 @@ public sealed class TwelveDataHistoryProvider(
     private readonly ILogger<TwelveDataHistoryProvider> _logger = logger;
 
     // Rango de la UI -> (interval, outputsize) de Twelve Data. YTD se calcula aparte.
-    private static readonly IReadOnlyDictionary<string, (string Interval, int OutputSize)> RangeMap =
+    private static readonly Dictionary<string, (string Interval, int OutputSize)> RangeMap =
         new Dictionary<string, (string, int)>(StringComparer.OrdinalIgnoreCase)
         {
             ["1D"] = ("5min", 100),

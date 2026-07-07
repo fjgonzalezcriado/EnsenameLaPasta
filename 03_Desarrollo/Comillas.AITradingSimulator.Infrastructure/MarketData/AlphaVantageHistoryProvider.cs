@@ -30,7 +30,7 @@ public sealed class AlphaVantageHistoryProvider(
 
     // Rango de la UI -> (función, intervalo intradía, outputsize, nº máx. de puntos a conservar).
     // MaxPoints=0 => sin recorte. Alpha Vantage no acepta "últimos N días"; recortamos nosotros.
-    private static readonly IReadOnlyDictionary<string, (Kind Kind, string Interval, string OutputSize, int MaxPoints)> RangeMap =
+    private static readonly Dictionary<string, (Kind Kind, string Interval, string OutputSize, int MaxPoints)> RangeMap =
         new Dictionary<string, (Kind, string, string, int)>(StringComparer.OrdinalIgnoreCase)
         {
             ["1D"] = (Kind.Intraday, "5min", "compact", 0),

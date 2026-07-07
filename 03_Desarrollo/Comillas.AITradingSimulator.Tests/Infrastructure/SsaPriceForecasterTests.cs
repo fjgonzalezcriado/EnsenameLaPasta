@@ -10,7 +10,7 @@ public class SsaPriceForecasterTests
     private static readonly DateTime BaseTime = new(2026, 7, 7, 9, 0, 0, DateTimeKind.Utc);
 
     // Serie sintética: precio = start + i*step.
-    private static IReadOnlyList<PricePoint> Series(int n, decimal start, decimal step)
+    private static List<PricePoint> Series(int n, decimal start, decimal step)
     {
         var list = new List<PricePoint>(n);
         for (var i = 0; i < n; i++)

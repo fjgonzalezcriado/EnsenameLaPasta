@@ -1,7 +1,13 @@
-# dotnet-code-style-guard.ps1 - Recuerda reglas de estilo .NET (IDExxxx)
+# dotnet-code-style-guard.ps1 - Recuerda reglas de estilo y rendimiento .NET (IDExxxx / CAxxxx)
 # Evento: PreToolUse[Write|Edit]
 # Exit 1 = AVISO informativo (NO bloquea el Write/Edit), Exit 0 = sin hallazgos
-# Version: 2.0.0
+# Version: 2.1.0
+#   v2.1.0: anadidas reglas de RENDIMIENTO (analizadores CA) detectables textualmente con bajo
+#           falso positivo: CA1827 (.Count()==0/>0 -> Any()), CA1820 (== "" -> IsNullOrEmpty/Length),
+#           CA1834 (StringBuilder.Append("x") de 1 char -> Append('x')), CA1848/CA1873 (logging con
+#           interpolacion $"..." -> plantilla estructurada / IsEnabled). Las CA que requieren
+#           analisis semantico (CA1859 tipo concreto, CA1861 array constante como arg, CA1822 miembro
+#           estatico, CA1873 boxing en logging estructurado) las detecta 'dotnet format analyzers'.
 #   v2.0.0: ampliado del solo-IDE0290 a un conjunto de reglas de estilo .NET detectables
 #           textualmente y comprobadas en el proyecto: IDE0290 (constructor primario),
 #           IDE0300 (expresion de coleccion en arrays), IDE0028 (expr. de coleccion en
@@ -84,12 +90,35 @@ if ($content -match '\bprivate\s+(?:readonly\s+)?object\s+\w+\s*=\s*new\s*\(\s*\
     $findings.Add('IDE0330 (Lock): object _gate = new(); + lock() -- usar System.Threading.Lock')
 }
 
+# ── Rendimiento (analizadores CA) detectables textualmente ────────────────────
+
+# CA1827: .Count() comparado con 0 -> Any() / !Any()
+if ($content -match '\.Count\(\)\s*(==|!=|>|<|>=|<=)\s*0\b') {
+    $findings.Add('CA1827 (perf): .Count() == 0 / > 0 -- usar !Any() / Any() (no enumera toda la coleccion)')
+}
+
+# CA1820: comparar string con "" -> string.IsNullOrEmpty / Length
+if ($content -match '(==|!=)\s*""' -or $content -match '(==|!=)\s*string\.Empty\b') {
+    $findings.Add('CA1820 (perf): s == "" -- usar string.IsNullOrEmpty(s) o s.Length == 0')
+}
+
+# CA1834: StringBuilder.Append("x") con string de UN caracter -> Append(char)
+if ($content -match '\.Append\("(?:[^"\\]|\\.)"\)') {
+    $findings.Add('CA1834 (perf): StringBuilder.Append("x") de 1 caracter -- usar el literal char Append(''x'')')
+}
+
+# CA1848 / CA1873: logging con interpolacion $"..." -> plantilla estructurada (+ IsEnabled)
+if ($content -match '(?i)\b(?:_?log(?:ger)?)\.Log\w*\(\s*(?:LogLevel\.\w+\s*,\s*)?\$"') {
+    $findings.Add('CA1848/CA1873 (perf logging): _logger.LogXxx($"...") -- usar plantilla estructurada "{Campo}" con args (evita interpolacion/boxing eager); en hot paths, LoggerMessage o guarda IsEnabled')
+}
+
 if ($findings.Count -gt 0) {
-    Write-Host "AVISO (estilo .NET): posibles reglas de estilo aplicables en este archivo:"
+    Write-Host "AVISO (estilo/rendimiento .NET): posibles reglas aplicables en este archivo:"
     foreach ($f in $findings) { Write-Host "  - $f" }
-    Write-Host "  Arreglo en bloque (verifica el diff): dotnet format style <sln> --diagnostics <IDExxxx> --severity info"
+    Write-Host "  Estilo (IDExxxx): dotnet format style <sln> --diagnostics <IDExxxx> --severity info"
+    Write-Host "  Rendimiento (CAxxxx): dotnet format analyzers <sln> --diagnostics <CAxxxx> --severity info"
     Write-Host "  Conserva la convencion de campos _field. Informativo, no bloquea."
-    Write-Host "  Ver .claude/rules/dotnet-code-style.md (tambien cubre IDE0042 desconstruccion e IDE0305 fluida)."
+    Write-Host "  Ver .claude/rules/dotnet-code-style.md (cubre tambien CA1859/CA1861/CA1822/CA1873 via analizadores)."
     exit 1
 }
 

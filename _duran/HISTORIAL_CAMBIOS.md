@@ -18,6 +18,20 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.37.5-rendimiento-ca] - 2026-07-07
+
+### Fixed
+- ⚡ **Rendimiento**: resueltas las reglas de analizador CA de rendimiento aplicables (a nivel *info*, no salían en `dotnet build`; detectadas con `dotnet format analyzers --verify-no-changes`): **CA1859** (5 — tipo concreto en campos/retornos privados: `RangeMap` de los 3 History providers `IReadOnlyDictionary`→`Dictionary`, helpers `Series` de tests `IReadOnlyList`→`List`), **CA1861** (4 — arrays constantes como argumento en tests → campos `static readonly` con nombres descriptivos `ExpectedOutcomes`/`ValidSignals`/`ValidDirections`/`ValidModels` y expresión `[...]`; el auto-fixer generaba nombres pésimos `collection`/`collection0`, corregidos a mano), **CA1822** (1 — helper de test `NewService` a `static`). Build 0/0, 190 tests verdes.
+
+### Changed
+- 🪝 Hook `dotnet-code-style-guard.ps1` **v2.1.0**: añade reglas de **rendimiento** detectables textualmente con bajo falso positivo — **CA1827** (`.Count()==0/>0`→`Any()`), **CA1820** (`== ""`→`IsNullOrEmpty`/`Length`), **CA1834** (`Append("x")` 1 char→`Append('x')`), **CA1848/CA1873** (logging con interpolación `$"..."`→plantilla estructurada). Probado (9 casos: avisan; logging estructurado y caso limpio→exit 0). Sigue solo-ASCII y WARN-first.
+- 📏 Regla `dotnet-code-style.md`: nueva sección **"Reglas de RENDIMIENTO (analizadores CA)"** con tabla (CA1827/1829/1820/1834/1848/1873/1859/1861/1822/1860/1862), flujo `dotnet format analyzers` y los límites (CA1859 solo en privados; CA1861 renombrar el auto-fix; **CA1873 es de criterio** — no envolver logging poco frecuente con `IsEnabled`, reservar `LoggerMessage` a hot paths).
+
+### Decisión
+- 🧭 **CA1873 (16 sitios) deliberadamente NO aplicada**: son llamadas de logging **estructurado** (no interpolado) que saltan por *boxing* de tipos valor en rutas de baja frecuencia (poll 30 s, arranque, `catch` de errores). Envolver cada una en `if (_logger.IsEnabled(...))` es boilerplate desproporcionado para una app de criticidad baja (CLAUDE.md: solución mínima, evitar over-engineering). El arreglo de alto rendimiento (`LoggerMessage`, CA1848) se reserva a rutas calientes; aquí no las hay.
+
+---
+
 ## [1.37.4-estilo-ampliado] - 2026-07-07
 
 ### Changed
