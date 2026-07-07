@@ -52,7 +52,7 @@ public sealed class TwelveDataHistoryProvider(
         {
             var now = _time.GetUtcNow().UtcDateTime;
             interval = "1day";
-            outputSize = (now - new DateTime(now.Year, 1, 1)).Days + 5;
+            outputSize = (now - new DateTime(now.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Days + 5;
         }
         else if (RangeMap.TryGetValue(range, out var r))
         {

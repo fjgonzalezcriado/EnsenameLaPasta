@@ -17,11 +17,8 @@ public class ChannelTickBusTests
         // Subscriber task
         var subscriberTask = Task.Run(async () =>
         {
-            await foreach (var tick in bus.SubscribeAsync(cts.Token))
-            {
-                return tick;
-            }
-            return null;
+            await using var enumerator = bus.SubscribeAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+            return await enumerator.MoveNextAsync() ? enumerator.Current : (MarketTick?)null;
         });
 
         // Publish
@@ -59,7 +56,7 @@ public class ChannelTickBusTests
 
         // Cancelar al instante
         await Task.Delay(50);
-        cts.Cancel();
+        await cts.CancelAsync();
 
         var outcome = await subscriberTask;
         Assert.Contains(outcome, ExpectedOutcomes);

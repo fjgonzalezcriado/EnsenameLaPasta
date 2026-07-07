@@ -45,9 +45,9 @@ public sealed class MarketTickGeneratorService(
                 await GenerateAndPersistAsync(stoppingToken);
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
-            _logger.LogInformation("Generador de ticks detenido por cancelación.");
+            _logger.LogInformation(ex, "Generador de ticks detenido por cancelación.");
         }
     }
 
@@ -84,7 +84,9 @@ public sealed class MarketTickGeneratorService(
             {
                 // Solo el mensaje (no el stack): suele ser un símbolo no disponible en el
                 // proveedor/plan y se repite cada ciclo; evita ruido en el log.
+#pragma warning disable S6667 // Intencionado: no adjuntar el stack de fallos recurrentes por símbolo.
                 _logger.LogWarning("Tick {Symbol} omitido este ciclo: {Error}", item.Symbol, ex.Message);
+#pragma warning restore S6667
             }
         }
 

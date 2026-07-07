@@ -43,9 +43,9 @@ public sealed class StrategyExecutionService(
                 await ExecuteSignalAsync(signal.Value, tick, stoppingToken);
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
-            _logger.LogInformation("Estrategia detenida por cancelación.");
+            _logger.LogInformation(ex, "Estrategia detenida por cancelación.");
         }
     }
 
@@ -61,24 +61,18 @@ public sealed class StrategyExecutionService(
             if (signal == TradeSignal.Buy)
             {
                 result = await orders.BuyAsync(tick.Symbol, tick.Price, _options.CurrentValue.Quantity, now, ct);
-                if (result is not null)
-                {
-                    if (_logger.IsEnabled(LogLevel.Information))
-                        _logger.LogInformation(
-                            "BUY {Symbol} @ {Price} qty={Qty}",
-                            result.Symbol, result.EntryPrice, result.Quantity);
-                }
+                if (result is not null && _logger.IsEnabled(LogLevel.Information))
+                    _logger.LogInformation(
+                        "BUY {Symbol} @ {Price} qty={Qty}",
+                        result.Symbol, result.EntryPrice, result.Quantity);
             }
             else
             {
                 result = await orders.CloseAsync(tick.Symbol, tick.Price, now, ct);
-                if (result is not null)
-                {
-                    if (_logger.IsEnabled(LogLevel.Information))
-                        _logger.LogInformation(
-                            "SELL {Symbol} @ {Price} pnl={PnL}",
-                            result.Symbol, result.ExitPrice, result.RealizedPnL);
-                }
+                if (result is not null && _logger.IsEnabled(LogLevel.Information))
+                    _logger.LogInformation(
+                        "SELL {Symbol} @ {Price} pnl={PnL}",
+                        result.Symbol, result.ExitPrice, result.RealizedPnL);
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

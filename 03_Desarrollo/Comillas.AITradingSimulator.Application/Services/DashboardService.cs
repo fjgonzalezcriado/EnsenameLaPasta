@@ -315,12 +315,12 @@ public sealed class DashboardService(
     private static (double MaxDrawdown, double CurrentDrawdown) ComputeDrawdown(List<(DateTime Timestamp, double Index)> indexed)
     {
         double peakIdx = double.MinValue, maxDd = 0;
-        foreach (var p in indexed)
+        foreach (var index in indexed.Select(p => p.Index))
         {
-            if (p.Index > peakIdx) peakIdx = p.Index;
+            if (index > peakIdx) peakIdx = index;
             if (peakIdx > 0)
             {
-                var dd = (p.Index - peakIdx) / peakIdx;
+                var dd = (index - peakIdx) / peakIdx;
                 if (dd < maxDd) maxDd = dd;
             }
         }

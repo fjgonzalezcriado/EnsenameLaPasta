@@ -73,9 +73,10 @@ public sealed class SsaPriceForecaster(IMarketHistoryProvider history, ILogger<S
 
             var forecastEnd = pts[^1].Value;
             var changePct = last != 0m ? (forecastEnd - last) / last * 100m : 0m;
-            var signal = changePct >= SignalThresholdPct ? "Alcista"
-                       : changePct <= -SignalThresholdPct ? "Bajista"
-                       : "Neutral";
+            string signal;
+            if (changePct >= SignalThresholdPct) signal = "Alcista";
+            else if (changePct <= -SignalThresholdPct) signal = "Bajista";
+            else signal = "Neutral";
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("SSA {Symbol} {Range}: {H} puntos, señal {Signal} ({Pct}%).",
@@ -85,7 +86,7 @@ public sealed class SsaPriceForecaster(IMarketHistoryProvider history, ILogger<S
         }
         catch (Exception ex)
         {
-            _logger.LogWarning("Pronóstico SSA {Symbol} {Range} falló: {Error}", symbol, range, ex.Message);
+            _logger.LogWarning(ex, "Pronóstico SSA {Symbol} {Range} falló.", symbol, range);
             return new PriceForecast(symbol, range, false, "Insuficiente", last, last, 0m, [],
                 "No se pudo calcular el pronóstico.");
         }

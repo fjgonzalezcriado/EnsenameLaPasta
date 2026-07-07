@@ -1,0 +1,26 @@
+# EditorConfig — calibración de SonarAnalyzer.CSharp (integrado en el build; ver
+# .claude/rules/dotnet-code-style.md y DURAN). Solo se ajusta la severidad de reglas Sonar
+# concretas; el resto de estilo/formato usa los valores por defecto del SDK.
+root = true
+
+[*.cs]
+
+# ── SonarAnalyzer: reglas opinionadas de ASP.NET/estilo, calibradas para esta API interna personal ──
+# El resto de reglas Sonar quedan a su severidad por defecto (warning) → bloquean el build
+# (TreatWarningsAsErrors=true), así que el código se mantiene Sonar-limpio en cada compilación.
+
+# S6967 (ModelState.IsValid en acciones): API interna personal, sin [ApiController] ni clientes no
+#        confiables; la validación de negocio vive en los servicios (p. ej. PositionService).
+#        Criticidad baja → no aporta añadir el chequeo en cada acción.
+dotnet_diagnostic.S6967.severity = none
+
+# S6931 (prefijo de ruta a nivel de controlador): usamos rutas absolutas por acción
+#        ([HttpGet("/api/...")]); convención aceptada en esta app.
+dotnet_diagnostic.S6931.severity = none
+
+# S6964 (tipos valor nullable/[Required] para evitar under-posting): no es un riesgo en una API
+#        interna personal sin formularios de terceros.
+dotnet_diagnostic.S6964.severity = none
+
+# S1135 (comentarios TODO): informativos, no deben romper el build.
+dotnet_diagnostic.S1135.severity = suggestion
