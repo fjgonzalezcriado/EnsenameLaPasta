@@ -315,7 +315,7 @@
                                                "specFile":  "_duran/specs/HV-042.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Fase 3: Alpha Vantage como 3er proveedor conmutable, mismo patron que Twelve Data. AlphaVantageOptions + AlphaVantageProvider (GLOBAL_QUOTE: precio+volumen, sin divisa; AV responde 200 tambien en cuota/error con Note/Information/Error Message -> mensaje claro sin stack) + AlphaVantageHistoryProvider (TIME_SERIES_INTRADAY/DAILY/WEEKLY; clave de serie localizada dinamicamente; OHLC HV-041; recorte a N recientes por rango; YTD por anio con TimeProvider; sin key o cuota -> degrada a vacio) + AlphaVantageInstrumentSearchProvider (SYMBOL_SEARCH). MarketProviderState.Available + 3 wrappers Selectable* + DI (opciones + HttpClient AlphaVantage + concretos). ProviderController expone alphaVantageKeyConfigured. UI: opcion Alpha Vantage + aviso sin API key. 15 tests nuevos (6 feed + 5 historico + 4 busqueda) + MarketProviderStateTests adaptado (3 proveedores). 171 verdes. Smoke cableado sin key: /api/provider lista AlphaVantage + alphaVantageKeyConfigured false; POST AlphaVantage -> dashboard providerType=AlphaVantage; historico/busqueda -> vacio (0 stacks, aviso una linea); POST invalido -> 400; Playwright: selector 3 opciones + aviso; vuelta a Yahoo. Limitacion: plan gratuito de AV = 25 req/dia, insuficiente para el feed en vivo. Key en user-secrets (no en repo). Rama feature/HV-042-alphavantage."
+                                               "notas":  "Fase 3: Alpha Vantage como 3er proveedor conmutable, mismo patron que Twelve Data. AlphaVantageOptions + AlphaVantageProvider (GLOBAL_QUOTE: precio+volumen, sin divisa; AV responde 200 tambien en cuota/error con Note/Information/Error Message -\u003e mensaje claro sin stack) + AlphaVantageHistoryProvider (TIME_SERIES_INTRADAY/DAILY/WEEKLY; clave de serie localizada dinamicamente; OHLC HV-041; recorte a N recientes por rango; YTD por anio con TimeProvider; sin key o cuota -\u003e degrada a vacio) + AlphaVantageInstrumentSearchProvider (SYMBOL_SEARCH). MarketProviderState.Available + 3 wrappers Selectable* + DI (opciones + HttpClient AlphaVantage + concretos). ProviderController expone alphaVantageKeyConfigured. UI: opcion Alpha Vantage + aviso sin API key. 15 tests nuevos (6 feed + 5 historico + 4 busqueda) + MarketProviderStateTests adaptado (3 proveedores). 171 verdes. Smoke cableado sin key: /api/provider lista AlphaVantage + alphaVantageKeyConfigured false; POST AlphaVantage -\u003e dashboard providerType=AlphaVantage; historico/busqueda -\u003e vacio (0 stacks, aviso una linea); POST invalido -\u003e 400; Playwright: selector 3 opciones + aviso; vuelta a Yahoo. Limitacion: plan gratuito de AV = 25 req/dia, insuficiente para el feed en vivo. Key en user-secrets (no en repo). Rama feature/HV-042-alphavantage."
                                            },
                                            {
                                                "codigo":  "HV-041",
@@ -1022,14 +1022,13 @@
                          "resumenSesion":  "HV-037..041 (mejoras del grafico de precios: variacion del rango, eje de categorias, techo/suelo, margen, velas japonesas) y HV-042 (Alpha Vantage como 3er proveedor conmutable). 171 tests verdes; smokes Playwright/cableado OK con Yahoo activo.",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
-                                                     "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 38 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-07 OK (171 tests verdes; HV-042 Alpha Vantage como 3er proveedor conmutable: feed/historico/busqueda + selector; smoke de cableado verde sin API key, degradacion limpia)",
+                     "ultimo_build":  "2026-07-07 OK (171 tests verdes; HV-042 Alpha Vantage 3er proveedor; smoke REAL con API key: historico IBM 1M=22 velas OHLC, busqueda microsoft=6 resultados; feed degrada limpio bajo la rafaga 1 req/s de AV)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
                      "evolutivos_completados_mes":  42

@@ -24,7 +24,8 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 - 🟢 **HV-042** Tercer proveedor de datos: **Alpha Vantage** (feed `GLOBAL_QUOTE`, histórico `TIME_SERIES_*` con OHLC, búsqueda `SYMBOL_SEARCH`), seleccionable en runtime como Yahoo/Twelve Data. Opción en el selector + aviso "⚠ sin API key". Mensaje claro en límite de cuota; histórico/búsqueda degradan a vacío sin key.
 
 ### Métricas
-- 171 tests verdes (156 + 15 nuevos; `MarketProviderStateTests` adaptado a 3 proveedores). Smoke de cableado: DI arranca con 3 proveedores, switch refleja en dashboard, degradación limpia sin key, POST inválido→400, UI con aviso. Limitación: plan gratuito de AV = 25 req/día.
+- 171 tests verdes (156 + 15 nuevos; `MarketProviderStateTests` adaptado a 3 proveedores). Smoke de cableado: DI arranca con 3 proveedores, switch refleja en dashboard, degradación limpia sin key, POST inválido→400, UI con aviso.
+- **Smoke real (API key)**: histórico IBM 1M = 22 velas OHLC reales; búsqueda "microsoft" = 6 resultados reales; feed degrada limpio. Limitación confirmada: AV gratuito = 25 req/día + 1 req/segundo (el feed en vivo tripea la ráfaga → usar Yahoo para el feed continuo).
 
 ---
 
