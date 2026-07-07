@@ -46,14 +46,13 @@ public sealed class TwelveDataInstrumentSearchProvider(
         }
 
         var data = payload.Data ?? [];
-        return data
+        return [.. data
             .Where(d => !string.IsNullOrWhiteSpace(d.Symbol))
             .Select(d => new InstrumentSearchResult(
                 d.Symbol!,
                 d.InstrumentName ?? string.Empty,
                 d.Exchange ?? string.Empty,
-                d.InstrumentType ?? string.Empty))
-            .ToList();
+                d.InstrumentType ?? string.Empty))];
     }
 
     private sealed record SymbolSearchResponse(

@@ -44,8 +44,8 @@ public sealed class PositionServiceTests : IDisposable
         await using (var ctx = NewContext())
             await NewService(ctx, 1m).CloseAsync(id, 110m, BaseTime.AddHours(1));
 
-        await using (var v = NewContext())
-            Assert.Equal(2m, (await v.Trades.FirstAsync()).Commission);     // compra + venta
+        await using var v = NewContext();
+        Assert.Equal(2m, (await v.Trades.FirstAsync()).Commission);     // compra + venta
     }
 
     [Fact]

@@ -39,7 +39,7 @@ public sealed class TwelveDataHistoryProvider(
         };
 
     private static readonly string[] DateTimeFormats =
-        { "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd" };
+        ["yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"];
 
     public async Task<IReadOnlyList<PricePoint>> GetHistoryAsync(string symbol, string range, CancellationToken cancellationToken = default)
     {

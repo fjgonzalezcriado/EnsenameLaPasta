@@ -64,7 +64,7 @@ public sealed class FxRefreshServiceTests : IDisposable
 
     private sealed class RecordingFxRateProvider : IFxRateProvider
     {
-        public ConcurrentBag<(string From, string To)> Refreshed { get; } = new();
+        public ConcurrentBag<(string From, string To)> Refreshed { get; } = [];
         public Task<decimal> GetRateAsync(string from, string to, CancellationToken cancellationToken = default)
             => Task.FromResult(1m);
         public Task RefreshAsync(string from, string to, CancellationToken cancellationToken = default)

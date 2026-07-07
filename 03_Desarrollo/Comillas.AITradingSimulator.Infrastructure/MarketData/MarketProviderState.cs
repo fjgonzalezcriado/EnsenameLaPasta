@@ -12,11 +12,11 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// </summary>
 public sealed class MarketProviderState : IMarketProviderState
 {
-    private static readonly string[] AvailableProviders = { "YahooFinance", "TwelveData", "AlphaVantage" };
+    private static readonly string[] AvailableProviders = ["YahooFinance", "TwelveData", "AlphaVantage"];
     private static readonly string FilePath = Path.Combine("App_Data", "active-provider.txt");
 
     private readonly ILogger<MarketProviderState> _logger;
-    private readonly object _gate = new();
+    private readonly Lock _gate = new();
     private string _current;
 
     public MarketProviderState(IOptions<MarketDataOptions> options, ILogger<MarketProviderState> logger)

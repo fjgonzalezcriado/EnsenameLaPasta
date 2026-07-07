@@ -8,11 +8,11 @@ namespace Comillas.AITradingSimulator.Application.Strategies;
 public sealed class MovingAverageCrossoverStrategy : IStrategy
 {
     private readonly StrategyOptions _options;
-    private readonly Dictionary<string, Queue<decimal>> _shortWindows = new();
-    private readonly Dictionary<string, Queue<decimal>> _longWindows = new();
+    private readonly Dictionary<string, Queue<decimal>> _shortWindows = [];
+    private readonly Dictionary<string, Queue<decimal>> _longWindows = [];
 
     /// <summary>Estado del último cruce conocido por símbolo. Ausente = aún sin datos suficientes.</summary>
-    private readonly Dictionary<string, bool> _wasShortAbove = new();
+    private readonly Dictionary<string, bool> _wasShortAbove = [];
 
     public MovingAverageCrossoverStrategy(IOptions<StrategyOptions> options)
     {

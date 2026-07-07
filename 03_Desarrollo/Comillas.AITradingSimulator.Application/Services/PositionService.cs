@@ -181,7 +181,7 @@ public sealed class PositionService(ITradingDbContext db, IWatchlistService watc
 
     private static bool TryParseDate(string raw, out DateTime value)
     {
-        string[] formats = { "yyyy-MM-dd", "dd/MM/yyyy", "dd-MM-yyyy", "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-dd HH:mm:ss" };
+        string[] formats = ["yyyy-MM-dd", "dd/MM/yyyy", "dd-MM-yyyy", "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-dd HH:mm:ss"];
         if (DateTime.TryParseExact(raw, formats, CultureInfo.InvariantCulture,
                 DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out value)
             || DateTime.TryParse(raw, CultureInfo.InvariantCulture,

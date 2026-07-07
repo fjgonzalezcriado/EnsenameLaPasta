@@ -64,7 +64,7 @@ namespace Comillas.AITradingSimulator.Infrastructure.Persistence.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_MarketTick_Symbol_Timestamp",
                 table: "MarketTick",
-                columns: new[] { "Symbol", "Timestamp" });
+                columns: ["Symbol", "Timestamp"]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PortfolioSnapshot_Timestamp",
@@ -79,7 +79,7 @@ namespace Comillas.AITradingSimulator.Infrastructure.Persistence.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Trade_Symbol_CreatedAt",
                 table: "Trade",
-                columns: new[] { "Symbol", "CreatedAt" });
+                columns: ["Symbol", "CreatedAt"]);
         }
 
         /// <inheritdoc />

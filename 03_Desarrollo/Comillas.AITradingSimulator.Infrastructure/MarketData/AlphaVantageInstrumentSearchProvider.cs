@@ -51,14 +51,13 @@ public sealed class AlphaVantageInstrumentSearchProvider(
         }
 
         var matches = payload.BestMatches ?? [];
-        return matches
+        return [.. matches
             .Where(m => !string.IsNullOrWhiteSpace(m.Symbol))
             .Select(m => new InstrumentSearchResult(
                 m.Symbol!,
                 m.Name ?? string.Empty,
                 m.Region ?? string.Empty,
-                m.Type ?? string.Empty))
-            .ToList();
+                m.Type ?? string.Empty))];
     }
 
     private sealed record SymbolSearchResponse(

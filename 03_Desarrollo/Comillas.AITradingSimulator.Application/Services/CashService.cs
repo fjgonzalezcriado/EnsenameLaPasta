@@ -16,9 +16,7 @@ public sealed class CashService(ITradingDbContext db, TimeProvider time) : ICash
             .OrderByDescending(m => m.CreatedAt)
             .ToListAsync(cancellationToken);
 
-        return movements
-            .Select(m => new CashMovementDto(m.Id, m.Amount, m.Note, m.Currency, m.CreatedAt))
-            .ToList();
+        return [.. movements.Select(m => new CashMovementDto(m.Id, m.Amount, m.Note, m.Currency, m.CreatedAt))];
     }
 
     public async Task<decimal> GetNetDepositsAsync(CancellationToken cancellationToken = default)

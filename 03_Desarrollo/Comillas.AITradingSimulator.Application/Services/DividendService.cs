@@ -16,9 +16,7 @@ public sealed class DividendService(ITradingDbContext db, TimeProvider time) : I
             .OrderByDescending(d => d.ReceivedAt)
             .ToListAsync(cancellationToken);
 
-        return items
-            .Select(d => new DividendDto(d.Id, d.Symbol, d.Amount, d.Currency, d.ReceivedAt, d.Note))
-            .ToList();
+        return [.. items.Select(d => new DividendDto(d.Id, d.Symbol, d.Amount, d.Currency, d.ReceivedAt, d.Note))];
     }
 
     public async Task<Guid> AddAsync(string symbol, decimal amount, DateTime? receivedAtUtc = null, string? currency = "EUR", string? note = null, CancellationToken cancellationToken = default)
