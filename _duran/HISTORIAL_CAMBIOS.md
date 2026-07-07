@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.32.0-ml-features-modelos] - 2026-07-07
+
+### Added
+- 🧠 **HV-045** Clasificador ampliado: **12 features** (añade momentum 10p, precio vs SMA20, MACD, Bollinger %B, estocástico %K) y **2 modelos** (SDCA + **FastTree**) con **selección por AUC** en hold-out. `DirectionSignal.ModelUsed` + tooltip con modelo/features/accuracy/AUC.
+
+### Métricas
+- 178 tests verdes. Smoke real: `HY9H.F 6M → SDCA` (AUC 0,65); `MBOT 1A → FastTree` (acc 0,62) — distintos símbolos eligen distinto modelo. Calidad 0,50–0,65 (nivel azar-ish), reportada con transparencia.
+
+---
+
 ## [1.31.0-ml-clasificacion] - 2026-07-07
 
 ### Added

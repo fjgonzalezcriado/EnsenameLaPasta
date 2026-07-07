@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.31.0-ml-clasificacion",
+                   "version_actual":  "1.32.0-ml-features-modelos",
                    "ultima_actualizacion":  "2026-07-07",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-045",
+                                               "titulo":  "ML - mas features + segundo modelo (FastTree) con seleccion",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-07-07",
+                                               "fechaInicio":  "2026-07-07",
+                                               "fechaCompletado":  "2026-07-07",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-045.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Amplia el clasificador de HV-044. Features 7 -> 12: anade momentum 10p, precio vs SMA20, MACD (histograma EMA12-EMA26 menos senal EMA9, normalizado), Bollinger %B(20,2sigma) y estocastico %K(14); EMAs del MACD precomputadas; Lookback 26, MinPoints 60. Segundo modelo: ademas de SDCA se entrena FastTree (Microsoft.ML.FastTree, NumberOfThreads=1 determinista, 50 arboles/10 hojas/min 5 por hoja) y se elige el de mayor AUC en hold-out (accuracy de desempate); se predice con el ganador. DirectionSignal.ModelUsed nuevo; tooltip de la UI muestra modelo + features + accuracy/AUC. Tests adaptados (FeatureCount 12, ModelUsed en {SDCA,FastTree}). 178 verdes. Smoke real Yahoo: HY9H.F 6M -> SDCA (AUC 0,646, Vender/Baja 27 por ciento, n=79); MBOT 1A -> FastTree (acc 0,622/AUC 0,521, n=179), distintos simbolos eligen distinto modelo. Honestidad: accuracy 0,50-0,65 (nivel azar-ish) reportada con transparencia; indicador educativo, no asesoramiento. Rama feature/HV-045-ml-features-modelos."
+                                           },
+                                           {
                                                "codigo":  "HV-044",
                                                "titulo":  "ML.NET - clasificacion sube/baja (SDCA + features tecnicas)",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-044.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Amplia ML.NET con clasificador binario de direccion (sube el proximo periodo). Microsoft.ML 4.0.2 (SDCA, ya transitivo). IDirectionClassifier + MlDirectionClassifier (regresion logistica SDCA) con 7 features tecnicas: retorno 1p, momentum 5p, ratio de medias SMA5/SMA10, precio vs SMA10, RSI(14) 0-1, volatilidad (sigma retornos 10p) y volumen relativo. Etiqueta close[i+1]>close[i]. Split cronologico 80/20 (no aleatorio) + evaluacion honesta en hold-out (accuracy + AUC). Normalizacion MinMax. Predice el ultimo dato -> P(sube) -> senal Comprar(>=0,55)/Vender(<=0,45)/Mantener; direccion Sube/Baja. Guardas: min 40 puntos, ambas clases en train, try/catch (no lanza, degrada). SignalController GET /api/signal. DI singleton. UI: el switch pasa a Senales ML y dispara ambos modelos; badge 📊 (Comprar/Vender/Mantener + prob) junto al 🔮 de pronostico, con calidad (accuracy/AUC/n) en el tooltip. 3 tests nuevos. 178 verdes. Smoke real Yahoo: HY9H.F 6M -> Comprar (Sube 68 por ciento), accuracy 0,61 / AUC 0,64 (n=88), modestamente mejor que el azar reportado con transparencia; 1D hoy -> Insuficiente (<40 puntos). Honestidad: la direccion de precio ronda el azar; indicador educativo, no asesoramiento financiero. Rama feature/HV-044-ml-clasificacion."
+                                               "notas":  "Amplia ML.NET con clasificador binario de direccion (sube el proximo periodo). Microsoft.ML 4.0.2 (SDCA, ya transitivo). IDirectionClassifier + MlDirectionClassifier (regresion logistica SDCA) con 7 features tecnicas: retorno 1p, momentum 5p, ratio de medias SMA5/SMA10, precio vs SMA10, RSI(14) 0-1, volatilidad (sigma retornos 10p) y volumen relativo. Etiqueta close[i+1]\u003eclose[i]. Split cronologico 80/20 (no aleatorio) + evaluacion honesta en hold-out (accuracy + AUC). Normalizacion MinMax. Predice el ultimo dato -\u003e P(sube) -\u003e senal Comprar(\u003e=0,55)/Vender(\u003c=0,45)/Mantener; direccion Sube/Baja. Guardas: min 40 puntos, ambas clases en train, try/catch (no lanza, degrada). SignalController GET /api/signal. DI singleton. UI: el switch pasa a Senales ML y dispara ambos modelos; badge 📊 (Comprar/Vender/Mantener + prob) junto al 🔮 de pronostico, con calidad (accuracy/AUC/n) en el tooltip. 3 tests nuevos. 178 verdes. Smoke real Yahoo: HY9H.F 6M -\u003e Comprar (Sube 68 por ciento), accuracy 0,61 / AUC 0,64 (n=88), modestamente mejor que el azar reportado con transparencia; 1D hoy -\u003e Insuficiente (\u003c40 puntos). Honestidad: la direccion de precio ronda el azar; indicador educativo, no asesoramiento financiero. Rama feature/HV-044-ml-clasificacion."
                                            },
                                            {
                                                "codigo":  "HV-043",
@@ -1053,7 +1070,7 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043 (ML.NET SSA pronostico) y HV-044 (ML.NET clasificacion sube/baja SDCA + features tecnicas + accuracy/AUC honestos). 178 tests verdes; smokes reales OK con Yahoo. Senales ML son indicadores educativos, no asesoramiento.",
+                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043 (ML SSA), HV-044 (ML clasificacion sube/baja) y HV-045 (12 features + 2 modelos SDCA/FastTree con seleccion por AUC). 178 tests verdes; smokes reales OK con Yahoo. Senales ML son indicadores educativos, no asesoramiento (calidad ~azar reportada con transparencia).",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
                                                      "_duran/METRICAS.json"
@@ -1062,10 +1079,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-07 OK (178 tests verdes; HV-044 ML.NET clasificacion sube/baja SDCA + 7 features tecnicas + accuracy/AUC hold-out; smoke real Yahoo 6M Comprar Sube 68 por ciento acc 0,61)",
+                     "ultimo_build":  "2026-07-07 OK (178 tests verdes; HV-045 clasificador ampliado a 12 features + 2 modelos SDCA/FastTree con seleccion por AUC; smoke real: HY9H.F->SDCA, MBOT->FastTree)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  44
+                     "evolutivos_completados_mes":  45
                  },
     "alertas":  {
                     "activas":  [

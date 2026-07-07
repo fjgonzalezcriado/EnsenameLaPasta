@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-045 ML — más features + segundo modelo (FastTree) con selección ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo (Fase 3)
+- **Spec**: `_duran/specs/HV-045.md`
+- **Resumen**: Amplía el clasificador de HV-044. **Features 7 → 12**: añade momentum 10p, precio vs SMA20, **MACD** (histograma normalizado), **Bollinger %B**(20) y **estocástico %K**(14) — EMAs del MACD precomputadas; warmup `Lookback=26`, `MinPoints=60`. **Segundo modelo**: además de SDCA se entrena **FastTree** (`Microsoft.ML.FastTree`, determinista) y se **elige el de mayor AUC** en el hold-out (accuracy de desempate). `DirectionSignal.ModelUsed` reportado; el tooltip de la UI muestra modelo + features + accuracy/AUC. 178 verdes. Smoke real: `HY9H.F 6M → SDCA` (AUC 0,65), `MBOT 1A → FastTree` — distintos símbolos eligen distinto modelo. **Honestidad**: calidad 0,50–0,65 (nivel azar-ish) reportada con transparencia; indicador, no asesoramiento.
+
 #### HV-044 ML.NET — clasificación sube/baja (SDCA + features técnicas) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo (Fase 3)
 - **Spec**: `_duran/specs/HV-044.md`

@@ -3,20 +3,22 @@ using Comillas.AITradingSimulator.Application.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.ML;
 using Microsoft.ML.Data;
+using Microsoft.ML.Trainers.FastTree;
 
 namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 
 /// <summary>
-/// Clasifica la dirección del próximo periodo (sube/baja) con ML.NET (regresión logística SDCA)
-/// sobre features técnicas del histórico: retorno, momentum, cruce de medias, precio vs media,
-/// RSI, volatilidad y volumen relativo (HV-044). Entrena al vuelo con split cronológico 80/20 y
-/// reporta accuracy/AUC del hold-out (honestidad: la dirección de precio ronda el azar).
+/// Clasifica la dirección del próximo periodo (sube/baja) con ML.NET sobre features técnicas del
+/// histórico (HV-044, ampliado en HV-045). Entrena DOS modelos — regresión logística SDCA y
+/// árboles con boosting FastTree — con split cronológico 80/20 y se queda con el mejor por AUC en
+/// el hold-out (reporta accuracy/AUC y el modelo elegido). Honestidad: la dirección de precio
+/// ronda el azar; es un indicador, no asesoramiento.
 /// </summary>
 public sealed class MlDirectionClassifier : IDirectionClassifier
 {
-    private const int Lookback = 14;      // RSI 14 marca el mínimo de historia por muestra
-    private const int MinPoints = 40;     // mínimo para tener muestras de entrenamiento suficientes
-    public const int FeatureCount = 7;
+    private const int Lookback = 26;      // warmup del EMA26 (MACD) marca el mínimo por muestra
+    private const int MinPoints = 60;     // mínimo para tener muestras de entrenamiento suficientes
+    public const int FeatureCount = 12;
 
     private readonly IMarketHistoryProvider _history;
     private readonly ILogger<MlDirectionClassifier> _logger;
@@ -35,61 +37,80 @@ public sealed class MlDirectionClassifier : IDirectionClassifier
         var volumes = series.Select(p => (double)p.Volume).ToArray();
 
         DirectionSignal Insufficient(string msg) =>
-            new(symbol, range, false, "Baja", 0.5, "Mantener", 0, 0, 0, FeatureCount, msg);
+            new(symbol, range, false, "Baja", 0.5, "Mantener", 0, 0, 0, FeatureCount, "-", msg);
 
         if (closes.Length < MinPoints)
             return Insufficient($"Histórico insuficiente para la clasificación (se necesitan ≥ {MinPoints} puntos).");
 
         try
         {
+            // Indicadores acumulativos precomputados (EMAs para MACD).
+            var ema12 = Ema(closes, 12);
+            var ema26 = Ema(closes, 26);
+            var macd = new double[closes.Length];
+            for (var k = 0; k < closes.Length; k++) macd[k] = ema12[k] - ema26[k];
+            var signal = Ema(macd, 9);
+
             var samples = new List<FeatureRow>();
-            // Muestras etiquetadas: i en [Lookback, n-2] (necesita c[i+1] para la etiqueta).
             for (var i = Lookback; i <= closes.Length - 2; i++)
-                samples.Add(new FeatureRow { Features = BuildFeatures(closes, volumes, i), Label = closes[i + 1] > closes[i] });
+                samples.Add(new FeatureRow { Features = BuildFeatures(closes, volumes, macd, signal, i), Label = closes[i + 1] > closes[i] });
 
             if (samples.Count < 20)
                 return Insufficient("Muestras de entrenamiento insuficientes.");
 
-            // Split cronológico 80/20 (no aleatorio: en series temporales no se mezcla el futuro).
             var cut = (int)(samples.Count * 0.8);
             var trainRows = samples.Take(cut).ToList();
             var testRows = samples.Skip(cut).ToList();
 
-            // SDCA necesita ambas clases en entrenamiento.
             if (trainRows.All(r => r.Label) || trainRows.None(r => r.Label))
                 return Insufficient("Sin variación de dirección suficiente para entrenar.");
 
             var ml = new MLContext(seed: 0);
             var trainData = ml.Data.LoadFromEnumerable(trainRows);
-            var pipeline = ml.Transforms.NormalizeMinMax("Features")
-                .Append(ml.BinaryClassification.Trainers.SdcaLogisticRegression(
-                    labelColumnName: nameof(FeatureRow.Label), featureColumnName: nameof(FeatureRow.Features)));
-            var model = pipeline.Fit(trainData);
+            var testData = ml.Data.LoadFromEnumerable(testRows);
+            var norm = ml.Transforms.NormalizeMinMax("Features");
 
-            // Evaluación honesta en el hold-out.
-            double accuracy = 0, auc = 0;
-            if (testRows.Count > 0)
+            // Dos candidatos; nos quedamos con el de mayor AUC (o accuracy si empatan) en hold-out.
+            var candidates = new (string Name, IEstimator<ITransformer> Pipe)[]
             {
-                var metrics = ml.BinaryClassification.Evaluate(model.Transform(ml.Data.LoadFromEnumerable(testRows)),
-                    labelColumnName: nameof(FeatureRow.Label));
-                accuracy = double.IsNaN(metrics.Accuracy) ? 0 : metrics.Accuracy;
-                auc = double.IsNaN(metrics.AreaUnderRocCurve) ? 0 : metrics.AreaUnderRocCurve;
+                ("SDCA", norm.Append(ml.BinaryClassification.Trainers.SdcaLogisticRegression(
+                    labelColumnName: nameof(FeatureRow.Label), featureColumnName: nameof(FeatureRow.Features)))),
+                ("FastTree", norm.Append(ml.BinaryClassification.Trainers.FastTree(new FastTreeBinaryTrainer.Options
+                {
+                    LabelColumnName = nameof(FeatureRow.Label),
+                    FeatureColumnName = nameof(FeatureRow.Features),
+                    NumberOfThreads = 1,          // determinismo
+                    NumberOfTrees = 50,
+                    NumberOfLeaves = 10,
+                    MinimumExampleCountPerLeaf = 5,
+                }))),
+            };
+
+            (string Name, ITransformer Model, double Acc, double Auc)? best = null;
+            foreach (var c in candidates)
+            {
+                var model = c.Pipe.Fit(trainData);
+                var m = ml.BinaryClassification.Evaluate(model.Transform(testData), labelColumnName: nameof(FeatureRow.Label));
+                var acc = double.IsNaN(m.Accuracy) ? 0 : m.Accuracy;
+                var auc = double.IsNaN(m.AreaUnderRocCurve) ? 0 : m.AreaUnderRocCurve;
+                if (best is null || auc > best.Value.Auc || (auc == best.Value.Auc && acc > best.Value.Acc))
+                    best = (c.Name, model, acc, auc);
             }
 
-            // Predicción para el último dato (features en n-1, sin etiqueta futura todavía).
-            var engine = ml.Model.CreatePredictionEngine<FeatureRow, DirectionPrediction>(model);
-            var latest = new FeatureRow { Features = BuildFeatures(closes, volumes, closes.Length - 1) };
+            var winner = best!.Value;
+            var engine = ml.Model.CreatePredictionEngine<FeatureRow, DirectionPrediction>(winner.Model);
+            var latest = new FeatureRow { Features = BuildFeatures(closes, volumes, macd, signal, closes.Length - 1) };
             var pred = engine.Predict(latest);
 
             var pUp = Math.Clamp(pred.Probability, 0f, 1f);
             var direction = pUp >= 0.5f ? "Sube" : "Baja";
-            var signal = pUp >= 0.55f ? "Comprar" : pUp <= 0.45f ? "Vender" : "Mantener";
+            var sig = pUp >= 0.55f ? "Comprar" : pUp <= 0.45f ? "Vender" : "Mantener";
 
-            _logger.LogDebug("Clasificación {Symbol} {Range}: {Dir} P(sube)={P:F2} acc={Acc:F2} auc={Auc:F2} (n={N}).",
-                symbol, range, direction, pUp, accuracy, auc, trainRows.Count);
+            _logger.LogDebug("Clasificación {Symbol} {Range}: {Dir} P(sube)={P:F2} modelo {Model} acc={Acc:F2} auc={Auc:F2} (n={N}).",
+                symbol, range, direction, pUp, winner.Name, winner.Acc, winner.Auc, trainRows.Count);
 
-            return new DirectionSignal(symbol, range, true, direction, pUp, signal, accuracy, auc,
-                trainRows.Count, FeatureCount, null);
+            return new DirectionSignal(symbol, range, true, direction, pUp, sig, winner.Acc, winner.Auc,
+                trainRows.Count, FeatureCount, winner.Name, null);
         }
         catch (Exception ex)
         {
@@ -98,20 +119,30 @@ public sealed class MlDirectionClassifier : IDirectionClassifier
         }
     }
 
-    // 7 features técnicas en el índice i (requiere i >= Lookback).
-    private static float[] BuildFeatures(double[] c, double[] v, int i)
+    // 12 features técnicas en el índice i (requiere i >= Lookback).
+    private static float[] BuildFeatures(double[] c, double[] v, double[] macd, double[] signal, int i)
     {
         var ret1 = Change(c[i - 1], c[i]);
         var ret5 = Change(c[i - 5], c[i]);
+        var ret10 = Change(c[i - 10], c[i]);
         var sma5 = Mean(c, i - 4, i);
         var sma10 = Mean(c, i - 9, i);
+        var sma20 = Mean(c, i - 19, i);
         var maRatio = sma10 != 0 ? sma5 / sma10 - 1 : 0;
-        var priceVsSma = sma10 != 0 ? c[i] / sma10 - 1 : 0;
-        var rsi = Rsi(c, i, Lookback) / 100.0;                 // 0..1
+        var priceVsSma10 = sma10 != 0 ? c[i] / sma10 - 1 : 0;
+        var priceVsSma20 = sma20 != 0 ? c[i] / sma20 - 1 : 0;
+        var rsi = Rsi(c, i, 14) / 100.0;                          // 0..1
         var vol = Volatility(c, i, 10);
         var avgVol = Mean(v, i - 9, i);
         var volRatio = avgVol > 0 ? v[i] / avgVol - 1 : 0;
-        return new[] { (float)ret1, (float)ret5, (float)maRatio, (float)priceVsSma, (float)rsi, (float)vol, (float)volRatio };
+        var macdHist = c[i] != 0 ? (macd[i] - signal[i]) / c[i] : 0;
+        var pctB = BollingerPctB(c, i, 20);                       // ~0..1 (posición en las bandas)
+        var stochK = StochasticK(c, i, 14);                       // 0..1
+        return new[]
+        {
+            (float)ret1, (float)ret5, (float)ret10, (float)maRatio, (float)priceVsSma10, (float)priceVsSma20,
+            (float)rsi, (float)vol, (float)volRatio, (float)macdHist, (float)pctB, (float)stochK
+        };
     }
 
     private static double Change(double from, double to) => from != 0 ? (to - from) / from : 0;
@@ -119,8 +150,19 @@ public sealed class MlDirectionClassifier : IDirectionClassifier
     private static double Mean(double[] a, int lo, int hi)
     {
         double sum = 0; var n = 0;
-        for (var k = lo; k <= hi; k++) { sum += a[k]; n++; }
+        for (var k = lo; k <= hi; k++) { if (k < 0) continue; sum += a[k]; n++; }
         return n > 0 ? sum / n : 0;
+    }
+
+    // Media móvil exponencial de toda la serie (para MACD).
+    private static double[] Ema(double[] a, int period)
+    {
+        var ema = new double[a.Length];
+        if (a.Length == 0) return ema;
+        var alpha = 2.0 / (period + 1);
+        ema[0] = a[0];
+        for (var k = 1; k < a.Length; k++) ema[k] = alpha * a[k] + (1 - alpha) * ema[k - 1];
+        return ema;
     }
 
     private static double Volatility(double[] c, int i, int window)
@@ -147,6 +189,32 @@ public sealed class MlDirectionClassifier : IDirectionClassifier
         if (avgLoss == 0) return avgGain == 0 ? 50.0 : 100.0;
         var rs = avgGain / avgLoss;
         return 100.0 - 100.0 / (1.0 + rs);
+    }
+
+    // %B de Bollinger(window, 2σ): posición del precio dentro de las bandas (0=inferior, 1=superior).
+    private static double BollingerPctB(double[] c, int i, int window)
+    {
+        var mean = Mean(c, i - window + 1, i);
+        double sq = 0; var n = 0;
+        for (var k = i - window + 1; k <= i; k++) { if (k < 0) continue; sq += (c[k] - mean) * (c[k] - mean); n++; }
+        if (n == 0) return 0.5;
+        var sd = Math.Sqrt(sq / n);
+        if (sd == 0) return 0.5;
+        var lower = mean - 2 * sd; var upper = mean + 2 * sd;
+        return (c[i] - lower) / (upper - lower);
+    }
+
+    // %K del estocástico(window): posición del cierre en el rango máx-mín de la ventana (0..1).
+    private static double StochasticK(double[] c, int i, int window)
+    {
+        double min = double.MaxValue, max = double.MinValue;
+        for (var k = i - window + 1; k <= i; k++)
+        {
+            if (k < 0) continue;
+            if (c[k] < min) min = c[k];
+            if (c[k] > max) max = c[k];
+        }
+        return max > min ? (c[i] - min) / (max - min) : 0.5;
     }
 
     private sealed class FeatureRow

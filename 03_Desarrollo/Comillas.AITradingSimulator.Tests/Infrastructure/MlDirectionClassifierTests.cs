@@ -37,7 +37,8 @@ public class MlDirectionClassifierTests
         Assert.Contains(s.Direction, new[] { "Sube", "Baja" });
         Assert.Equal(s.Direction, s.Probability >= 0.5 ? "Sube" : "Baja");
         Assert.True(s.TrainSamples > 0);
-        Assert.Equal(7, s.FeatureCount);
+        Assert.Equal(12, s.FeatureCount);
+        Assert.Contains(s.ModelUsed, new[] { "SDCA", "FastTree" });   // selección de modelo (HV-045)
         Assert.InRange(s.Accuracy, 0.0, 1.0);
         Assert.InRange(s.Auc, 0.0, 1.0);
     }

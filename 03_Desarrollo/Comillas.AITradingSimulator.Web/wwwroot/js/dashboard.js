@@ -1004,9 +1004,10 @@
         const pUp = Math.round((s.probability || 0) * 100);
         el.textContent = '📊 ' + s.signal + ' (' + s.direction + ' ' + pUp + '%)';
         el.className = 'small fw-semibold ' + cls;
-        // Honestidad: la calidad del modelo (hold-out) en el tooltip.
-        el.title = 'Clasificación SDCA sobre features técnicas · acierto ' + Math.round((s.accuracy || 0) * 100)
-            + '% / AUC ' + (s.auc || 0).toFixed(2) + ' en hold-out (n=' + s.trainSamples + '). Indicador, no asesoramiento.';
+        // Honestidad: modelo elegido + calidad (hold-out) en el tooltip.
+        el.title = 'Modelo ' + (s.modelUsed || '-') + ' · ' + (s.featureCount || 0) + ' features técnicas · acierto '
+            + Math.round((s.accuracy || 0) * 100) + '% / AUC ' + (s.auc || 0).toFixed(2)
+            + ' en hold-out (n=' + s.trainSamples + '). Indicador, no asesoramiento.';
     }
 
     async function loadSignal() {
