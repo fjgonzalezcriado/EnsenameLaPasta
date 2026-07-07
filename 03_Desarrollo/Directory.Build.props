@@ -1,0 +1,21 @@
+<Project>
+
+  <!--
+    Supresión de auditoría NuGet — SOLO este aviso concreto (HV-043).
+
+    GHSA-2m69-gcr7-jv3q afecta a la librería NATIVA de SQLite (SQLitePCLRaw.lib.e_sqlite3 2.1.11),
+    arrastrada de forma TRANSITIVA por Microsoft.EntityFrameworkCore.Sqlite 10.0.8. No hay control
+    directo sobre su versión hasta que EF Core publique una que fije un e_sqlite3 parcheado.
+
+    Este es un proyecto personal local: SQLite en fichero, sin datos reales, criticidad baja, sin
+    exposición de red a la BD. El riesgo real es mínimo. La auditoría NuGet sigue ACTIVA para el
+    resto de paquetes; solo se silencia este advisory para no bloquear el build (TreatWarningsAsErrors).
+
+    Revisar / retirar al actualizar EF Core Sqlite. (Aparece al añadir Microsoft.ML.TimeSeries porque
+    fuerza un restore en fresco que re-ejecuta la auditoría; la vulnerabilidad ya existía antes.)
+  -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
+
+</Project>

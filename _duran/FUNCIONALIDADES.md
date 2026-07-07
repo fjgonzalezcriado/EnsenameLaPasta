@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-043 Señales con ML.NET — pronóstico de precio (SSA) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo (Fase 3)
+- **Spec**: `_duran/specs/HV-043.md`
+- **Resumen**: Primer uso de **ML.NET** (`Microsoft.ML.TimeSeries` 4.0.2): pronóstico de precio con **SSA** sobre los cierres del histórico del símbolo. `IPriceForecaster`/`SsaPriceForecaster` (entrena al vuelo con `IMarketHistoryProvider`, `ForecastBySsa` horizonte N + banda de confianza 95 %) → deriva **señal** Alcista/Bajista/Neutral (umbral ±0,5 %). `GET /api/forecast`. UI: switch **"🔮 Pronóstico"** + badge de señal + overlay en el gráfico (línea naranja discontinua + banda sombreada sobre categorías futuras +1..+N). Degrada sin lanzar (mín. 12 puntos; símbolo inválido → "Insuficiente"). Añade `Directory.Build.props` que suprime un advisory NuGet **transitivo de SQLite** (preexistente, destapado por el restore en fresco de ML.NET). 4 tests nuevos. 175 verdes. Smoke real (Yahoo): `HY9H.F 6M` → Alcista +39 % con banda (screenshot OK); degradación limpia. **Caveat**: SSA en series cortas extrapola con fuerza (la banda refleja la incertidumbre); no es asesoramiento financiero.
+
 #### HV-042 Tercer proveedor de datos — Alpha Vantage ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo (Fase 3)
 - **Spec**: `_duran/specs/HV-042.md`

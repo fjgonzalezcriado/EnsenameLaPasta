@@ -10,6 +10,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.8" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.8" />
+    <!-- ML.NET: pronóstico de series temporales (SSA) para señales (HV-043). -->
+    <PackageReference Include="Microsoft.ML.TimeSeries" Version="4.0.2" />
   </ItemGroup>
 
   <PropertyGroup>

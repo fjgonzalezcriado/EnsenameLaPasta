@@ -9,6 +9,9 @@
     let yMarginPct = 0.02;
     let lastRenderedSeries = null;   // última serie dibujada (para re-render al cambiar el margen)
     let chartType = 'line';          // 'line' | 'candle' (velas japonesas, HV-041)
+    let forecastActive = false;      // overlay de pronóstico ML.NET (SSA) (HV-043)
+    let lastForecast = null;         // último PriceForecast recibido (símbolo+rango propios)
+    const FORECAST_HORIZON = 10;
     const COLORS = ['#0d6efd', '#fd7e14', '#198754', '#dc3545', '#6f42c1', '#20c997'];
     // En modo "En vivo" los ticks se capturan cada ~30 s, pero entre sesiones (app apagada)
     // hay huecos de horas/días. Si dos ticks consecutivos distan más de esto, cortamos la
@@ -182,7 +185,7 @@
             const axisRight = chart.width;        // borde derecho del canvas
             const h = 18;
             chart.data.datasets.forEach(function (ds, i) {
-                if (ds.isVolume) return;   // la etiqueta de valor no aplica a las barras de volumen
+                if (ds.isVolume || ds.isForecast) return;   // no aplica a volumen ni a pronóstico
                 const meta = chart.getDatasetMeta(i);
                 if (meta.hidden || !meta.data || meta.data.length === 0) return;
                 // Último punto con valor. Con el eje de categorías (HV-038) los datos son
@@ -513,6 +516,34 @@
         });
         const datasets = priceDatasets.concat(volumeDatasets);
 
+        // Overlay de pronóstico (HV-043): añade categorías futuras (+1..+N) con la línea de
+        // pronóstico (naranja discontinua) y la banda de confianza sombreada. Solo con un símbolo.
+        let fc = null;
+        if (forecastActive && lastForecast && lastForecast.hasForecast
+            && lastForecast.symbol === selectedSymbol && lastForecast.range === chartMode
+            && Array.isArray(lastForecast.points) && lastForecast.points.length && priceDatasets.length === 1) {
+            fc = lastForecast.points;
+        }
+        if (fc) {
+            const h = fc.length;
+            const baseLen = cats.length;
+            const realData = priceDatasets[0].data;
+            let anchor = null;
+            for (let k = realData.length - 1; k >= 0; k--) { if (realData[k] != null) { anchor = realData[k]; break; } }
+            for (let i = 1; i <= h; i++) { labels.push('+' + i); labelsFull.push('Pronóstico +' + i); }
+            datasets.forEach(function (ds) { for (let i = 0; i < h; i++) ds.data.push(null); });
+            const FORE = '#fd7e14';
+            const arr = function (pick, withAnchor) {
+                const a = new Array(baseLen + h).fill(null);
+                if (withAnchor && anchor != null) a[baseLen - 1] = anchor;
+                for (let i = 0; i < h; i++) a[baseLen + i] = pick(fc[i]);
+                return a;
+            };
+            datasets.push({ label: 'Banda inf.', data: arr(function (p) { return p.lowerBound; }, false), isForecast: true, borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, borderWidth: 0, yAxisID: 'y', order: 0, spanGaps: true });
+            datasets.push({ label: 'Banda sup.', data: arr(function (p) { return p.upperBound; }, false), isForecast: true, borderColor: 'transparent', backgroundColor: hexToRgba(FORE, 0.12), fill: '-1', pointRadius: 0, borderWidth: 0, yAxisID: 'y', order: 0, spanGaps: true });
+            datasets.push({ label: 'Pronóstico', data: arr(function (p) { return p.value; }, true), isForecast: true, isForecastLine: true, borderColor: FORE, borderDash: [5, 4], backgroundColor: 'transparent', pointRadius: 0, borderWidth: 2, yAxisID: 'y', order: 0, spanGaps: true });
+        }
+
         // El eje de volumen se escala para que las barras ocupen ~el 25% inferior del área.
         const volMax = maxVol > 0 ? maxVol * 4 : 1;
 
@@ -536,6 +567,12 @@
                     if (n > hi) hi = n;
                     if (n < lo) lo = n;
                 });
+            });
+        }
+        if (fc) {   // que la banda de pronóstico quepa en el eje (HV-043)
+            fc.forEach(function (p) {
+                if (p.upperBound > hi) hi = p.upperBound;
+                if (p.lowerBound < lo) lo = p.lowerBound;
             });
         }
         const hasHiLo = Number.isFinite(hi) && Number.isFinite(lo);
@@ -590,7 +627,8 @@
                             labels: {
                                 filter: function (item, data) {
                                     const ds = data.datasets[item.datasetIndex];
-                                    return !(ds && ds.isVolume);   // ocultar las series de volumen de la leyenda
+                                    // ocultar volumen y las bandas de pronóstico; mostrar la línea "Pronóstico"
+                                    return !(ds && (ds.isVolume || (ds.isForecast && !ds.isForecastLine)));
                                 }
                             }
                         },
@@ -903,6 +941,68 @@
         });
     }
 
+    // ── Pronóstico ML.NET (SSA) (HV-043) ────────────────────────────────────────
+    function renderForecastBadge() {
+        const el = document.getElementById('forecastSignal');
+        if (!el) return;
+        if (!forecastActive) { el.textContent = ''; el.className = 'small fw-semibold'; return; }
+        if (selectedSymbol === 'ALL') {
+            el.textContent = '🔮 elige un símbolo';
+            el.className = 'small fw-semibold text-muted';
+            return;
+        }
+        const f = lastForecast;
+        if (!f || f.symbol !== selectedSymbol || f.range !== chartMode) {
+            el.textContent = '🔮 …'; el.className = 'small fw-semibold text-muted'; return;
+        }
+        if (!f.hasForecast) {
+            el.textContent = '🔮 ' + (f.message || 'sin pronóstico');
+            el.className = 'small fw-semibold text-muted';
+            return;
+        }
+        const cls = f.signal === 'Alcista' ? 'text-success' : f.signal === 'Bajista' ? 'text-danger' : 'text-secondary';
+        el.textContent = '🔮 ' + chartMode + ': ' + f.signal + ' ' + pctSigned(f.expectedChangePct) + ' (' + f.points.length + 'p)';
+        el.className = 'small fw-semibold ' + cls;
+    }
+
+    async function loadForecast() {
+        if (!forecastActive) { lastForecast = null; renderForecastBadge(); return; }
+        if (!selectedSymbol || selectedSymbol === 'ALL') { lastForecast = null; renderForecastBadge(); return; }
+        renderForecastBadge();   // muestra "…" mientras llega
+        const sym = selectedSymbol, rng = chartMode;
+        try {
+            const resp = await fetch('/api/forecast?symbol=' + encodeURIComponent(sym)
+                + '&range=' + encodeURIComponent(rng) + '&horizon=' + FORECAST_HORIZON);
+            if (!resp.ok) { lastForecast = null; renderForecastBadge(); return; }
+            const f = await resp.json();
+            // Ignora respuestas obsoletas (el usuario cambió de símbolo/rango entretanto).
+            if (f.symbol !== selectedSymbol || f.range !== chartMode) return;
+            lastForecast = f;
+            renderForecastBadge();
+            if (lastRenderedSeries) renderChart(lastRenderedSeries);   // pinta el overlay
+        } catch (e) {
+            lastForecast = null; renderForecastBadge();
+        }
+    }
+
+    function initForecastControl() {
+        try { if (localStorage.getItem('chartForecast') === '1') forecastActive = true; } catch (e) { }
+        const sw = document.getElementById('forecastSwitch');
+        if (!sw) return;
+        sw.checked = forecastActive;
+        sw.addEventListener('change', function () {
+            forecastActive = sw.checked;
+            try { localStorage.setItem('chartForecast', forecastActive ? '1' : '0'); } catch (e) { }
+            if (forecastActive) {
+                loadForecast();
+            } else {
+                lastForecast = null;
+                renderForecastBadge();
+                if (lastRenderedSeries) renderChart(lastRenderedSeries);   // quita el overlay
+            }
+        });
+    }
+
     // ── Barra de rango temporal: histórico real de Yahoo (/api/history) ─────────
     async function loadHistory(range) {
         const hint = document.getElementById('rangeHint');
@@ -925,7 +1025,8 @@
                 return;
             }
             renderChart(series);
-            if (hint) hint.textContent = 'Histórico Yahoo · ' + range;
+            if (forecastActive) loadForecast();   // el pronóstico depende de símbolo+rango (HV-043)
+            if (hint) hint.textContent = 'Histórico · ' + range;
         } catch (e) {
             console.error('Error cargando histórico', e);
             if (hint) hint.textContent = 'Error cargando histórico.';
@@ -1434,6 +1535,7 @@
     initHistoryControl();
     initYMarginControl();
     initCandleControl();
+    initForecastControl();
     initRangeBar();
     initInstrumentSearch();
     initRemoveSymbol();
