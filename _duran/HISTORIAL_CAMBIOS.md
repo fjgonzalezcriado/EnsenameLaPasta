@@ -18,6 +18,13 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.38.1-checklist-barrido] - 2026-07-07
+
+### Changed
+- 📏 Regla portable `dotnet-code-style.md`: nueva sección **"Comprobación de barrido a cero (checklist pre-commit / cierre de evolutivo)"** con la nota práctica exportable — los 2 comandos `dotnet format style|analyzers <sln> --severity info --verify-no-changes` (barrido), el recuento por regla con `grep | sort | uniq -c`, cómo arreglar (con `--diagnostics <ID>` o a mano cuando no hay fixer) y el cierre (`build` 0/0 + `test`). Recuerda que un build verde no garantiza 0 sugerencias (IDE/CA a nivel *info* no salen en `dotnet build`). Solo documentación; se exporta a otros proyectos junto al hook.
+
+---
+
 ## [1.38.0-cero-sugerencias] - 2026-07-07
 
 ### Changed

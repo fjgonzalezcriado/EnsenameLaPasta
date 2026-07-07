@@ -13,20 +13,6 @@
 
                                       },
                          "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-06-15 12:38:45"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
                          "fecha":  "2026-06-15 12:43:16"
                      },
                      {
@@ -696,6 +682,20 @@
                                       },
                          "versionProyecto":  "1.37.6-ide0090",
                          "fecha":  "2026-07-07 13:32:22"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.38.0-cero-sugerencias",
+                         "fecha":  "2026-07-07 13:48:16"
                      }
                  ]
 }

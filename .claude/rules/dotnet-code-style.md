@@ -133,6 +133,32 @@ dotnet format analyzers <sln> --diagnostics CA1861 --severity info
   por sistema**; el arreglo correcto de alto rendimiento es `LoggerMessage` (CA1848), reservado a
   rutas calientes. Documenta la decisión si lo dejas sin aplicar.
 
+## Comprobación de barrido a cero (checklist pre-commit / cierre de evolutivo)
+
+Ni `IDExxxx` ni las `CAxxxx` a nivel *info* aparecen en `dotnet build` — un build verde **no**
+garantiza que estén a cero. Antes de commitear C# o cerrar un evolutivo, ejecuta este barrido
+(sustituye `<sln>` por la solución/proyecto, p. ej. `MiApp.slnx`):
+
+```bash
+# 1) ESTILO (IDExxxx) — no cambia nada, solo lista lo pendiente:
+dotnet format style     <sln> --severity info --verify-no-changes
+
+# 2) RENDIMIENTO (CAxxxx) — idem:
+dotnet format analyzers <sln> --severity info --verify-no-changes
+```
+
+- **Ambos comandos sin salida ⇒ 0 sugerencias** (objetivo). Si listan algo, arréglalo con el mismo
+  comando sin `--verify-no-changes` y `--diagnostics <ID>` (una regla a la vez, revisando el diff),
+  o a mano cuando no haya *fixer* (CA1859, inicializadores de propiedad IDE0300/0305, etc.).
+- **Recuento rápido** de lo que queda, agrupado por regla:
+
+  ```bash
+  dotnet format style     <sln> --severity info --verify-no-changes 2>&1 | grep -oE 'IDE[0-9]{4}' | sort | uniq -c
+  dotnet format analyzers <sln> --severity info --verify-no-changes 2>&1 | grep -oE 'CA[0-9]{4}'  | sort | uniq -c
+  ```
+- **Cierre**: tras arreglar, `dotnet build` (0/0) + `dotnet test` (verde) antes de commitear.
+- El hook avisa *al escribir*; este barrido es la **red de seguridad** que confirma el cero global.
+
 ## Alcance del hook gemelo
 
 `.claude/hooks/dotnet-code-style-guard.ps1` (PreToolUse Write|Edit, **exit 1 = aviso, no bloquea**):
