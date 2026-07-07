@@ -7,24 +7,16 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// Proveedor de datos en vivo que delega en el proveedor activo (resuelto en cada llamada
 /// vía <see cref="IMarketProviderState"/>), permitiendo cambiarlo en runtime desde la UI.
 /// </summary>
-public sealed class SelectableMarketDataProvider : IMarketDataProvider
+public sealed class SelectableMarketDataProvider(
+    YahooFinanceProvider yahoo,
+    TwelveDataProvider twelveData,
+    AlphaVantageProvider alphaVantage,
+    IMarketProviderState state) : IMarketDataProvider
 {
-    private readonly YahooFinanceProvider _yahoo;
-    private readonly TwelveDataProvider _twelveData;
-    private readonly AlphaVantageProvider _alphaVantage;
-    private readonly IMarketProviderState _state;
-
-    public SelectableMarketDataProvider(
-        YahooFinanceProvider yahoo,
-        TwelveDataProvider twelveData,
-        AlphaVantageProvider alphaVantage,
-        IMarketProviderState state)
-    {
-        _yahoo = yahoo;
-        _twelveData = twelveData;
-        _alphaVantage = alphaVantage;
-        _state = state;
-    }
+    private readonly YahooFinanceProvider _yahoo = yahoo;
+    private readonly TwelveDataProvider _twelveData = twelveData;
+    private readonly AlphaVantageProvider _alphaVantage = alphaVantage;
+    private readonly IMarketProviderState _state = state;
 
     public Task<MarketQuote> GetLatestAsync(string symbol, DateTime timestampUtc, CancellationToken cancellationToken = default)
     {

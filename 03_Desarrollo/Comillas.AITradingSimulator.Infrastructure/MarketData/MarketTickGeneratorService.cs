@@ -10,30 +10,20 @@ using Microsoft.Extensions.Options;
 
 namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 
-public sealed class MarketTickGeneratorService : BackgroundService
+public sealed class MarketTickGeneratorService(
+    IServiceScopeFactory scopeFactory,
+    IMarketDataProvider provider,
+    ITickBus bus,
+    IOptionsMonitor<MarketDataOptions> optionsMonitor,
+    TimeProvider timeProvider,
+    ILogger<MarketTickGeneratorService> logger) : BackgroundService
 {
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IMarketDataProvider _provider;
-    private readonly ITickBus _bus;
-    private readonly IOptionsMonitor<MarketDataOptions> _optionsMonitor;
-    private readonly TimeProvider _timeProvider;
-    private readonly ILogger<MarketTickGeneratorService> _logger;
-
-    public MarketTickGeneratorService(
-        IServiceScopeFactory scopeFactory,
-        IMarketDataProvider provider,
-        ITickBus bus,
-        IOptionsMonitor<MarketDataOptions> optionsMonitor,
-        TimeProvider timeProvider,
-        ILogger<MarketTickGeneratorService> logger)
-    {
-        _scopeFactory = scopeFactory;
-        _provider = provider;
-        _bus = bus;
-        _optionsMonitor = optionsMonitor;
-        _timeProvider = timeProvider;
-        _logger = logger;
-    }
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    private readonly IMarketDataProvider _provider = provider;
+    private readonly ITickBus _bus = bus;
+    private readonly IOptionsMonitor<MarketDataOptions> _optionsMonitor = optionsMonitor;
+    private readonly TimeProvider _timeProvider = timeProvider;
+    private readonly ILogger<MarketTickGeneratorService> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

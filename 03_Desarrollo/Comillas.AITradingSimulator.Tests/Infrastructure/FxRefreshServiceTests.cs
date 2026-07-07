@@ -74,10 +74,9 @@ public sealed class FxRefreshServiceTests : IDisposable
         }
     }
 
-    private sealed class StaticOptionsMonitor : IOptionsMonitor<FxOptions>
+    private sealed class StaticOptionsMonitor(FxOptions value) : IOptionsMonitor<FxOptions>
     {
-        public StaticOptionsMonitor(FxOptions value) => CurrentValue = value;
-        public FxOptions CurrentValue { get; }
+        public FxOptions CurrentValue { get; } = value;
         public FxOptions Get(string? name) => CurrentValue;
         public IDisposable? OnChange(Action<FxOptions, string?> listener) => null;
     }

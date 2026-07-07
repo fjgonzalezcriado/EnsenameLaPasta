@@ -14,20 +14,14 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// el hold-out (reporta accuracy/AUC y el modelo elegido). Honestidad: la dirección de precio
 /// ronda el azar; es un indicador, no asesoramiento.
 /// </summary>
-public sealed class MlDirectionClassifier : IDirectionClassifier
+public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogger<MlDirectionClassifier> logger) : IDirectionClassifier
 {
     private const int Lookback = 26;      // warmup del EMA26 (MACD) marca el mínimo por muestra
     private const int MinPoints = 60;     // mínimo para tener muestras de entrenamiento suficientes
     public const int FeatureCount = 12;
 
-    private readonly IMarketHistoryProvider _history;
-    private readonly ILogger<MlDirectionClassifier> _logger;
-
-    public MlDirectionClassifier(IMarketHistoryProvider history, ILogger<MlDirectionClassifier> logger)
-    {
-        _history = history;
-        _logger = logger;
-    }
+    private readonly IMarketHistoryProvider _history = history;
+    private readonly ILogger<MlDirectionClassifier> _logger = logger;
 
     public async Task<DirectionSignal> ClassifyAsync(string symbol, string range, CancellationToken cancellationToken = default)
     {

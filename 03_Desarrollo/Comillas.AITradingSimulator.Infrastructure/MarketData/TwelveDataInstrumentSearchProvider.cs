@@ -13,21 +13,14 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// con la convención de Twelve Data (los que su feed/histórico aceptan). Reutiliza el
 /// HttpClient "TwelveData".
 /// </summary>
-public sealed class TwelveDataInstrumentSearchProvider : IInstrumentSearchProvider
+public sealed class TwelveDataInstrumentSearchProvider(
+    IHttpClientFactory httpFactory,
+    IOptionsMonitor<TwelveDataOptions> options,
+    ILogger<TwelveDataInstrumentSearchProvider> logger) : IInstrumentSearchProvider
 {
-    private readonly IHttpClientFactory _httpFactory;
-    private readonly IOptionsMonitor<TwelveDataOptions> _options;
-    private readonly ILogger<TwelveDataInstrumentSearchProvider> _logger;
-
-    public TwelveDataInstrumentSearchProvider(
-        IHttpClientFactory httpFactory,
-        IOptionsMonitor<TwelveDataOptions> options,
-        ILogger<TwelveDataInstrumentSearchProvider> logger)
-    {
-        _httpFactory = httpFactory;
-        _options = options;
-        _logger = logger;
-    }
+    private readonly IHttpClientFactory _httpFactory = httpFactory;
+    private readonly IOptionsMonitor<TwelveDataOptions> _options = options;
+    private readonly ILogger<TwelveDataInstrumentSearchProvider> _logger = logger;
 
     public async Task<IReadOnlyList<InstrumentSearchResult>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {

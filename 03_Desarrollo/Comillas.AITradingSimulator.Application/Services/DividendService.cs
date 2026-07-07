@@ -5,16 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comillas.AITradingSimulator.Application.Services;
 
-public sealed class DividendService : IDividendService
+public sealed class DividendService(ITradingDbContext db, TimeProvider time) : IDividendService
 {
-    private readonly ITradingDbContext _db;
-    private readonly TimeProvider _time;
-
-    public DividendService(ITradingDbContext db, TimeProvider time)
-    {
-        _db = db;
-        _time = time;
-    }
+    private readonly ITradingDbContext _db = db;
+    private readonly TimeProvider _time = time;
 
     public async Task<IReadOnlyList<DividendDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {

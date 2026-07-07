@@ -10,30 +10,20 @@ using Microsoft.Extensions.Options;
 
 namespace Comillas.AITradingSimulator.Infrastructure.Strategy;
 
-public sealed class StrategyExecutionService : BackgroundService
+public sealed class StrategyExecutionService(
+    ITickBus bus,
+    IStrategy strategy,
+    IServiceScopeFactory scopeFactory,
+    IOptionsMonitor<StrategyOptions> options,
+    TimeProvider timeProvider,
+    ILogger<StrategyExecutionService> logger) : BackgroundService
 {
-    private readonly ITickBus _bus;
-    private readonly IStrategy _strategy;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IOptionsMonitor<StrategyOptions> _options;
-    private readonly TimeProvider _timeProvider;
-    private readonly ILogger<StrategyExecutionService> _logger;
-
-    public StrategyExecutionService(
-        ITickBus bus,
-        IStrategy strategy,
-        IServiceScopeFactory scopeFactory,
-        IOptionsMonitor<StrategyOptions> options,
-        TimeProvider timeProvider,
-        ILogger<StrategyExecutionService> logger)
-    {
-        _bus = bus;
-        _strategy = strategy;
-        _scopeFactory = scopeFactory;
-        _options = options;
-        _timeProvider = timeProvider;
-        _logger = logger;
-    }
+    private readonly ITickBus _bus = bus;
+    private readonly IStrategy _strategy = strategy;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    private readonly IOptionsMonitor<StrategyOptions> _options = options;
+    private readonly TimeProvider _timeProvider = timeProvider;
+    private readonly ILogger<StrategyExecutionService> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

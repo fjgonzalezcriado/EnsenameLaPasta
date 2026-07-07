@@ -15,24 +15,16 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// El nombre de la serie en la respuesta varía ("Time Series (5min)", "Time Series (Daily)",
 /// "Weekly Time Series"…), así que se localiza dinámicamente.
 /// </summary>
-public sealed class AlphaVantageHistoryProvider : IMarketHistoryProvider
+public sealed class AlphaVantageHistoryProvider(
+    IHttpClientFactory httpFactory,
+    IOptionsMonitor<AlphaVantageOptions> options,
+    TimeProvider time,
+    ILogger<AlphaVantageHistoryProvider> logger) : IMarketHistoryProvider
 {
-    private readonly IHttpClientFactory _httpFactory;
-    private readonly IOptionsMonitor<AlphaVantageOptions> _options;
-    private readonly TimeProvider _time;
-    private readonly ILogger<AlphaVantageHistoryProvider> _logger;
-
-    public AlphaVantageHistoryProvider(
-        IHttpClientFactory httpFactory,
-        IOptionsMonitor<AlphaVantageOptions> options,
-        TimeProvider time,
-        ILogger<AlphaVantageHistoryProvider> logger)
-    {
-        _httpFactory = httpFactory;
-        _options = options;
-        _time = time;
-        _logger = logger;
-    }
+    private readonly IHttpClientFactory _httpFactory = httpFactory;
+    private readonly IOptionsMonitor<AlphaVantageOptions> _options = options;
+    private readonly TimeProvider _time = time;
+    private readonly ILogger<AlphaVantageHistoryProvider> _logger = logger;
 
     private enum Kind { Intraday, Daily, Weekly }
 

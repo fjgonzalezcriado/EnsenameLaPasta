@@ -7,24 +7,16 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// Buscador de instrumentos que delega en el del proveedor activo (Yahoo o Twelve Data),
 /// para que los resultados usen la convención de símbolos del feed en uso.
 /// </summary>
-public sealed class SelectableInstrumentSearchProvider : IInstrumentSearchProvider
+public sealed class SelectableInstrumentSearchProvider(
+    YahooInstrumentSearchProvider yahoo,
+    TwelveDataInstrumentSearchProvider twelveData,
+    AlphaVantageInstrumentSearchProvider alphaVantage,
+    IMarketProviderState state) : IInstrumentSearchProvider
 {
-    private readonly YahooInstrumentSearchProvider _yahoo;
-    private readonly TwelveDataInstrumentSearchProvider _twelveData;
-    private readonly AlphaVantageInstrumentSearchProvider _alphaVantage;
-    private readonly IMarketProviderState _state;
-
-    public SelectableInstrumentSearchProvider(
-        YahooInstrumentSearchProvider yahoo,
-        TwelveDataInstrumentSearchProvider twelveData,
-        AlphaVantageInstrumentSearchProvider alphaVantage,
-        IMarketProviderState state)
-    {
-        _yahoo = yahoo;
-        _twelveData = twelveData;
-        _alphaVantage = alphaVantage;
-        _state = state;
-    }
+    private readonly YahooInstrumentSearchProvider _yahoo = yahoo;
+    private readonly TwelveDataInstrumentSearchProvider _twelveData = twelveData;
+    private readonly AlphaVantageInstrumentSearchProvider _alphaVantage = alphaVantage;
+    private readonly IMarketProviderState _state = state;
 
     public Task<IReadOnlyList<InstrumentSearchResult>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {

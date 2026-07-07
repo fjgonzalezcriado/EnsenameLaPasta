@@ -8,24 +8,16 @@ using Microsoft.Extensions.Options;
 
 namespace Comillas.AITradingSimulator.Application.Services;
 
-public sealed class DashboardService : IDashboardService
+public sealed class DashboardService(
+    ITradingDbContext db,
+    IMarketProviderState providerState,
+    IFxRateProvider fx,
+    IOptions<FxOptions> fxOptions) : IDashboardService
 {
-    private readonly ITradingDbContext _db;
-    private readonly IMarketProviderState _providerState;
-    private readonly IFxRateProvider _fx;
-    private readonly IOptions<FxOptions> _fxOptions;
-
-    public DashboardService(
-        ITradingDbContext db,
-        IMarketProviderState providerState,
-        IFxRateProvider fx,
-        IOptions<FxOptions> fxOptions)
-    {
-        _db = db;
-        _providerState = providerState;
-        _fx = fx;
-        _fxOptions = fxOptions;
-    }
+    private readonly ITradingDbContext _db = db;
+    private readonly IMarketProviderState _providerState = providerState;
+    private readonly IFxRateProvider _fx = fx;
+    private readonly IOptions<FxOptions> _fxOptions = fxOptions;
 
     public async Task<DashboardDto> GetSnapshotAsync(
         int priceSeriesPoints = 50,

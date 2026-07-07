@@ -684,11 +684,9 @@ public sealed class DashboardServiceTests : IDisposable
     public void Dispose() => _connection.Dispose();
 
     /// <summary>Stub de IFxRateProvider: rate 1 salvo los pares configurados.</summary>
-    private sealed class StubFxRateProvider : IFxRateProvider
+    private sealed class StubFxRateProvider(Dictionary<(string, string), decimal>? rates = null) : IFxRateProvider
     {
-        private readonly Dictionary<(string, string), decimal> _rates;
-        public StubFxRateProvider(Dictionary<(string, string), decimal>? rates = null)
-            => _rates = rates ?? new();
+        private readonly Dictionary<(string, string), decimal> _rates = rates ?? new();
 
         public Task<decimal> GetRateAsync(string from, string to, CancellationToken cancellationToken = default)
         {
@@ -700,10 +698,9 @@ public sealed class DashboardServiceTests : IDisposable
     }
 
     /// <summary>Stub de IMarketProviderState (proveedor fijo) para tests.</summary>
-    private sealed class StaticProviderState : IMarketProviderState
+    private sealed class StaticProviderState(string current = "YahooFinance") : IMarketProviderState
     {
-        public string Current { get; }
-        public StaticProviderState(string current = "YahooFinance") => Current = current;
+        public string Current { get; } = current;
         public IReadOnlyList<string> Available { get; } = new[] { "YahooFinance", "TwelveData" };
         public void Set(string provider) { }
     }

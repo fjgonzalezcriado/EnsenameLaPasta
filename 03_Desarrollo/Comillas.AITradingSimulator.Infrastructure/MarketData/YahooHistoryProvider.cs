@@ -10,16 +10,10 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// Histórico de precios desde Yahoo Finance (<c>/v8/finance/chart</c> con
 /// <c>range</c>/<c>interval</c>). Reutiliza el HttpClient "YahooFinance".
 /// </summary>
-public sealed class YahooHistoryProvider : IMarketHistoryProvider
+public sealed class YahooHistoryProvider(IHttpClientFactory httpFactory, ILogger<YahooHistoryProvider> logger) : IMarketHistoryProvider
 {
-    private readonly IHttpClientFactory _httpFactory;
-    private readonly ILogger<YahooHistoryProvider> _logger;
-
-    public YahooHistoryProvider(IHttpClientFactory httpFactory, ILogger<YahooHistoryProvider> logger)
-    {
-        _httpFactory = httpFactory;
-        _logger = logger;
-    }
+    private readonly IHttpClientFactory _httpFactory = httpFactory;
+    private readonly ILogger<YahooHistoryProvider> _logger = logger;
 
     // Rango de la UI -> (range, interval) de Yahoo.
     private static readonly IReadOnlyDictionary<string, (string Range, string Interval)> RangeMap =

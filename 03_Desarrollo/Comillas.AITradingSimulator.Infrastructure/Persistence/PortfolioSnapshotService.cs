@@ -13,24 +13,16 @@ namespace Comillas.AITradingSimulator.Infrastructure.Persistence;
 /// <see cref="PortfolioSnapshot"/>, para graficar la evolución de la cuenta en el tiempo.
 /// El histórico se construye hacia delante; con la app parada quedan huecos.
 /// </summary>
-public sealed class PortfolioSnapshotService : BackgroundService
+public sealed class PortfolioSnapshotService(
+    IServiceScopeFactory scopeFactory,
+    IOptionsMonitor<SnapshotOptions> options,
+    TimeProvider timeProvider,
+    ILogger<PortfolioSnapshotService> logger) : BackgroundService
 {
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IOptionsMonitor<SnapshotOptions> _options;
-    private readonly TimeProvider _timeProvider;
-    private readonly ILogger<PortfolioSnapshotService> _logger;
-
-    public PortfolioSnapshotService(
-        IServiceScopeFactory scopeFactory,
-        IOptionsMonitor<SnapshotOptions> options,
-        TimeProvider timeProvider,
-        ILogger<PortfolioSnapshotService> logger)
-    {
-        _scopeFactory = scopeFactory;
-        _options = options;
-        _timeProvider = timeProvider;
-        _logger = logger;
-    }
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    private readonly IOptionsMonitor<SnapshotOptions> _options = options;
+    private readonly TimeProvider _timeProvider = timeProvider;
+    private readonly ILogger<PortfolioSnapshotService> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

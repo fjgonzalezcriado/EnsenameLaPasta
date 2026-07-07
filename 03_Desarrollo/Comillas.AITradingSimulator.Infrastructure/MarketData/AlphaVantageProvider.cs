@@ -15,23 +15,16 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// llamada. Tercer proveedor (Fase 3), seleccionable con <see cref="MarketDataOptions.ProviderType"/>
 /// == "AlphaVantage". No informa la divisa (GLOBAL_QUOTE no la incluye) → se deja vacía.
 /// </summary>
-public sealed class AlphaVantageProvider : IMarketDataProvider
+public sealed class AlphaVantageProvider(
+    IHttpClientFactory httpFactory,
+    IOptionsMonitor<AlphaVantageOptions> options,
+    ILogger<AlphaVantageProvider> logger) : IMarketDataProvider
 {
     public const string HttpClientName = "AlphaVantage";
 
-    private readonly IHttpClientFactory _httpFactory;
-    private readonly IOptionsMonitor<AlphaVantageOptions> _options;
-    private readonly ILogger<AlphaVantageProvider> _logger;
-
-    public AlphaVantageProvider(
-        IHttpClientFactory httpFactory,
-        IOptionsMonitor<AlphaVantageOptions> options,
-        ILogger<AlphaVantageProvider> logger)
-    {
-        _httpFactory = httpFactory;
-        _options = options;
-        _logger = logger;
-    }
+    private readonly IHttpClientFactory _httpFactory = httpFactory;
+    private readonly IOptionsMonitor<AlphaVantageOptions> _options = options;
+    private readonly ILogger<AlphaVantageProvider> _logger = logger;
 
     public async Task<MarketQuote> GetLatestAsync(string symbol, DateTime timestampUtc, CancellationToken cancellationToken = default)
     {

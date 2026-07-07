@@ -5,16 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comillas.AITradingSimulator.Application.Services;
 
-public sealed class CashService : ICashService
+public sealed class CashService(ITradingDbContext db, TimeProvider time) : ICashService
 {
-    private readonly ITradingDbContext _db;
-    private readonly TimeProvider _time;
-
-    public CashService(ITradingDbContext db, TimeProvider time)
-    {
-        _db = db;
-        _time = time;
-    }
+    private readonly ITradingDbContext _db = db;
+    private readonly TimeProvider _time = time;
 
     public async Task<IReadOnlyList<CashMovementDto>> GetMovementsAsync(CancellationToken cancellationToken = default)
     {

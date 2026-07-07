@@ -12,21 +12,14 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// Búsqueda de instrumentos vía Alpha Vantage (<c>SYMBOL_SEARCH</c>): devuelve símbolos con la
 /// convención de Alpha Vantage. Reutiliza el HttpClient "AlphaVantage".
 /// </summary>
-public sealed class AlphaVantageInstrumentSearchProvider : IInstrumentSearchProvider
+public sealed class AlphaVantageInstrumentSearchProvider(
+    IHttpClientFactory httpFactory,
+    IOptionsMonitor<AlphaVantageOptions> options,
+    ILogger<AlphaVantageInstrumentSearchProvider> logger) : IInstrumentSearchProvider
 {
-    private readonly IHttpClientFactory _httpFactory;
-    private readonly IOptionsMonitor<AlphaVantageOptions> _options;
-    private readonly ILogger<AlphaVantageInstrumentSearchProvider> _logger;
-
-    public AlphaVantageInstrumentSearchProvider(
-        IHttpClientFactory httpFactory,
-        IOptionsMonitor<AlphaVantageOptions> options,
-        ILogger<AlphaVantageInstrumentSearchProvider> logger)
-    {
-        _httpFactory = httpFactory;
-        _options = options;
-        _logger = logger;
-    }
+    private readonly IHttpClientFactory _httpFactory = httpFactory;
+    private readonly IOptionsMonitor<AlphaVantageOptions> _options = options;
+    private readonly ILogger<AlphaVantageInstrumentSearchProvider> _logger = logger;
 
     public async Task<IReadOnlyList<InstrumentSearchResult>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {

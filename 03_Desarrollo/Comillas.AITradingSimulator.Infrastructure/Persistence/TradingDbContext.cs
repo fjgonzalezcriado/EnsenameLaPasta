@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comillas.AITradingSimulator.Infrastructure.Persistence;
 
-public sealed class TradingDbContext : DbContext, ITradingDbContext
+public sealed class TradingDbContext(DbContextOptions<TradingDbContext> options) : DbContext(options), ITradingDbContext
 {
-    public TradingDbContext(DbContextOptions<TradingDbContext> options) : base(options) { }
-
     public DbSet<Trade> Trades => Set<Trade>();
     public DbSet<MarketTick> MarketTicks => Set<MarketTick>();
     public DbSet<PortfolioSnapshot> PortfolioSnapshots => Set<PortfolioSnapshot>();

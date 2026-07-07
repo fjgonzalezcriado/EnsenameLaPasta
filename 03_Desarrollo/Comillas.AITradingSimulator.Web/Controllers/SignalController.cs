@@ -6,11 +6,9 @@ namespace Comillas.AITradingSimulator.Web.Controllers;
 /// <summary>
 /// Señal de dirección (sube/baja) por clasificación ML.NET (HV-044).
 /// </summary>
-public sealed class SignalController : Controller
+public sealed class SignalController(IDirectionClassifier classifier) : Controller
 {
-    private readonly IDirectionClassifier _classifier;
-
-    public SignalController(IDirectionClassifier classifier) => _classifier = classifier;
+    private readonly IDirectionClassifier _classifier = classifier;
 
     // GET /api/signal?symbol=IBM&range=1M
     [HttpGet("/api/signal")]

@@ -12,20 +12,14 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// datos de entrenamiento persistidos) y devuelve el pronóstico con banda de confianza y una
 /// señal (Alcista/Bajista/Neutral) derivada del cambio esperado.
 /// </summary>
-public sealed class SsaPriceForecaster : IPriceForecaster
+public sealed class SsaPriceForecaster(IMarketHistoryProvider history, ILogger<SsaPriceForecaster> logger) : IPriceForecaster
 {
     // Nº mínimo de puntos para que SSA sea razonable; umbral (%) para clasificar la señal.
     private const int MinPoints = 12;
     private const decimal SignalThresholdPct = 0.5m;
 
-    private readonly IMarketHistoryProvider _history;
-    private readonly ILogger<SsaPriceForecaster> _logger;
-
-    public SsaPriceForecaster(IMarketHistoryProvider history, ILogger<SsaPriceForecaster> logger)
-    {
-        _history = history;
-        _logger = logger;
-    }
+    private readonly IMarketHistoryProvider _history = history;
+    private readonly ILogger<SsaPriceForecaster> _logger = logger;
 
     public async Task<PriceForecast> ForecastAsync(string symbol, string range, int horizon, CancellationToken cancellationToken = default)
     {

@@ -18,6 +18,13 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.37.1-ide0290] - 2026-07-07
+
+### Changed
+- 🧹 **Estilo**: resueltas todas las advertencias **IDE0290** (usar constructor primario) en 48 archivos (servicios, proveedores, tests) con `dotnet format style --diagnostics IDE0290`. Conversión a constructor primario **conservando los campos `_field`** (convención STIC) — sin cambios de comportamiento. 190 tests verdes; 0 IDE0290 restantes.
+
+---
+
 ## [1.37.0-comisiones-dividendos] - 2026-07-07
 
 ### Added

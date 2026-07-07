@@ -6,16 +6,10 @@ namespace Comillas.AITradingSimulator.Web.Controllers;
 /// <summary>
 /// Búsqueda de instrumentos y gestión de la watchlist (alta/baja de símbolos seguidos).
 /// </summary>
-public sealed class InstrumentsController : Controller
+public sealed class InstrumentsController(IInstrumentSearchProvider search, IWatchlistService watchlist) : Controller
 {
-    private readonly IInstrumentSearchProvider _search;
-    private readonly IWatchlistService _watchlist;
-
-    public InstrumentsController(IInstrumentSearchProvider search, IWatchlistService watchlist)
-    {
-        _search = search;
-        _watchlist = watchlist;
-    }
+    private readonly IInstrumentSearchProvider _search = search;
+    private readonly IWatchlistService _watchlist = watchlist;
 
     [HttpGet("/api/instruments/search")]
     public async Task<IActionResult> Search(string q, CancellationToken cancellationToken)

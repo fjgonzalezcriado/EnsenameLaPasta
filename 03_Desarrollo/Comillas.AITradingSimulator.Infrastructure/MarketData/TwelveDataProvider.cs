@@ -15,23 +15,16 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// cierre, volumen y divisa en una sola llamada. Alternativa a Yahoo, seleccionable
 /// con <see cref="MarketDataOptions.ProviderType"/> == "TwelveData".
 /// </summary>
-public sealed class TwelveDataProvider : IMarketDataProvider
+public sealed class TwelveDataProvider(
+    IHttpClientFactory httpFactory,
+    IOptionsMonitor<TwelveDataOptions> options,
+    ILogger<TwelveDataProvider> logger) : IMarketDataProvider
 {
     public const string HttpClientName = "TwelveData";
 
-    private readonly IHttpClientFactory _httpFactory;
-    private readonly IOptionsMonitor<TwelveDataOptions> _options;
-    private readonly ILogger<TwelveDataProvider> _logger;
-
-    public TwelveDataProvider(
-        IHttpClientFactory httpFactory,
-        IOptionsMonitor<TwelveDataOptions> options,
-        ILogger<TwelveDataProvider> logger)
-    {
-        _httpFactory = httpFactory;
-        _options = options;
-        _logger = logger;
-    }
+    private readonly IHttpClientFactory _httpFactory = httpFactory;
+    private readonly IOptionsMonitor<TwelveDataOptions> _options = options;
+    private readonly ILogger<TwelveDataProvider> _logger = logger;
 
     public async Task<MarketQuote> GetLatestAsync(string symbol, DateTime timestampUtc, CancellationToken cancellationToken = default)
     {

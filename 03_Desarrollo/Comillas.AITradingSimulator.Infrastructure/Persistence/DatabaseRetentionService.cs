@@ -13,21 +13,14 @@ namespace Comillas.AITradingSimulator.Infrastructure.Persistence;
 /// más antiguos hasta bajar a la marca de agua baja y compacta con VACUUM
 /// (borrar filas no reduce el fichero en SQLite sin VACUUM).
 /// </summary>
-public sealed class DatabaseRetentionService : BackgroundService
+public sealed class DatabaseRetentionService(
+    IServiceScopeFactory scopeFactory,
+    IOptionsMonitor<RetentionOptions> options,
+    ILogger<DatabaseRetentionService> logger) : BackgroundService
 {
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IOptionsMonitor<RetentionOptions> _options;
-    private readonly ILogger<DatabaseRetentionService> _logger;
-
-    public DatabaseRetentionService(
-        IServiceScopeFactory scopeFactory,
-        IOptionsMonitor<RetentionOptions> options,
-        ILogger<DatabaseRetentionService> logger)
-    {
-        _scopeFactory = scopeFactory;
-        _options = options;
-        _logger = logger;
-    }
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    private readonly IOptionsMonitor<RetentionOptions> _options = options;
+    private readonly ILogger<DatabaseRetentionService> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

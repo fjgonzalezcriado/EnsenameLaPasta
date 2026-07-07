@@ -8,21 +8,14 @@ namespace Comillas.AITradingSimulator.Web.Controllers;
 /// <summary>
 /// Consulta y cambio (en runtime) del proveedor de datos de mercado activo (HV-033).
 /// </summary>
-public sealed class ProviderController : Controller
+public sealed class ProviderController(
+    IMarketProviderState state,
+    IOptionsMonitor<TwelveDataOptions> twelveData,
+    IOptionsMonitor<AlphaVantageOptions> alphaVantage) : Controller
 {
-    private readonly IMarketProviderState _state;
-    private readonly IOptionsMonitor<TwelveDataOptions> _twelveData;
-    private readonly IOptionsMonitor<AlphaVantageOptions> _alphaVantage;
-
-    public ProviderController(
-        IMarketProviderState state,
-        IOptionsMonitor<TwelveDataOptions> twelveData,
-        IOptionsMonitor<AlphaVantageOptions> alphaVantage)
-    {
-        _state = state;
-        _twelveData = twelveData;
-        _alphaVantage = alphaVantage;
-    }
+    private readonly IMarketProviderState _state = state;
+    private readonly IOptionsMonitor<TwelveDataOptions> _twelveData = twelveData;
+    private readonly IOptionsMonitor<AlphaVantageOptions> _alphaVantage = alphaVantage;
 
     [HttpGet("/api/provider")]
     public IActionResult Get() => Json(new

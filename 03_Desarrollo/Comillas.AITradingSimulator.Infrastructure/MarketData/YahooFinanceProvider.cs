@@ -7,18 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 
-public sealed class YahooFinanceProvider : IMarketDataProvider
+public sealed class YahooFinanceProvider(IHttpClientFactory httpFactory, ILogger<YahooFinanceProvider> logger) : IMarketDataProvider
 {
     public const string HttpClientName = "YahooFinance";
 
-    private readonly IHttpClientFactory _httpFactory;
-    private readonly ILogger<YahooFinanceProvider> _logger;
-
-    public YahooFinanceProvider(IHttpClientFactory httpFactory, ILogger<YahooFinanceProvider> logger)
-    {
-        _httpFactory = httpFactory;
-        _logger = logger;
-    }
+    private readonly IHttpClientFactory _httpFactory = httpFactory;
+    private readonly ILogger<YahooFinanceProvider> _logger = logger;
 
     public async Task<MarketQuote> GetLatestAsync(string symbol, DateTime timestampUtc, CancellationToken cancellationToken = default)
     {

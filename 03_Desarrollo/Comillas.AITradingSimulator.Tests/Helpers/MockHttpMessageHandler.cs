@@ -7,16 +7,11 @@ namespace Comillas.AITradingSimulator.Tests.Helpers;
 /// HttpMessageHandler de test que responde con una función configurable.
 /// Permite simular respuestas HTTP determinísticas sin red.
 /// </summary>
-public sealed class MockHttpMessageHandler : HttpMessageHandler
+public sealed class MockHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
 {
-    private readonly Func<HttpRequestMessage, HttpResponseMessage> _responder;
+    private readonly Func<HttpRequestMessage, HttpResponseMessage> _responder = responder;
 
     public List<HttpRequestMessage> ReceivedRequests { get; } = new();
-
-    public MockHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> responder)
-    {
-        _responder = responder;
-    }
 
     /// <summary>Atajo: responde siempre con el JSON dado y el status indicado (default 200).</summary>
     public static MockHttpMessageHandler Json(string json, HttpStatusCode status = HttpStatusCode.OK)

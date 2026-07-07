@@ -6,14 +6,9 @@ namespace Comillas.AITradingSimulator.Web.Controllers;
 /// <summary>
 /// Movimientos de caja (ingresos/retiradas) del usuario.
 /// </summary>
-public sealed class CashController : Controller
+public sealed class CashController(ICashService cash) : Controller
 {
-    private readonly ICashService _cash;
-
-    public CashController(ICashService cash)
-    {
-        _cash = cash;
-    }
+    private readonly ICashService _cash = cash;
 
     [HttpGet("/api/cash/movements")]
     public async Task<IActionResult> Movements(CancellationToken cancellationToken)
