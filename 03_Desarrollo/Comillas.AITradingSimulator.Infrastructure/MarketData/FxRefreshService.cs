@@ -74,7 +74,7 @@ public sealed class FxRefreshService(
         foreach (var ccy in currencies)
             await _fx.RefreshAsync(ccy, baseCurrency, ct);
 
-        if (currencies.Count > 0)
+        if (currencies.Count > 0 && _logger.IsEnabled(LogLevel.Debug))
             _logger.LogDebug("FX refrescados {Count} tipos hacia {Base}.", currencies.Count, baseCurrency);
     }
 }

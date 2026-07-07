@@ -142,7 +142,8 @@ public sealed class AlphaVantageHistoryProvider(
         if (r.MaxPoints > 0 && points.Count > r.MaxPoints)
             points = points.GetRange(points.Count - r.MaxPoints, r.MaxPoints);
 
-        _logger.LogDebug("Alpha Vantage histórico {Symbol} {Range}: {Count} puntos.", symbol, range, points.Count);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Alpha Vantage histórico {Symbol} {Range}: {Count} puntos.", symbol, range, points.Count);
         return points;
     }
 

@@ -46,7 +46,8 @@ public sealed class MarketProviderState : IMarketProviderState
                 _logger.LogWarning(ex, "No se pudo persistir el proveedor activo en {File}.", FilePath);
             }
         }
-        _logger.LogInformation("Proveedor de datos activo cambiado a {Provider}.", normalized);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Proveedor de datos activo cambiado a {Provider}.", normalized);
     }
 
     private static string Normalize(string? provider)

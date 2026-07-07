@@ -118,7 +118,8 @@ public sealed class TwelveDataHistoryProvider(
         // Twelve Data devuelve los valores del más reciente al más antiguo; ordenar ascendente.
         points.Reverse();
 
-        _logger.LogDebug("Twelve Data histórico {Symbol} {Range}: {Count} puntos.", tdSymbol, range, points.Count);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Twelve Data histórico {Symbol} {Range}: {Count} puntos.", tdSymbol, range, points.Count);
         return points;
     }
 

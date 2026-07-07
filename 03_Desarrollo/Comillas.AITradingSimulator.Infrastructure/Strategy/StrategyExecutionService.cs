@@ -28,9 +28,10 @@ public sealed class StrategyExecutionService(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var opts = _options.CurrentValue;
-        _logger.LogInformation(
-            "Iniciando estrategia MA Crossover. ShortWindow={Short} LongWindow={Long} Quantity={Qty}",
-            opts.ShortWindow, opts.LongWindow, opts.Quantity);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation(
+                "Iniciando estrategia MA Crossover. ShortWindow={Short} LongWindow={Long} Quantity={Qty}",
+                opts.ShortWindow, opts.LongWindow, opts.Quantity);
 
         try
         {
@@ -62,9 +63,10 @@ public sealed class StrategyExecutionService(
                 result = await orders.BuyAsync(tick.Symbol, tick.Price, _options.CurrentValue.Quantity, now, ct);
                 if (result is not null)
                 {
-                    _logger.LogInformation(
-                        "BUY {Symbol} @ {Price} qty={Qty}",
-                        result.Symbol, result.EntryPrice, result.Quantity);
+                    if (_logger.IsEnabled(LogLevel.Information))
+                        _logger.LogInformation(
+                            "BUY {Symbol} @ {Price} qty={Qty}",
+                            result.Symbol, result.EntryPrice, result.Quantity);
                 }
             }
             else
@@ -72,9 +74,10 @@ public sealed class StrategyExecutionService(
                 result = await orders.CloseAsync(tick.Symbol, tick.Price, now, ct);
                 if (result is not null)
                 {
-                    _logger.LogInformation(
-                        "SELL {Symbol} @ {Price} pnl={PnL}",
-                        result.Symbol, result.ExitPrice, result.RealizedPnL);
+                    if (_logger.IsEnabled(LogLevel.Information))
+                        _logger.LogInformation(
+                            "SELL {Symbol} @ {Price} pnl={PnL}",
+                            result.Symbol, result.ExitPrice, result.RealizedPnL);
                 }
             }
         }

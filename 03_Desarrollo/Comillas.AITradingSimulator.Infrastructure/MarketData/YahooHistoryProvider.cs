@@ -85,7 +85,8 @@ public sealed class YahooHistoryProvider(IHttpClientFactory httpFactory, ILogger
                 Open: PickOr(opens, i, c), High: PickOr(highs, i, c), Low: PickOr(lows, i, c)));
         }
 
-        _logger.LogDebug("Yahoo histórico {Symbol} {Range}: {Count} puntos.", yahooSymbol, range, points.Count);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Yahoo histórico {Symbol} {Range}: {Count} puntos.", yahooSymbol, range, points.Count);
         return points;
     }
 

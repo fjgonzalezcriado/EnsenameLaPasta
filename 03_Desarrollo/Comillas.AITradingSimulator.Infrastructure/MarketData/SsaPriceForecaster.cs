@@ -77,8 +77,9 @@ public sealed class SsaPriceForecaster(IMarketHistoryProvider history, ILogger<S
                        : changePct <= -SignalThresholdPct ? "Bajista"
                        : "Neutral";
 
-            _logger.LogDebug("SSA {Symbol} {Range}: {H} puntos, señal {Signal} ({Pct}%).",
-                symbol, range, pts.Count, signal, changePct);
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("SSA {Symbol} {Range}: {H} puntos, señal {Signal} ({Pct}%).",
+                    symbol, range, pts.Count, signal, changePct);
 
             return new PriceForecast(symbol, range, true, signal, last, forecastEnd, changePct, pts, null);
         }

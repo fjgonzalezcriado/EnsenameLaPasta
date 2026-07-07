@@ -100,8 +100,9 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
             var direction = pUp >= 0.5f ? "Sube" : "Baja";
             var sig = pUp >= 0.55f ? "Comprar" : pUp <= 0.45f ? "Vender" : "Mantener";
 
-            _logger.LogDebug("Clasificación {Symbol} {Range}: {Dir} P(sube)={P:F2} modelo {Model} acc={Acc:F2} auc={Auc:F2} (n={N}).",
-                symbol, range, direction, pUp, winner.Name, winner.Acc, winner.Auc, trainRows.Count);
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Clasificación {Symbol} {Range}: {Dir} P(sube)={P:F2} modelo {Model} acc={Acc:F2} auc={Auc:F2} (n={N}).",
+                    symbol, range, direction, pUp, winner.Name, winner.Acc, winner.Auc, trainRows.Count);
 
             return new DirectionSignal(symbol, range, true, direction, pUp, sig, winner.Acc, winner.Auc,
                 trainRows.Count, FeatureCount, winner.Name, null);

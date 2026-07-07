@@ -58,7 +58,8 @@ public sealed class TwelveDataProvider(
         if (!string.IsNullOrWhiteSpace(quote.Volume))
             decimal.TryParse(quote.Volume, NumberStyles.Any, CultureInfo.InvariantCulture, out volume);
 
-        _logger.LogDebug("Twelve Data: {Symbol} = {Price} {Currency} (vol {Volume})", symbol, price, quote.Currency, volume);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Twelve Data: {Symbol} = {Price} {Currency} (vol {Volume})", symbol, price, quote.Currency, volume);
 
         return new MarketQuote(MarketTick.Create(symbol, price, volume, timestampUtc), quote.Currency);
     }

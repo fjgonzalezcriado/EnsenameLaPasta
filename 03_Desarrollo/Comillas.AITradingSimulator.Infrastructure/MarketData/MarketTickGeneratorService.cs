@@ -29,9 +29,10 @@ public sealed class MarketTickGeneratorService(
     {
         var intervalMs = _optionsMonitor.CurrentValue.TickIntervalMs;
 
-        _logger.LogInformation(
-            "Iniciando generador de ticks (datos reales). Intervalo: {Interval}ms. Símbolos: watchlist (BD).",
-            intervalMs);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation(
+                "Iniciando generador de ticks (datos reales). Intervalo: {Interval}ms. Símbolos: watchlist (BD).",
+                intervalMs);
 
         using var timer = new PeriodicTimer(
             TimeSpan.FromMilliseconds(intervalMs),
