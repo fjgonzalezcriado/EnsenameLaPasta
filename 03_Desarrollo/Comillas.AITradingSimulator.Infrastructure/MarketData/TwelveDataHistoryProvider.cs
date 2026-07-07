@@ -26,7 +26,7 @@ public sealed class TwelveDataHistoryProvider(
 
     // Rango de la UI -> (interval, outputsize) de Twelve Data. YTD se calcula aparte.
     private static readonly Dictionary<string, (string Interval, int OutputSize)> RangeMap =
-        new Dictionary<string, (string, int)>(StringComparer.OrdinalIgnoreCase)
+        new(StringComparer.OrdinalIgnoreCase)
         {
             ["1D"] = ("5min", 100),
             ["5D"] = ("30min", 200),

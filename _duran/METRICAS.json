@@ -13,20 +13,6 @@
 
                                       },
                          "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-06-15 12:12:38"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
                          "fecha":  "2026-06-15 12:15:03"
                      },
                      {
@@ -696,6 +682,20 @@
                                       },
                          "versionProyecto":  "1.37.4-estilo-ampliado",
                          "fecha":  "2026-07-07 13:00:13"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.37.5-rendimiento-ca",
+                         "fecha":  "2026-07-07 13:19:55"
                      }
                  ]
 }
