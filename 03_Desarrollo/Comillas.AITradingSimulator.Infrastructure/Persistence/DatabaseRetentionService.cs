@@ -98,8 +98,9 @@ public sealed class DatabaseRetentionService(
         await db.Database.ExecuteSqlRawAsync("VACUUM;", ct);
 
         var newBytes = await db.GetDatabaseSizeBytesAsync(ct);
-        _logger.LogInformation(
-            "Retención: BD {OldMB:F1} MB > {LimitMB} MB → purgados {Deleted} ticks (<= {Cutoff:u}); compactada a {NewMB:F1} MB.",
-            currentBytes / 1048576.0, opts.MaxDatabaseSizeMb, deleted, cutoff.Value, newBytes / 1048576.0);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation(
+                "Retención: BD {OldMB:F1} MB > {LimitMB} MB → purgados {Deleted} ticks (<= {Cutoff:u}); compactada a {NewMB:F1} MB.",
+                currentBytes / 1048576.0, opts.MaxDatabaseSizeMb, deleted, cutoff.Value, newBytes / 1048576.0);
     }
 }

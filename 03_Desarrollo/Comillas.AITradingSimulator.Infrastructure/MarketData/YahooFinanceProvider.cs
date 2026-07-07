@@ -38,7 +38,8 @@ public sealed class YahooFinanceProvider(IHttpClientFactory httpFactory, ILogger
         var price = (decimal)meta.RegularMarketPrice.Value;
         var volume = (decimal)(meta.RegularMarketVolume ?? 0);
 
-        _logger.LogDebug("Yahoo Finance: {Symbol} = {Price} {Currency} (vol {Volume})", symbol, price, meta.Currency, volume);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Yahoo Finance: {Symbol} = {Price} {Currency} (vol {Volume})", symbol, price, meta.Currency, volume);
 
         return new MarketQuote(MarketTick.Create(symbol, price, volume, timestampUtc), meta.Currency);
     }

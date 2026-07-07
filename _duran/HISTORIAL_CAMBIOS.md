@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.38.0-cero-sugerencias] - 2026-07-07
+
+### Changed
+- ⚡ **CA1873 (16 sitios) ahora SÍ aplicada** (a petición explícita: "barre todas las sugerencias IDE y CA restantes"; **revierte** la decisión de 1.37.5 de dejarla por criterio). Cada `_logger.LogXxx(...)` con *boxing* de tipos valor se envuelve en `if (_logger.IsEnabled(LogLevel.X))`: 10 `LogDebug` (feed Yahoo/TwelveData/AlphaVantage, histórico de los 3, búsqueda Yahoo, `MlDirectionClassifier`, `SsaPriceForecaster`) y 6 `LogInformation` (`MarketProviderState`, `MarketTickGeneratorService`, `DatabaseRetentionService`, `StrategyExecutionService` ×3). `FxRefreshService` combina el guard con su `if` existente (`Count > 0 && IsEnabled(Debug)`). Sin cambios de comportamiento (el log sigue emitiéndose cuando el nivel está activo).
+
+### Métricas
+- **Barrido completo: 0 sugerencias IDE y 0 CA** (`dotnet format style`/`analyzers --severity info --verify-no-changes` → vacío). Build 0/0, **190 tests verdes**.
+
+---
+
 ## [1.37.6-ide0090] - 2026-07-07
 
 ### Fixed

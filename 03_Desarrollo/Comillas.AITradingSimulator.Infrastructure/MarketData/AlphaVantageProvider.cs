@@ -59,7 +59,8 @@ public sealed class AlphaVantageProvider(
         if (!string.IsNullOrWhiteSpace(quote.Volume))
             decimal.TryParse(quote.Volume, NumberStyles.Any, CultureInfo.InvariantCulture, out volume);
 
-        _logger.LogDebug("Alpha Vantage: {Symbol} = {Price} (vol {Volume})", symbol, price, volume);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Alpha Vantage: {Symbol} = {Price} (vol {Volume})", symbol, price, volume);
 
         // GLOBAL_QUOTE no trae divisa → vacía (el generador no pisa la divisa si viene vacía).
         return new MarketQuote(MarketTick.Create(symbol, price, volume, timestampUtc), string.Empty);

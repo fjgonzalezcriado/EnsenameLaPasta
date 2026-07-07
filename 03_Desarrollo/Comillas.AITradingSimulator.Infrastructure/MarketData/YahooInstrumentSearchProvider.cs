@@ -42,7 +42,8 @@ public sealed class YahooInstrumentSearchProvider(IHttpClientFactory httpFactory
                 FirstNonEmpty(q.TypeDisp, q.QuoteType) ?? string.Empty))
             .ToList();
 
-        _logger.LogDebug("Yahoo búsqueda '{Query}': {Count} resultados.", query, results.Count);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Yahoo búsqueda '{Query}': {Count} resultados.", query, results.Count);
         return results;
     }
 
