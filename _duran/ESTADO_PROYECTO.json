@@ -1157,13 +1157,14 @@
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
                          "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML), HV-046 (visor puro), HV-047 (importar cerrados), HV-048 (metricas avanzadas), HV-049 (desglose por periodo) y HV-050 (comisiones Trade Republic + dividendos en el PnL). 190 tests verdes; smokes reales/Playwright OK con Yahoo. Nueva migracion AddCommissionAndDividends (se auto-aplica al arrancar).",
                          "archivosModificados":  [
+                                                     "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 38 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-07 OK (190 tests verdes; estilo: resueltas todas las advertencias IDE0290 constructor primario en 48 archivos con dotnet format, conservando los campos _field; sin cambios de comportamiento)",
+                     "ultimo_build":  "2026-07-07 OK (190 tests verdes; hook dotnet-primary-ctor-guard PreToolUse Write|Edit que avisa de IDE0290 WARN-first + regla dotnet-code-style; ambos portatiles)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
                      "evolutivos_completados_mes":  50

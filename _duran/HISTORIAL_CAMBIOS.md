@@ -18,6 +18,13 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.37.3-hook-ide0290] - 2026-07-07
+
+### Added
+- 🪝 Hook `.claude/hooks/dotnet-primary-ctor-guard.ps1` (PreToolUse Write|Edit, registrado en `settings.json`): **avisa** (WARN-first, no bloquea) al escribir un `.cs` con un constructor que solo asigna campos → recuerda usar constructor primario (IDE0290) + el comando `dotnet format`. Escaneo textual rápido (no ejecuta build). Complementa la regla `dotnet-code-style`. Probado (clásico/expr-bodied → avisa; ya-primario/con-validación → silencio). Portátil (copiar hook + registrar en settings).
+
+---
+
 ## [1.37.2-regla-estilo] - 2026-07-07
 
 ### Added
