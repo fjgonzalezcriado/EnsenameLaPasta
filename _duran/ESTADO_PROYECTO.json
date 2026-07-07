@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.34.0-import-cerrados",
+                   "version_actual":  "1.35.0-metricas-avanzadas",
                    "ultima_actualizacion":  "2026-07-07",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-048",
+                                               "titulo":  "Metricas avanzadas de cartera (drawdown, Sharpe, volatilidad, profit factor)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-07-07",
+                                               "fechaInicio":  "2026-07-07",
+                                               "fechaCompletado":  "2026-07-07",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-048.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Tarjeta Metricas avanzadas: Max Drawdown (+ actual), Sharpe y volatilidad anualizados y Profit Factor. DashboardService.GetPortfolioMetricsAsync + GET /api/account/metrics. Base NEUTRAL a aportaciones/retiradas: las metricas de rendimiento se calculan sobre el indice de retorno (1 + PnL/aportado = 1 + ReturnPct/100), no sobre el valor de cuenta bruto (que se dispara con cada ingreso de caja). Drawdown pico->valle del indice; Sharpe/vol sobre retornos diarios (ultimo snapshot de cada dia UTC) anualizados con raiz(252), rf=0, con gate de honestidad >=10 retornos diarios (~11 dias); con menos, HasEnoughData=false + mensaje (anualizar 2-3 retornos da valores absurdos). Profit Factor de trades cerrados (infinito si solo ganancias). PeakValue/CurrentValue = valor de cuenta (contexto). UI: tarjeta bajo el grafico de cuenta, refresco 60s, aviso de honestidad. 4 tests nuevos. 185 verdes. CORRECCION clave: el 1er intento sobre valor de cuenta bruto daba Sharpe 12,56/vol 143 por ciento por las aportaciones -> corregido con indice de retorno (vol ~23 por ciento). Smoke real (3 dias): Max Drawdown -7,69 por ciento (actual -7,32); Sharpe/vol -> necesitan >=11 dias (hay 3); Profit Factor - (sin trades cerrados). Indicador, no asesoramiento. Rama feature/HV-048-metricas-avanzadas."
+                                           },
+                                           {
                                                "codigo":  "HV-047",
                                                "titulo":  "Importar trades cerrados por CSV",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-047.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Amplia el import de HV-018 (que solo abria posiciones) para importar tambien trades cerrados. PositionService.ImportCsvAsync acepta symbol, entry, qty[, date[, exit[, closeDate]]]: si la fila trae exit (>0) se abre y se cierra (CloseAsync(exit, closeDate ?? openedAt)); si no, posicion abierta (compat HV-018). Pre-validacion por fila para no dejar posiciones a medio abrir: exit invalido -> error; closeDate sin exit -> error; closeDate anterior a la apertura -> error (rechaza antes de abrir). Reutiliza el parser (cabecera opcional, delimitador ,/; con coma decimal, fechas multiples). Modal Importar CSV actualizado con el nuevo formato y ejemplo (abierta vs cerrada). Solo Application, sin migracion. 3 tests nuevos (exit -> trade cerrado con RealizedPnL 150; exit invalido -> error; cierre anterior a apertura -> error sin abrir). 181 verdes. Smoke real sin ensuciar la cartera: closeDate<apertura -> 'La fecha de cierre es anterior a la de apertura'; exit no numerico -> 'Precio de salida invalido'; ambos imported:0/failed:1. Camino feliz cubierto por tests unitarios (SQLite en memoria). Rama feature/HV-047-import-cerrados."
+                                               "notas":  "Amplia el import de HV-018 (que solo abria posiciones) para importar tambien trades cerrados. PositionService.ImportCsvAsync acepta symbol, entry, qty[, date[, exit[, closeDate]]]: si la fila trae exit (\u003e0) se abre y se cierra (CloseAsync(exit, closeDate ?? openedAt)); si no, posicion abierta (compat HV-018). Pre-validacion por fila para no dejar posiciones a medio abrir: exit invalido -\u003e error; closeDate sin exit -\u003e error; closeDate anterior a la apertura -\u003e error (rechaza antes de abrir). Reutiliza el parser (cabecera opcional, delimitador ,/; con coma decimal, fechas multiples). Modal Importar CSV actualizado con el nuevo formato y ejemplo (abierta vs cerrada). Solo Application, sin migracion. 3 tests nuevos (exit -\u003e trade cerrado con RealizedPnL 150; exit invalido -\u003e error; cierre anterior a apertura -\u003e error sin abrir). 181 verdes. Smoke real sin ensuciar la cartera: closeDate\u003capertura -\u003e \u0027La fecha de cierre es anterior a la de apertura\u0027; exit no numerico -\u003e \u0027Precio de salida invalido\u0027; ambos imported:0/failed:1. Camino feliz cubierto por tests unitarios (SQLite en memoria). Rama feature/HV-047-import-cerrados."
                                            },
                                            {
                                                "codigo":  "HV-046",
@@ -1104,19 +1121,18 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML SSA + clasificacion sube/baja con 12 features y 2 modelos), HV-046 (visor puro) y HV-047 (importar trades cerrados por CSV). 181 tests verdes; smokes reales/Playwright OK con Yahoo. Backlog de la sesion completado.",
+                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML SSA + clasificacion), HV-046 (visor puro), HV-047 (importar trades cerrados) y HV-048 (metricas avanzadas: drawdown/Sharpe/volatilidad/profit factor). 185 tests verdes; smokes reales/Playwright OK con Yahoo. Metricas de rendimiento sobre indice de retorno (neutral a aportaciones), indicadores no asesoramiento.",
                          "archivosModificados":  [
-                                                     ".claude/settings.json",
                                                      "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 38 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-07 OK (181 tests verdes; HV-047 importar trades cerrados por CSV: columnas opcionales exit/closeDate; smoke valida sin escribir en la cartera)",
+                     "ultimo_build":  "2026-07-07 OK (185 tests verdes; HV-048 metricas avanzadas: drawdown/Sharpe/volatilidad/profit factor sobre indice de retorno neutral a aportaciones; smoke real: drawdown -7,69 por ciento, Sharpe/vol insuficientes con 3 dias)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  47
+                     "evolutivos_completados_mes":  48
                  },
     "alertas":  {
                     "activas":  [

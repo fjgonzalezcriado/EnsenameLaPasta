@@ -233,4 +233,87 @@ public sealed class DashboardService : IDashboardService
             return new AccountHistoryPointDto(s.Timestamp, s.Capital, netDeposits, totalPnL, returnPct);
         }).ToList();
     }
+
+    public async Task<PortfolioMetricsDto> GetPortfolioMetricsAsync(CancellationToken cancellationToken = default)
+    {
+        // Curva de capital (ascendente). Decimal→TEXT en SQLite: se computa en C#.
+        var snapshots = await _db.PortfolioSnapshots
+            .OrderByDescending(s => s.Timestamp)
+            .Take(5000)
+            .ToListAsync(cancellationToken);
+        snapshots.Reverse();
+
+        // Profit factor de trades cerrados (independiente de los snapshots).
+        // Decimal→TEXT en SQLite: materializamos y usamos RealizedPnL (computado en C#).
+        var closedTrades = await _db.Trades
+            .Where(t => t.Status == TradeStatus.Closed)
+            .ToListAsync(cancellationToken);
+        var closedPnls = closedTrades.Select(t => t.RealizedPnL ?? 0m).ToList();
+        var gains = closedPnls.Where(p => p > 0m).Sum();
+        var losses = closedPnls.Where(p => p < 0m).Sum(p => -p);
+        var pfInfinite = losses == 0m && gains > 0m;
+        var profitFactor = losses > 0m ? Math.Round(gains / losses, 2) : 0m;
+        var closedCount = closedPnls.Count;
+
+        var count = snapshots.Count;
+        if (count < 2)
+        {
+            return new PortfolioMetricsDto(false, count, 0, count > 0 ? snapshots[^1].Capital : 0m,
+                count > 0 ? snapshots[^1].Capital : 0m, 0m, 0m, 0, 0, profitFactor, pfInfinite, closedCount,
+                "Aún no hay suficientes snapshots del valor de cuenta para las métricas.");
+        }
+
+        // Índice de retorno (1 + PnL/aportado) por snapshot: NEUTRAL a aportaciones/retiradas
+        // (un ingreso de caja no cuenta como rentabilidad). Las métricas se calculan sobre él,
+        // no sobre el valor de cuenta bruto (que se dispararía con cada aportación).
+        var indexed = snapshots.Select(s =>
+        {
+            var totalPnL = s.RealizedPnL + s.UnrealizedPnL;
+            var netDep = s.Capital - totalPnL;
+            var retPct = netDep != 0m ? totalPnL / netDep : 0m;   // fracción
+            var idx = 1.0 + (double)retPct;
+            return (s.Timestamp, Index: idx > 0 ? idx : 0.0001);   // guarda de positividad
+        }).ToList();
+
+        // Drawdown del índice de retorno: peor caída pico→valle y caída actual desde el pico.
+        double peakIdx = double.MinValue, maxDd = 0;
+        foreach (var p in indexed)
+        {
+            if (p.Index > peakIdx) peakIdx = p.Index;
+            if (peakIdx > 0) { var dd = (p.Index - peakIdx) / peakIdx; if (dd < maxDd) maxDd = dd; }
+        }
+        var currentDd = peakIdx > 0 ? (indexed[^1].Index - peakIdx) / peakIdx : 0.0;
+
+        // Valor de cuenta (pico / actual) para contexto informativo.
+        var peak = snapshots.Max(s => s.Capital);
+        var current = snapshots[^1].Capital;
+
+        // Sharpe / volatilidad sobre retornos DIARIOS del índice (último de cada día UTC), √252.
+        var daily = indexed
+            .GroupBy(p => p.Timestamp.Date)
+            .OrderBy(g => g.Key)
+            .Select(g => g.OrderBy(p => p.Timestamp).Last().Index)
+            .ToList();
+        var returns = new List<double>();
+        for (var i = 1; i < daily.Count; i++)
+            if (daily[i - 1] != 0) returns.Add(daily[i] / daily[i - 1] - 1.0);
+
+        // Sharpe/volatilidad no son interpretables con muy pocos datos (anualizar 2-3 retornos
+        // da valores absurdos). Exigimos ≥ 10 retornos diarios (~2 semanas de sesiones).
+        var hasEnough = returns.Count >= 10;
+        double sharpe = 0, volPct = 0;
+        if (hasEnough)
+        {
+            var mean = returns.Average();
+            var sd = Math.Sqrt(returns.Sum(r => (r - mean) * (r - mean)) / returns.Count);
+            volPct = Math.Round(sd * Math.Sqrt(252) * 100.0, 2);
+            sharpe = sd > 0 ? Math.Round(mean / sd * Math.Sqrt(252), 2) : 0;
+        }
+
+        return new PortfolioMetricsDto(
+            hasEnough, count, daily.Count, peak, current,
+            Math.Round((decimal)(maxDd * 100.0), 2), Math.Round((decimal)(currentDd * 100.0), 2),
+            sharpe, volPct, profitFactor, pfInfinite, closedCount,
+            hasEnough ? null : $"Sharpe/volatilidad necesitan ≥ 11 días de snapshots (hay {daily.Count}).");
+    }
 }

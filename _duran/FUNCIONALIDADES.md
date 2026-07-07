@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-048 Métricas avanzadas de cartera (drawdown, Sharpe, volatilidad, profit factor) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: `_duran/specs/HV-048.md`
+- **Resumen**: Tarjeta "📐 Métricas avanzadas" con **Max Drawdown** (+ actual), **Sharpe**, **volatilidad** anualizados y **Profit Factor**. `DashboardService.GetPortfolioMetricsAsync` + `GET /api/account/metrics`. Las métricas de rendimiento se calculan sobre el **índice de retorno** (`1 + PnL/aportado`), **neutral a aportaciones/retiradas** (un ingreso de caja no cuenta como rentabilidad); drawdown pico→valle del índice; Sharpe/vol sobre retornos diarios anualizados √252 con **gate de honestidad ≥ 10 retornos diarios** (con menos → "insuficiente", para no anualizar muestras minúsculas). Profit Factor de trades cerrados (∞ si solo ganancias). 4 tests nuevos. 185 verdes. Smoke real: Max Drawdown −7,69 % mostrado; Sharpe/vol "necesitan ≥ 11 días (hay 3)". **Corrección**: el 1er intento sobre valor de cuenta bruto daba Sharpe 12,56/vol 143 % por las aportaciones → corregido con el índice de retorno.
+
 #### HV-047 Importar trades cerrados por CSV ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: `_duran/specs/HV-047.md`

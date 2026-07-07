@@ -507,6 +507,84 @@ public sealed class DashboardServiceTests : IDisposable
         Assert.Equal(0.5m, history[1].ReturnPct);        // 50 / 10000 × 100
     }
 
+    [Fact]
+    public async Task GetPortfolioMetrics_CalculaDrawdownSobreIndiceDeRetorno()
+    {
+        await using (var ctx = NewContext())
+        {
+            // Aportado neto constante (100) y PnL variable → índice de retorno 1 → 1.2 → 0.9 → 1.1.
+            // Capital = 100 + PnL; unrealized = Capital − 100 ⇒ NetDeposits = 100 constante.
+            decimal[] caps = { 100m, 120m, 90m, 110m };
+            for (var i = 0; i < caps.Length; i++)
+                ctx.PortfolioSnapshots.Add(PortfolioSnapshot.Create(BaseTime.AddDays(i), caps[i], 0m, caps[i] - 100m, 0, 0));
+            await ctx.SaveChangesAsync();
+        }
+
+        await using var ctx2 = NewContext();
+        var m = await NewService(ctx2).GetPortfolioMetricsAsync();
+
+        Assert.Equal(4, m.SnapshotCount);
+        Assert.Equal(120m, m.PeakValue);
+        Assert.Equal(-25.00m, m.MaxDrawdownPct);     // (0.9 − 1.2) / 1.2
+        Assert.Equal(-8.33m, m.CurrentDrawdownPct);  // (1.1 − 1.2) / 1.2
+        Assert.False(m.HasEnoughData);               // 3 retornos < 10 → Sharpe/vol insuficientes
+        Assert.NotNull(m.Message);
+    }
+
+    [Fact]
+    public async Task GetPortfolioMetrics_ConSuficientesDias_CalculaSharpeYVolatilidad()
+    {
+        await using (var ctx = NewContext())
+        {
+            // 15 días (≥ 11) con índice oscilante (aportado neto 100 constante) → std > 0.
+            for (var i = 0; i < 15; i++)
+            {
+                var cap = 100m + (i % 2 == 0 ? 0m : 5m);   // alterna 100 / 105
+                ctx.PortfolioSnapshots.Add(PortfolioSnapshot.Create(BaseTime.AddDays(i), cap, 0m, cap - 100m, 0, 0));
+            }
+            await ctx.SaveChangesAsync();
+        }
+
+        await using var ctx2 = NewContext();
+        var m = await NewService(ctx2).GetPortfolioMetricsAsync();
+
+        Assert.True(m.HasEnoughData);          // 14 retornos ≥ 10
+        Assert.Equal(15, m.DailyPoints);
+        Assert.True(m.AnnualizedVolatilityPct > 0);
+        Assert.Null(m.Message);
+    }
+
+    [Fact]
+    public async Task GetPortfolioMetrics_ProfitFactorDeTradesCerrados()
+    {
+        await using (var ctx = NewContext())
+        {
+            var win = Trade.Open("A", 100m, 10m, BaseTime); win.Close(110m, BaseTime.AddHours(1));   // +100
+            var loss = Trade.Open("B", 100m, 10m, BaseTime); loss.Close(95m, BaseTime.AddHours(1));  // −50
+            ctx.Trades.AddRange(win, loss);
+            await ctx.SaveChangesAsync();
+        }
+
+        await using var ctx2 = NewContext();
+        var m = await NewService(ctx2).GetPortfolioMetricsAsync();
+
+        Assert.Equal(2m, m.ProfitFactor);          // 100 / 50
+        Assert.False(m.ProfitFactorInfinite);
+        Assert.Equal(2, m.ClosedTrades);
+    }
+
+    [Fact]
+    public async Task GetPortfolioMetrics_SinSnapshots_NoSuficiente()
+    {
+        await using var ctx = NewContext();
+        var m = await NewService(ctx).GetPortfolioMetricsAsync();
+
+        Assert.False(m.HasEnoughData);
+        Assert.Equal(0, m.SnapshotCount);
+        Assert.Equal(0m, m.MaxDrawdownPct);
+        Assert.NotNull(m.Message);
+    }
+
     public void Dispose() => _connection.Dispose();
 
     /// <summary>Stub de IFxRateProvider: rate 1 salvo los pares configurados.</summary>
