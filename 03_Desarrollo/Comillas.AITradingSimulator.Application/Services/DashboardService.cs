@@ -256,74 +256,99 @@ public sealed class DashboardService(
         var closedTrades = await _db.Trades
             .Where(t => t.Status == TradeStatus.Closed)
             .ToListAsync(cancellationToken);
-        // PnL neto de comisiones por trade (HV-050).
-        var closedPnls = closedTrades.Select(t => (t.RealizedPnL ?? 0m) - t.Commission).ToList();
-        var gains = closedPnls.Where(p => p > 0m).Sum();
-        var losses = closedPnls.Where(p => p < 0m).Sum(p => -p);
-        var pfInfinite = losses == 0m && gains > 0m;
-        var profitFactor = losses > 0m ? Math.Round(gains / losses, 2) : 0m;
-        var closedCount = closedPnls.Count;
+        var (profitFactor, pfInfinite, closedCount) = ComputeProfitFactor(closedTrades);
 
         var count = snapshots.Count;
         if (count < 2)
         {
-            return new PortfolioMetricsDto(false, count, 0, count > 0 ? snapshots[^1].Capital : 0m,
-                count > 0 ? snapshots[^1].Capital : 0m, 0m, 0m, 0, 0, profitFactor, pfInfinite, closedCount,
+            var only = count > 0 ? snapshots[^1].Capital : 0m;
+            return new PortfolioMetricsDto(false, count, 0, only, only, 0m, 0m, 0, 0,
+                profitFactor, pfInfinite, closedCount,
                 "Aún no hay suficientes snapshots del valor de cuenta para las métricas.");
         }
 
         // Índice de retorno (1 + PnL/aportado) por snapshot: NEUTRAL a aportaciones/retiradas
-        // (un ingreso de caja no cuenta como rentabilidad). Las métricas se calculan sobre él,
-        // no sobre el valor de cuenta bruto (que se dispararía con cada aportación).
-        var indexed = snapshots.Select(s =>
-        {
-            var totalPnL = s.RealizedPnL + s.UnrealizedPnL;
-            var netDep = s.Capital - totalPnL;
-            var retPct = netDep != 0m ? totalPnL / netDep : 0m;   // fracción
-            var idx = 1.0 + (double)retPct;
-            return (s.Timestamp, Index: idx > 0 ? idx : 0.0001);   // guarda de positividad
-        }).ToList();
-
-        // Drawdown del índice de retorno: peor caída pico→valle y caída actual desde el pico.
-        double peakIdx = double.MinValue, maxDd = 0;
-        foreach (var p in indexed)
-        {
-            if (p.Index > peakIdx) peakIdx = p.Index;
-            if (peakIdx > 0) { var dd = (p.Index - peakIdx) / peakIdx; if (dd < maxDd) maxDd = dd; }
-        }
-        var currentDd = peakIdx > 0 ? (indexed[^1].Index - peakIdx) / peakIdx : 0.0;
+        // (un ingreso de caja no cuenta como rentabilidad). Se calcula sobre él, no sobre el valor
+        // de cuenta bruto (que se dispararía con cada aportación).
+        var indexed = BuildReturnIndex(snapshots);
+        var (maxDd, currentDd) = ComputeDrawdown(indexed);
 
         // Valor de cuenta (pico / actual) para contexto informativo.
         var peak = snapshots.Max(s => s.Capital);
         var current = snapshots[^1].Capital;
 
-        // Sharpe / volatilidad sobre retornos DIARIOS del índice (último de cada día UTC), √252.
-        var daily = indexed
-            .GroupBy(p => p.Timestamp.Date)
-            .OrderBy(g => g.Key)
-            .Select(g => g.OrderBy(p => p.Timestamp).Last().Index)
-            .ToList();
-        var returns = new List<double>();
-        for (var i = 1; i < daily.Count; i++)
-            if (daily[i - 1] != 0) returns.Add(daily[i] / daily[i - 1] - 1.0);
-
-        // Sharpe/volatilidad no son interpretables con muy pocos datos (anualizar 2-3 retornos
-        // da valores absurdos). Exigimos ≥ 10 retornos diarios (~2 semanas de sesiones).
-        var hasEnough = returns.Count >= 10;
-        double sharpe = 0, volPct = 0;
-        if (hasEnough)
-        {
-            var mean = returns.Average();
-            var sd = Math.Sqrt(returns.Sum(r => (r - mean) * (r - mean)) / returns.Count);
-            volPct = Math.Round(sd * Math.Sqrt(252) * 100.0, 2);
-            sharpe = sd > 0 ? Math.Round(mean / sd * Math.Sqrt(252), 2) : 0;
-        }
+        // Sharpe / volatilidad sobre retornos DIARIOS del índice (último de cada día UTC), √252,
+        // con gate de honestidad (≥ 10 retornos diarios; anualizar 2-3 da valores absurdos).
+        var daily = ComputeDailyReturnIndices(indexed);
+        var (sharpe, volPct, hasEnough) = ComputeSharpeVolatility(daily);
 
         return new PortfolioMetricsDto(
             hasEnough, count, daily.Count, peak, current,
             Math.Round((decimal)(maxDd * 100.0), 2), Math.Round((decimal)(currentDd * 100.0), 2),
             sharpe, volPct, profitFactor, pfInfinite, closedCount,
             hasEnough ? null : $"Sharpe/volatilidad necesitan ≥ 11 días de snapshots (hay {daily.Count}).");
+    }
+
+    // PnL neto de comisiones (HV-050) → profit factor de trades cerrados.
+    private static (decimal ProfitFactor, bool Infinite, int Count) ComputeProfitFactor(List<Trade> closedTrades)
+    {
+        var closedPnls = closedTrades.Select(t => (t.RealizedPnL ?? 0m) - t.Commission).ToList();
+        var gains = closedPnls.Where(p => p > 0m).Sum();
+        var losses = closedPnls.Where(p => p < 0m).Sum(p => -p);
+        var infinite = losses == 0m && gains > 0m;
+        var profitFactor = losses > 0m ? Math.Round(gains / losses, 2) : 0m;
+        return (profitFactor, infinite, closedPnls.Count);
+    }
+
+    // Índice de retorno por snapshot (1 + PnL/aportado), con guarda de positividad.
+    private static List<(DateTime Timestamp, double Index)> BuildReturnIndex(List<PortfolioSnapshot> snapshots)
+        => [.. snapshots.Select(s =>
+        {
+            var totalPnL = s.RealizedPnL + s.UnrealizedPnL;
+            var netDep = s.Capital - totalPnL;
+            var retPct = netDep != 0m ? totalPnL / netDep : 0m;   // fracción
+            var idx = 1.0 + (double)retPct;
+            return (s.Timestamp, Index: idx > 0 ? idx : 0.0001);
+        })];
+
+    // Drawdown del índice: peor caída pico→valle (maxDd) y caída actual desde el pico.
+    private static (double MaxDrawdown, double CurrentDrawdown) ComputeDrawdown(List<(DateTime Timestamp, double Index)> indexed)
+    {
+        double peakIdx = double.MinValue, maxDd = 0;
+        foreach (var p in indexed)
+        {
+            if (p.Index > peakIdx) peakIdx = p.Index;
+            if (peakIdx > 0)
+            {
+                var dd = (p.Index - peakIdx) / peakIdx;
+                if (dd < maxDd) maxDd = dd;
+            }
+        }
+        var currentDd = peakIdx > 0 ? (indexed[^1].Index - peakIdx) / peakIdx : 0.0;
+        return (maxDd, currentDd);
+    }
+
+    // Un valor de índice por día UTC (el último de cada día), en orden ascendente.
+    private static List<double> ComputeDailyReturnIndices(List<(DateTime Timestamp, double Index)> indexed)
+        => [.. indexed
+            .GroupBy(p => p.Timestamp.Date)
+            .OrderBy(g => g.Key)
+            .Select(g => g.OrderBy(p => p.Timestamp).Last().Index)];
+
+    // Sharpe y volatilidad anualizados (√252) sobre retornos diarios; HasEnough=false si < 10.
+    private static (double Sharpe, double VolatilityPct, bool HasEnough) ComputeSharpeVolatility(List<double> dailyIndices)
+    {
+        var returns = new List<double>();
+        for (var i = 1; i < dailyIndices.Count; i++)
+            if (dailyIndices[i - 1] != 0) returns.Add(dailyIndices[i] / dailyIndices[i - 1] - 1.0);
+
+        if (returns.Count < 10) return (0, 0, false);
+
+        var mean = returns.Average();
+        var sd = Math.Sqrt(returns.Sum(r => (r - mean) * (r - mean)) / returns.Count);
+        var volPct = Math.Round(sd * Math.Sqrt(252) * 100.0, 2);
+        var sharpe = sd > 0 ? Math.Round(mean / sd * Math.Sqrt(252), 2) : 0;
+        return (sharpe, volPct, true);
     }
 
     public async Task<ClosedTradesBreakdownDto> GetClosedTradesBreakdownAsync(CancellationToken cancellationToken = default)
