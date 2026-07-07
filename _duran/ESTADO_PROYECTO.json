@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.32.0-ml-features-modelos",
+                   "version_actual":  "1.33.0-visor-puro",
                    "ultima_actualizacion":  "2026-07-07",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-046",
+                                               "titulo":  "Dashboard visor puro (modo solo lectura)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-07-07",
+                                               "fechaInicio":  "2026-07-07",
+                                               "fechaCompletado":  "2026-07-07",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-046.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Modo visor puro (solo lectura) para mostrar en pantalla sin riesgo de editar. Boton Visor en la cabecera (persistido en localStorage) anade la clase viewer-mode al contenedor .dashboard; CSS .dashboard.viewer-mode .js-editor-only { display:none }. Se marcan js-editor-only los controles que mutan: selector de proveedor, botones Buscar/anadir, Caja, Importar CSV, Nueva posicion, el x de quitar simbolo y la columna Acciones. renderOpenTrades no dibuja la celda de acciones en modo visor y ajusta el colspan (9->8). Se conservan los controles de VISTA (rango, simbolo, velas, senales ML, margen, rango de cuenta) y toda la visualizacion. Solo frontend (.cshtml/.css/.js), sin backend ni tests nuevos; 178 verdes sin cambios. Smoke Playwright: visor OFF muestra todo; ON oculta proveedor/Buscar/Caja/Nueva posicion/Importar CSV/Acciones con rango y simbolo intactos; persiste tras reload (aria-pressed true, proveedor oculto); 0 errores. Rama feature/HV-046-visor-puro."
+                                           },
+                                           {
                                                "codigo":  "HV-045",
                                                "titulo":  "ML - mas features + segundo modelo (FastTree) con seleccion",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-045.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Amplia el clasificador de HV-044. Features 7 -> 12: anade momentum 10p, precio vs SMA20, MACD (histograma EMA12-EMA26 menos senal EMA9, normalizado), Bollinger %B(20,2sigma) y estocastico %K(14); EMAs del MACD precomputadas; Lookback 26, MinPoints 60. Segundo modelo: ademas de SDCA se entrena FastTree (Microsoft.ML.FastTree, NumberOfThreads=1 determinista, 50 arboles/10 hojas/min 5 por hoja) y se elige el de mayor AUC en hold-out (accuracy de desempate); se predice con el ganador. DirectionSignal.ModelUsed nuevo; tooltip de la UI muestra modelo + features + accuracy/AUC. Tests adaptados (FeatureCount 12, ModelUsed en {SDCA,FastTree}). 178 verdes. Smoke real Yahoo: HY9H.F 6M -> SDCA (AUC 0,646, Vender/Baja 27 por ciento, n=79); MBOT 1A -> FastTree (acc 0,622/AUC 0,521, n=179), distintos simbolos eligen distinto modelo. Honestidad: accuracy 0,50-0,65 (nivel azar-ish) reportada con transparencia; indicador educativo, no asesoramiento. Rama feature/HV-045-ml-features-modelos."
+                                               "notas":  "Amplia el clasificador de HV-044. Features 7 -\u003e 12: anade momentum 10p, precio vs SMA20, MACD (histograma EMA12-EMA26 menos senal EMA9, normalizado), Bollinger %B(20,2sigma) y estocastico %K(14); EMAs del MACD precomputadas; Lookback 26, MinPoints 60. Segundo modelo: ademas de SDCA se entrena FastTree (Microsoft.ML.FastTree, NumberOfThreads=1 determinista, 50 arboles/10 hojas/min 5 por hoja) y se elige el de mayor AUC en hold-out (accuracy de desempate); se predice con el ganador. DirectionSignal.ModelUsed nuevo; tooltip de la UI muestra modelo + features + accuracy/AUC. Tests adaptados (FeatureCount 12, ModelUsed en {SDCA,FastTree}). 178 verdes. Smoke real Yahoo: HY9H.F 6M -\u003e SDCA (AUC 0,646, Vender/Baja 27 por ciento, n=79); MBOT 1A -\u003e FastTree (acc 0,622/AUC 0,521, n=179), distintos simbolos eligen distinto modelo. Honestidad: accuracy 0,50-0,65 (nivel azar-ish) reportada con transparencia; indicador educativo, no asesoramiento. Rama feature/HV-045-ml-features-modelos."
                                            },
                                            {
                                                "codigo":  "HV-044",
@@ -1070,7 +1087,7 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043 (ML SSA), HV-044 (ML clasificacion sube/baja) y HV-045 (12 features + 2 modelos SDCA/FastTree con seleccion por AUC). 178 tests verdes; smokes reales OK con Yahoo. Senales ML son indicadores educativos, no asesoramiento (calidad ~azar reportada con transparencia).",
+                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML: SSA + clasificacion sube/baja con 12 features y 2 modelos) y HV-046 (modo visor puro solo lectura). 178 tests verdes; smokes reales/Playwright OK con Yahoo. Senales ML son indicadores educativos (calidad ~azar, reportada con transparencia).",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
                                                      "_duran/METRICAS.json"
@@ -1079,10 +1096,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-07 OK (178 tests verdes; HV-045 clasificador ampliado a 12 features + 2 modelos SDCA/FastTree con seleccion por AUC; smoke real: HY9H.F->SDCA, MBOT->FastTree)",
+                     "ultimo_build":  "2026-07-07 OK (178 tests verdes; HV-046 modo visor puro solo lectura; solo frontend; smoke Playwright verde)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  45
+                     "evolutivos_completados_mes":  46
                  },
     "alertas":  {
                     "activas":  [

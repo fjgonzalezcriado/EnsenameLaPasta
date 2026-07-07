@@ -96,3 +96,7 @@ body {
   pointer-events: none;
   white-space: nowrap;
 }
+
+/* Modo visor puro (HV-046): oculta los controles de edición (solo lectura). */
+.dashboard.viewer-mode .js-editor-only { display: none !important; }
+#viewerToggle.active { background-color: var(--comillas-azul, #003366); color: #fff; }

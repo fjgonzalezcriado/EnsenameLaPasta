@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.33.0-visor-puro] - 2026-07-07
+
+### Added
+- 👁 **HV-046** Modo **visor puro** (botón "👁 Visor"): pone el panel en solo lectura ocultando los controles de edición (proveedor, buscar/añadir, caja, importar CSV, nueva posición, quitar símbolo, columna Acciones). Conserva los controles de vista y la visualización. Persistido entre sesiones.
+
+### Métricas
+- 178 tests verdes (sin cambios; solo frontend). Smoke Playwright: OFF muestra todo, ON oculta edición, persiste tras reload, 0 errores de consola.
+
+---
+
 ## [1.32.0-ml-features-modelos] - 2026-07-07
 
 ### Added

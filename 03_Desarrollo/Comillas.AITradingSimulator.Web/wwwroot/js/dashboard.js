@@ -9,6 +9,7 @@
     let yMarginPct = 0.02;
     let lastRenderedSeries = null;   // última serie dibujada (para re-render al cambiar el margen)
     let chartType = 'line';          // 'line' | 'candle' (velas japonesas, HV-041)
+    let viewerMode = false;          // modo visor puro: solo lectura, sin controles de edición (HV-046)
     let forecastActive = false;      // señales ML.NET (SSA + clasificación) (HV-043/044)
     let lastForecast = null;         // último PriceForecast recibido (símbolo+rango propios)
     let lastSignal = null;           // última DirectionSignal (clasificación sube/baja, HV-044)
@@ -131,7 +132,7 @@
         (trades || []).forEach(function (t) { if (t.currency) symbolCurrency[t.symbol] = t.currency; });
         const tbody = document.getElementById('openTradesBody');
         if (!trades || trades.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Sin posiciones abiertas</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="' + (viewerMode ? 8 : 9) + '" class="text-center text-muted">Sin posiciones abiertas</td></tr>';
             return;
         }
         tbody.innerHTML = trades.map(function (t) {
@@ -144,12 +145,12 @@
                 + '<td class="' + signClass(t.unrealizedPnL) + '">' + pnlCell(t.unrealizedPnL, t.currency, t.unrealizedPnLBase) + '</td>'
                 + '<td class="' + signClass(t.returnPct) + '">' + pctSigned(t.returnPct) + '</td>'
                 + '<td><small>' + new Date(t.createdAt).toLocaleString('es-ES') + '</small></td>'
-                + '<td class="text-end text-nowrap">'
-                + '<button type="button" class="btn btn-outline-primary btn-sm py-0 me-1" '
-                + 'data-close="' + t.id + '" data-symbol="' + t.symbol + '" data-price="' + t.currentPrice + '">Cerrar</button>'
-                + '<button type="button" class="btn btn-outline-danger btn-sm py-0" '
-                + 'data-del="' + t.id + '" data-symbol="' + t.symbol + '" title="Eliminar del seguimiento">✕</button>'
-                + '</td>'
+                + (viewerMode ? '' : ('<td class="text-end text-nowrap">'
+                    + '<button type="button" class="btn btn-outline-primary btn-sm py-0 me-1" '
+                    + 'data-close="' + t.id + '" data-symbol="' + t.symbol + '" data-price="' + t.currentPrice + '">Cerrar</button>'
+                    + '<button type="button" class="btn btn-outline-danger btn-sm py-0" '
+                    + 'data-del="' + t.id + '" data-symbol="' + t.symbol + '" title="Eliminar del seguimiento">✕</button>'
+                    + '</td>'))
                 + '</tr>';
         }).join('');
     }
@@ -1573,6 +1574,27 @@
         } catch (e) { }
     }
 
+    // ── Modo visor puro (HV-046): solo lectura, oculta los controles de edición ──
+    function initViewerMode() {
+        try { if (localStorage.getItem('viewerMode') === '1') viewerMode = true; } catch (e) { }
+        const container = document.querySelector('.dashboard');
+        const btn = document.getElementById('viewerToggle');
+        function apply() {
+            if (container) container.classList.toggle('viewer-mode', viewerMode);
+            if (btn) { btn.classList.toggle('active', viewerMode); btn.setAttribute('aria-pressed', viewerMode ? 'true' : 'false'); }
+        }
+        apply();
+        if (btn) {
+            btn.addEventListener('click', function () {
+                viewerMode = !viewerMode;
+                try { localStorage.setItem('viewerMode', viewerMode ? '1' : '0'); } catch (e) { }
+                apply();
+                fetchAndRender(false);   // re-render tablas (aparece/desaparece la columna de acciones)
+            });
+        }
+    }
+
+    initViewerMode();
     initProviderControl();
     initChartRefreshControl();
     initSymbolControl();
