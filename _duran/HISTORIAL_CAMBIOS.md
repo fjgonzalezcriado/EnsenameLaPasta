@@ -18,6 +18,13 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.37.2-regla-estilo] - 2026-07-07
+
+### Added
+- 📏 Regla portátil `.claude/rules/dotnet-code-style.md` (`globs: **/*.cs`): mantiene el código libre de **IDE0290** (constructor primario) de forma automática en cada sesión. Reutilizable en otros proyectos .NET copiando el archivo a su `.claude/rules/`.
+
+---
+
 ## [1.37.1-ide0290] - 2026-07-07
 
 ### Changed
