@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-047 Importar trades cerrados por CSV ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: `_duran/specs/HV-047.md`
+- **Resumen**: Amplía el import de HV-018 (que solo abría posiciones) para importar también **trades cerrados**. `ImportCsvAsync` acepta `symbol, entry, qty[, date[, exit[, closeDate]]]`: si la fila trae **`exit`** se abre y se cierra (`CloseAsync(exit, closeDate ?? openedAt)`); si no, posición abierta. Pre-validación por fila (exit inválido / closeDate sin exit / cierre anterior a apertura → error **sin dejar la posición a medio abrir**). Reutiliza el parser (cabecera/delimitador/coma decimal/fechas). Modal actualizado con el nuevo formato y ejemplo. Solo Application, sin migración. 3 tests nuevos. 181 verdes. Smoke (sin tocar la cartera real): errores reportados correctamente; camino feliz cubierto por tests unitarios (estado Closed + PnL 150 + fecha).
+
 #### HV-046 Dashboard visor puro (modo solo lectura) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: `_duran/specs/HV-046.md`

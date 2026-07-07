@@ -118,9 +118,44 @@ public sealed class PositionService : IPositionService
                 openedAt = date;
             }
 
+            // Columnas opcionales para importar trades CERRADOS: exit (5) y closeDate (6).
+            // Si hay precio de salida, la fila se abre y se cierra (HV-047).
+            decimal? exit = null;
+            if (fields.Length >= 5 && !string.IsNullOrWhiteSpace(fields[4]))
+            {
+                if (!TryParseDecimal(fields[4], delimiter, out var ex) || ex <= 0)
+                {
+                    errors.Add(new ImportErrorDto(lineNo, $"Precio de salida inválido: '{fields[4].Trim()}'."));
+                    continue;
+                }
+                exit = ex;
+            }
+            DateTime? closedAt = null;
+            if (fields.Length >= 6 && !string.IsNullOrWhiteSpace(fields[5]))
+            {
+                if (!TryParseDate(fields[5].Trim(), out var cd))
+                {
+                    errors.Add(new ImportErrorDto(lineNo, $"Fecha de cierre inválida: '{fields[5].Trim()}' (usa yyyy-MM-dd o dd/MM/yyyy)."));
+                    continue;
+                }
+                closedAt = cd;
+            }
+            if (closedAt.HasValue && !exit.HasValue)
+            {
+                errors.Add(new ImportErrorDto(lineNo, "Fecha de cierre sin precio de salida."));
+                continue;
+            }
+            if (closedAt.HasValue && openedAt.HasValue && closedAt.Value < openedAt.Value)
+            {
+                errors.Add(new ImportErrorDto(lineNo, "La fecha de cierre es anterior a la de apertura."));
+                continue;
+            }
+
             try
             {
-                await OpenAsync(symbol, entry, qty, openedAt, cancellationToken);
+                var id = await OpenAsync(symbol, entry, qty, openedAt, cancellationToken);
+                if (exit.HasValue)
+                    await CloseAsync(id, exit.Value, closedAt ?? openedAt, cancellationToken);
                 imported++;
             }
             catch (Exception ex) when (ex is not OperationCanceledException)

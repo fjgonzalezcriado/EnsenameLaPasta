@@ -389,12 +389,13 @@
             </div>
             <div class="modal-body">
                 <p class="small text-muted mb-2">
-                    Columnas: <code>symbol, entry, qty, date</code> (la fecha es opcional). Cabecera opcional.
+                    Columnas: <code>symbol, entry, qty, date, exit, closeDate</code>. Solo <code>symbol, entry, qty</code> son obligatorias.
+                    Si indicas <code>exit</code> (precio de salida), la fila se importa como <strong>trade cerrado</strong>; si no, como posición abierta. Cabecera opcional.
                     Delimitador <code>,</code> o <code>;</code> (con <code>;</code> el decimal puede ser <code>,</code>). Fecha: <code>yyyy-MM-dd</code> o <code>dd/MM/yyyy</code>.
                 </p>
-                <pre class="small bg-body-secondary p-2 rounded mb-2">symbol,entry,qty,date
-HY9H.F,1360,5,2026-06-01
-AAPL,180.5,10,2026-05-20</pre>
+                <pre class="small bg-body-secondary p-2 rounded mb-2">symbol,entry,qty,date,exit,closeDate
+HY9H.F,1360,5,2026-06-01            (posición abierta)
+AAPL,180.5,10,2026-05-20,195.3,2026-06-10   (trade cerrado)</pre>
                 <div class="mb-2">
                     <input type="file" id="importFile" class="form-control" accept=".csv,.txt,text/csv,text/plain" />
                 </div>
