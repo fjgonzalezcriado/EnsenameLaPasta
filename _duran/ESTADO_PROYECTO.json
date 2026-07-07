@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.30.0-mlnet-senales",
+                   "version_actual":  "1.31.0-ml-clasificacion",
                    "ultima_actualizacion":  "2026-07-07",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-044",
+                                               "titulo":  "ML.NET - clasificacion sube/baja (SDCA + features tecnicas)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-07-07",
+                                               "fechaInicio":  "2026-07-07",
+                                               "fechaCompletado":  "2026-07-07",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-044.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Amplia ML.NET con clasificador binario de direccion (sube el proximo periodo). Microsoft.ML 4.0.2 (SDCA, ya transitivo). IDirectionClassifier + MlDirectionClassifier (regresion logistica SDCA) con 7 features tecnicas: retorno 1p, momentum 5p, ratio de medias SMA5/SMA10, precio vs SMA10, RSI(14) 0-1, volatilidad (sigma retornos 10p) y volumen relativo. Etiqueta close[i+1]>close[i]. Split cronologico 80/20 (no aleatorio) + evaluacion honesta en hold-out (accuracy + AUC). Normalizacion MinMax. Predice el ultimo dato -> P(sube) -> senal Comprar(>=0,55)/Vender(<=0,45)/Mantener; direccion Sube/Baja. Guardas: min 40 puntos, ambas clases en train, try/catch (no lanza, degrada). SignalController GET /api/signal. DI singleton. UI: el switch pasa a Senales ML y dispara ambos modelos; badge 📊 (Comprar/Vender/Mantener + prob) junto al 🔮 de pronostico, con calidad (accuracy/AUC/n) en el tooltip. 3 tests nuevos. 178 verdes. Smoke real Yahoo: HY9H.F 6M -> Comprar (Sube 68 por ciento), accuracy 0,61 / AUC 0,64 (n=88), modestamente mejor que el azar reportado con transparencia; 1D hoy -> Insuficiente (<40 puntos). Honestidad: la direccion de precio ronda el azar; indicador educativo, no asesoramiento financiero. Rama feature/HV-044-ml-clasificacion."
+                                           },
+                                           {
                                                "codigo":  "HV-043",
                                                "titulo":  "Senales con ML.NET - pronostico de precio (SSA)",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-043.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Primer uso de ML.NET (Microsoft.ML.TimeSeries 4.0.2): pronostico de precio con SSA sobre los cierres del historico del simbolo. IPriceForecaster + SsaPriceForecaster (entrena al vuelo con IMarketHistoryProvider; ForecastBySsa horizonte N + banda de confianza 95 por ciento; windowSize ~ serie/3 acotado) deriva senal Alcista/Bajista/Neutral (umbral +-0,5 por ciento). Guardas: min 12 puntos y try/catch -> no lanza, degrada con mensaje. ForecastController GET /api/forecast (horizon 1..60). DI singleton. UI: switch Pronostico persistido + badge de senal + overlay en el grafico (linea naranja discontinua anclada al ultimo cierre + banda sombreada sobre categorias futuras +1..+N; techo/suelo incluyen la banda). Solo con un simbolo. Directory.Build.props nuevo suprime el advisory NuGet GHSA-2m69-gcr7-jv3q (vuln transitiva de la lib nativa de SQLite via EF Core; preexistente, destapada por el restore en fresco de ML.NET; auditoria activa para el resto). 4 tests nuevos. 175 verdes. Smoke real Yahoo: HY9H.F 1M -> Bajista con banda; 6M -> Alcista +39 por ciento (overlay linea+banda, screenshot OK); simbolo inexistente / 1D con pocos puntos hoy -> Insuficiente (degrada limpio). Caveat: SSA en series cortas extrapola con fuerza (banda ancha refleja incertidumbre); no es asesoramiento financiero. Rama feature/HV-043-mlnet-senales."
+                                               "notas":  "Primer uso de ML.NET (Microsoft.ML.TimeSeries 4.0.2): pronostico de precio con SSA sobre los cierres del historico del simbolo. IPriceForecaster + SsaPriceForecaster (entrena al vuelo con IMarketHistoryProvider; ForecastBySsa horizonte N + banda de confianza 95 por ciento; windowSize ~ serie/3 acotado) deriva senal Alcista/Bajista/Neutral (umbral +-0,5 por ciento). Guardas: min 12 puntos y try/catch -\u003e no lanza, degrada con mensaje. ForecastController GET /api/forecast (horizon 1..60). DI singleton. UI: switch Pronostico persistido + badge de senal + overlay en el grafico (linea naranja discontinua anclada al ultimo cierre + banda sombreada sobre categorias futuras +1..+N; techo/suelo incluyen la banda). Solo con un simbolo. Directory.Build.props nuevo suprime el advisory NuGet GHSA-2m69-gcr7-jv3q (vuln transitiva de la lib nativa de SQLite via EF Core; preexistente, destapada por el restore en fresco de ML.NET; auditoria activa para el resto). 4 tests nuevos. 175 verdes. Smoke real Yahoo: HY9H.F 1M -\u003e Bajista con banda; 6M -\u003e Alcista +39 por ciento (overlay linea+banda, screenshot OK); simbolo inexistente / 1D con pocos puntos hoy -\u003e Insuficiente (degrada limpio). Caveat: SSA en series cortas extrapola con fuerza (banda ancha refleja incertidumbre); no es asesoramiento financiero. Rama feature/HV-043-mlnet-senales."
                                            },
                                            {
                                                "codigo":  "HV-042",
@@ -1036,7 +1053,7 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037..041 (mejoras del grafico), HV-042 (Alpha Vantage 3er proveedor) y HV-043 (ML.NET SSA: pronostico de precio + senal Alcista/Bajista + overlay linea/banda). 175 tests verdes; smokes reales OK con Yahoo. Nuevo Directory.Build.props suprime un advisory NuGet transitivo de SQLite.",
+                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043 (ML.NET SSA pronostico) y HV-044 (ML.NET clasificacion sube/baja SDCA + features tecnicas + accuracy/AUC honestos). 178 tests verdes; smokes reales OK con Yahoo. Senales ML son indicadores educativos, no asesoramiento.",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
                                                      "_duran/METRICAS.json"
@@ -1045,10 +1062,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-07 OK (175 tests verdes; HV-043 ML.NET SSA pronostico de precio + senal + overlay; Microsoft.ML.TimeSeries 4.0.2; smoke real Yahoo 6M Alcista +39 por ciento con banda)",
+                     "ultimo_build":  "2026-07-07 OK (178 tests verdes; HV-044 ML.NET clasificacion sube/baja SDCA + 7 features tecnicas + accuracy/AUC hold-out; smoke real Yahoo 6M Comprar Sube 68 por ciento acc 0,61)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  43
+                     "evolutivos_completados_mes":  44
                  },
     "alertas":  {
                     "activas":  [

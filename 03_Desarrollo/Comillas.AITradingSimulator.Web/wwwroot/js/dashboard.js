@@ -9,8 +9,9 @@
     let yMarginPct = 0.02;
     let lastRenderedSeries = null;   // última serie dibujada (para re-render al cambiar el margen)
     let chartType = 'line';          // 'line' | 'candle' (velas japonesas, HV-041)
-    let forecastActive = false;      // overlay de pronóstico ML.NET (SSA) (HV-043)
+    let forecastActive = false;      // señales ML.NET (SSA + clasificación) (HV-043/044)
     let lastForecast = null;         // último PriceForecast recibido (símbolo+rango propios)
+    let lastSignal = null;           // última DirectionSignal (clasificación sube/baja, HV-044)
     const FORECAST_HORIZON = 10;
     const COLORS = ['#0d6efd', '#fd7e14', '#198754', '#dc3545', '#6f42c1', '#20c997'];
     // En modo "En vivo" los ticks se capturan cada ~30 s, pero entre sesiones (app apagada)
@@ -985,6 +986,45 @@
         }
     }
 
+    // Clasificación sube/baja (HV-044): badge con dirección/señal + calidad del modelo.
+    function renderDirectionBadge() {
+        const el = document.getElementById('directionSignal');
+        if (!el) return;
+        if (!forecastActive || selectedSymbol === 'ALL') { el.textContent = ''; el.className = 'small fw-semibold'; el.title = ''; return; }
+        const s = lastSignal;
+        if (!s || s.symbol !== selectedSymbol || s.range !== chartMode) {
+            el.textContent = '📊 …'; el.className = 'small fw-semibold text-muted'; el.title = ''; return;
+        }
+        if (!s.hasPrediction) {
+            el.textContent = '📊 ' + (s.message || 'sin señal');
+            el.className = 'small fw-semibold text-muted'; el.title = '';
+            return;
+        }
+        const cls = s.signal === 'Comprar' ? 'text-success' : s.signal === 'Vender' ? 'text-danger' : 'text-secondary';
+        const pUp = Math.round((s.probability || 0) * 100);
+        el.textContent = '📊 ' + s.signal + ' (' + s.direction + ' ' + pUp + '%)';
+        el.className = 'small fw-semibold ' + cls;
+        // Honestidad: la calidad del modelo (hold-out) en el tooltip.
+        el.title = 'Clasificación SDCA sobre features técnicas · acierto ' + Math.round((s.accuracy || 0) * 100)
+            + '% / AUC ' + (s.auc || 0).toFixed(2) + ' en hold-out (n=' + s.trainSamples + '). Indicador, no asesoramiento.';
+    }
+
+    async function loadSignal() {
+        if (!forecastActive || !selectedSymbol || selectedSymbol === 'ALL') { lastSignal = null; renderDirectionBadge(); return; }
+        renderDirectionBadge();
+        try {
+            const resp = await fetch('/api/signal?symbol=' + encodeURIComponent(selectedSymbol)
+                + '&range=' + encodeURIComponent(chartMode));
+            if (!resp.ok) { lastSignal = null; renderDirectionBadge(); return; }
+            const s = await resp.json();
+            if (s.symbol !== selectedSymbol || s.range !== chartMode) return;   // respuesta obsoleta
+            lastSignal = s;
+            renderDirectionBadge();
+        } catch (e) {
+            lastSignal = null; renderDirectionBadge();
+        }
+    }
+
     function initForecastControl() {
         try { if (localStorage.getItem('chartForecast') === '1') forecastActive = true; } catch (e) { }
         const sw = document.getElementById('forecastSwitch');
@@ -995,9 +1035,12 @@
             try { localStorage.setItem('chartForecast', forecastActive ? '1' : '0'); } catch (e) { }
             if (forecastActive) {
                 loadForecast();
+                loadSignal();
             } else {
                 lastForecast = null;
+                lastSignal = null;
                 renderForecastBadge();
+                renderDirectionBadge();
                 if (lastRenderedSeries) renderChart(lastRenderedSeries);   // quita el overlay
             }
         });
@@ -1025,7 +1068,7 @@
                 return;
             }
             renderChart(series);
-            if (forecastActive) loadForecast();   // el pronóstico depende de símbolo+rango (HV-043)
+            if (forecastActive) { loadForecast(); loadSignal(); }   // señales dependen de símbolo+rango (HV-043/044)
             if (hint) hint.textContent = 'Histórico · ' + range;
         } catch (e) {
             console.error('Error cargando histórico', e);
