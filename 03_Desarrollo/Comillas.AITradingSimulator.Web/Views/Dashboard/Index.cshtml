@@ -215,6 +215,35 @@
         </div>
     </div>
 
+    <!-- Resultados por periodo (trades cerrados) (HV-049) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                        <h5 class="card-title mb-0">🗓️ Resultados por periodo <small class="text-muted fw-normal">(trades cerrados, PnL en divisa base)</small></h5>
+                        <span id="breakdownTotal" class="small fw-semibold"></span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Periodo</th>
+                                    <th class="text-end">PnL</th>
+                                    <th class="text-end">Trades</th>
+                                    <th class="text-end">Ganados / Perdidos</th>
+                                </tr>
+                            </thead>
+                            <tbody id="breakdownBody">
+                                <tr><td colspan="4" class="text-center text-muted">—</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tablas -->
     <div class="row g-3">
         <div class="col-12 col-xl-6">

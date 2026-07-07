@@ -42,6 +42,11 @@ public sealed class DashboardController : Controller
     public async Task<IActionResult> Metrics(CancellationToken cancellationToken = default)
         => Json(await _service.GetPortfolioMetricsAsync(cancellationToken));
 
+    // Desglose de trades cerrados por año/mes con PnL sumado (HV-049).
+    [HttpGet("/api/account/closed-breakdown")]
+    public async Task<IActionResult> ClosedBreakdown(CancellationToken cancellationToken = default)
+        => Json(await _service.GetClosedTradesBreakdownAsync(cancellationToken));
+
     [HttpGet("/api/history")]
     public async Task<IActionResult> History(string symbol, string range, CancellationToken cancellationToken)
     {

@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.36.0-desglose-periodo] - 2026-07-07
+
+### Added
+- 🗓️ **HV-049** Desglose de **trades cerrados por año/mes** con PnL sumado (convertido a divisa base), nº de trades y ganados/perdidos. `GET /api/account/closed-breakdown` + tarjeta "Resultados por periodo" (tabla año→mes).
+
+### Métricas
+- 187 tests verdes (185 + 2). Smoke end-to-end en BD temporal aislada (cartera real intacta): Total 100 €/4 → 2026 80 € (may 50, jun 30), 2025 20 € (dic).
+
+---
+
 ## [1.35.0-metricas-avanzadas] - 2026-07-07
 
 ### Added

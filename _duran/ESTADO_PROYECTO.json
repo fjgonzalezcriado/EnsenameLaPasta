@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.35.0-metricas-avanzadas",
+                   "version_actual":  "1.36.0-desglose-periodo",
                    "ultima_actualizacion":  "2026-07-07",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-049",
+                                               "titulo":  "Desglose de trades cerrados por anio/mes con PnL sumado",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-07-07",
+                                               "fechaInicio":  "2026-07-07",
+                                               "fechaCompletado":  "2026-07-07",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-049.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Desglose de trades cerrados agrupados por anio (descendente) y mes (ascendente) segun ClosedAt, con el PnL realizado sumado y convertido a divisa base (reutiliza RateOf/currencyBySymbol del dashboard, HV-020/022), nº de trades y ganados/perdidos por periodo + total global. DTOs ClosedTradesBreakdownDto/YearBreakdownDto/MonthBreakdownDto. DashboardService.GetClosedTradesBreakdownAsync + GET /api/account/closed-breakdown. UI: tarjeta Resultados por periodo con tabla (fila de anio en negrita + meses indentados, PnL coloreado, ganados/perdidos verde/rojo), total en cabecera, refresco 60s. 2 tests nuevos (agrupacion 2026/2025 con sumas por mes y W/L; vacio sin trades). 187 verdes. Smoke end-to-end sin tocar la cartera real: app arrancada contra BD SQLite temporal (ConnectionStrings__Default), importados 4 trades cerrados de prueba -> Total 100 EUR/4; 2026 80 EUR (may 50 [1G/1P], jun 30), 2025 20 EUR (dic); tabla renderizada OK, 0 errores; BD temporal borrada. Cartera real (0 cerrados) -> Sin trades cerrados. Rama feature/HV-049-desglose-periodo."
+                                           },
+                                           {
                                                "codigo":  "HV-048",
                                                "titulo":  "Metricas avanzadas de cartera (drawdown, Sharpe, volatilidad, profit factor)",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-048.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Tarjeta Metricas avanzadas: Max Drawdown (+ actual), Sharpe y volatilidad anualizados y Profit Factor. DashboardService.GetPortfolioMetricsAsync + GET /api/account/metrics. Base NEUTRAL a aportaciones/retiradas: las metricas de rendimiento se calculan sobre el indice de retorno (1 + PnL/aportado = 1 + ReturnPct/100), no sobre el valor de cuenta bruto (que se dispara con cada ingreso de caja). Drawdown pico->valle del indice; Sharpe/vol sobre retornos diarios (ultimo snapshot de cada dia UTC) anualizados con raiz(252), rf=0, con gate de honestidad >=10 retornos diarios (~11 dias); con menos, HasEnoughData=false + mensaje (anualizar 2-3 retornos da valores absurdos). Profit Factor de trades cerrados (infinito si solo ganancias). PeakValue/CurrentValue = valor de cuenta (contexto). UI: tarjeta bajo el grafico de cuenta, refresco 60s, aviso de honestidad. 4 tests nuevos. 185 verdes. CORRECCION clave: el 1er intento sobre valor de cuenta bruto daba Sharpe 12,56/vol 143 por ciento por las aportaciones -> corregido con indice de retorno (vol ~23 por ciento). Smoke real (3 dias): Max Drawdown -7,69 por ciento (actual -7,32); Sharpe/vol -> necesitan >=11 dias (hay 3); Profit Factor - (sin trades cerrados). Indicador, no asesoramiento. Rama feature/HV-048-metricas-avanzadas."
+                                               "notas":  "Tarjeta Metricas avanzadas: Max Drawdown (+ actual), Sharpe y volatilidad anualizados y Profit Factor. DashboardService.GetPortfolioMetricsAsync + GET /api/account/metrics. Base NEUTRAL a aportaciones/retiradas: las metricas de rendimiento se calculan sobre el indice de retorno (1 + PnL/aportado = 1 + ReturnPct/100), no sobre el valor de cuenta bruto (que se dispara con cada ingreso de caja). Drawdown pico-\u003evalle del indice; Sharpe/vol sobre retornos diarios (ultimo snapshot de cada dia UTC) anualizados con raiz(252), rf=0, con gate de honestidad \u003e=10 retornos diarios (~11 dias); con menos, HasEnoughData=false + mensaje (anualizar 2-3 retornos da valores absurdos). Profit Factor de trades cerrados (infinito si solo ganancias). PeakValue/CurrentValue = valor de cuenta (contexto). UI: tarjeta bajo el grafico de cuenta, refresco 60s, aviso de honestidad. 4 tests nuevos. 185 verdes. CORRECCION clave: el 1er intento sobre valor de cuenta bruto daba Sharpe 12,56/vol 143 por ciento por las aportaciones -\u003e corregido con indice de retorno (vol ~23 por ciento). Smoke real (3 dias): Max Drawdown -7,69 por ciento (actual -7,32); Sharpe/vol -\u003e necesitan \u003e=11 dias (hay 3); Profit Factor - (sin trades cerrados). Indicador, no asesoramiento. Rama feature/HV-048-metricas-avanzadas."
                                            },
                                            {
                                                "codigo":  "HV-047",
@@ -1121,18 +1138,19 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML SSA + clasificacion), HV-046 (visor puro), HV-047 (importar trades cerrados) y HV-048 (metricas avanzadas: drawdown/Sharpe/volatilidad/profit factor). 185 tests verdes; smokes reales/Playwright OK con Yahoo. Metricas de rendimiento sobre indice de retorno (neutral a aportaciones), indicadores no asesoramiento.",
+                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML), HV-046 (visor puro), HV-047 (importar cerrados), HV-048 (metricas avanzadas) y HV-049 (desglose por anio/mes de trades cerrados). 187 tests verdes; smokes reales/Playwright OK con Yahoo.",
                          "archivosModificados":  [
+                                                     "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 38 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-07 OK (185 tests verdes; HV-048 metricas avanzadas: drawdown/Sharpe/volatilidad/profit factor sobre indice de retorno neutral a aportaciones; smoke real: drawdown -7,69 por ciento, Sharpe/vol insuficientes con 3 dias)",
+                     "ultimo_build":  "2026-07-07 OK (187 tests verdes; HV-049 desglose de trades cerrados por anio/mes con PnL sumado en divisa base; smoke end-to-end en BD temporal aislada)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  48
+                     "evolutivos_completados_mes":  49
                  },
     "alertas":  {
                     "activas":  [

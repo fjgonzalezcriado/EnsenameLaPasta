@@ -585,6 +585,55 @@ public sealed class DashboardServiceTests : IDisposable
         Assert.NotNull(m.Message);
     }
 
+    [Fact]
+    public async Task GetClosedTradesBreakdown_AgrupaPorAnioYMesYSumaPnL()
+    {
+        await using (var ctx = NewContext())
+        {
+            // 2026-05: +100 y −50 · 2026-06: +30 · 2025-12: +20. Sin TrackedSymbols → base EUR (rate 1).
+            var a = Trade.Open("A", 100m, 10m, new DateTime(2026, 5, 15, 0, 0, 0, DateTimeKind.Utc));
+            a.Close(110m, new DateTime(2026, 5, 15, 12, 0, 0, DateTimeKind.Utc));   // +100
+            var b = Trade.Open("B", 100m, 10m, new DateTime(2026, 5, 20, 0, 0, 0, DateTimeKind.Utc));
+            b.Close(95m, new DateTime(2026, 5, 20, 12, 0, 0, DateTimeKind.Utc));    // −50
+            var c = Trade.Open("C", 50m, 10m, new DateTime(2026, 6, 10, 0, 0, 0, DateTimeKind.Utc));
+            c.Close(53m, new DateTime(2026, 6, 10, 12, 0, 0, DateTimeKind.Utc));    // +30
+            var d = Trade.Open("D", 10m, 2m, new DateTime(2025, 12, 1, 0, 0, 0, DateTimeKind.Utc));
+            d.Close(20m, new DateTime(2025, 12, 1, 12, 0, 0, DateTimeKind.Utc));    // +20
+            ctx.Trades.AddRange(a, b, c, d);
+            await ctx.SaveChangesAsync();
+        }
+
+        await using var ctx2 = NewContext();
+        var bd = await NewService(ctx2).GetClosedTradesBreakdownAsync();
+
+        Assert.Equal(4, bd.TotalTrades);
+        Assert.Equal(100m, bd.TotalPnLBase);          // 100 − 50 + 30 + 20
+        Assert.Equal(2, bd.Years.Count);
+        Assert.Equal(2026, bd.Years[0].Year);         // más reciente primero
+        Assert.Equal(2025, bd.Years[1].Year);
+
+        var y26 = bd.Years[0];
+        Assert.Equal(80m, y26.PnLBase);               // 100 − 50 + 30
+        Assert.Equal(3, y26.Trades);
+        Assert.Equal(2, y26.Wins);
+        Assert.Equal(1, y26.Losses);
+        Assert.Equal(5, y26.Months[0].Month);         // meses ascendente: mayo, junio
+        Assert.Equal(50m, y26.Months[0].PnLBase);     // 100 − 50
+        Assert.Equal(6, y26.Months[1].Month);
+        Assert.Equal(30m, y26.Months[1].PnLBase);
+    }
+
+    [Fact]
+    public async Task GetClosedTradesBreakdown_SinTradesCerrados_Vacio()
+    {
+        await using var ctx = NewContext();
+        var bd = await NewService(ctx).GetClosedTradesBreakdownAsync();
+
+        Assert.Equal(0, bd.TotalTrades);
+        Assert.Equal(0m, bd.TotalPnLBase);
+        Assert.Empty(bd.Years);
+    }
+
     public void Dispose() => _connection.Dispose();
 
     /// <summary>Stub de IFxRateProvider: rate 1 salvo los pares configurados.</summary>
