@@ -57,12 +57,14 @@ public static class DependencyInjection
         // en runtime SelectableMarketHistoryProvider (coherente con el feed en vivo).
         services.AddSingleton<YahooHistoryProvider>();
         services.AddSingleton<TwelveDataHistoryProvider>();
+        services.AddSingleton<AlphaVantageHistoryProvider>();
         services.AddSingleton<IMarketHistoryProvider, SelectableMarketHistoryProvider>();
 
         // Búsqueda de instrumentos: ambos proveedores + selector por proveedor activo,
         // para que los resultados usen la convención de símbolos del feed en uso (HV-034).
         services.AddSingleton<YahooInstrumentSearchProvider>();
         services.AddSingleton<TwelveDataInstrumentSearchProvider>();
+        services.AddSingleton<AlphaVantageInstrumentSearchProvider>();
         services.AddSingleton<IInstrumentSearchProvider, SelectableInstrumentSearchProvider>();
 
         // Conversión de divisas (totales en divisa base). Usa el HttpClient de Yahoo.
@@ -94,10 +96,23 @@ public static class DependencyInjection
             client.Timeout = TimeSpan.FromSeconds(opts.TimeoutSeconds);
         });
 
-        // Feed EN VIVO: ambos proveedores registrados; el activo lo resuelve en runtime
+        // Tercer proveedor: Alpha Vantage (requiere API key; plan gratuito muy limitado,
+        // 25 req/día). HttpClient siempre registrado; solo se usa si es el proveedor activo.
+        services.AddOptions<AlphaVantageOptions>()
+            .Bind(configuration.GetSection(AlphaVantageOptions.SectionName))
+            .ValidateOnStart();
+        services.AddHttpClient(AlphaVantageProvider.HttpClientName, (sp, client) =>
+        {
+            var opts = sp.GetRequiredService<IOptions<AlphaVantageOptions>>().Value;
+            client.BaseAddress = new Uri(opts.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(opts.TimeoutSeconds);
+        });
+
+        // Feed EN VIVO: los proveedores registrados; el activo lo resuelve en runtime
         // SelectableMarketDataProvider. La simulación RandomWalk se retiró.
         services.AddSingleton<YahooFinanceProvider>();
         services.AddSingleton<TwelveDataProvider>();
+        services.AddSingleton<AlphaVantageProvider>();
         services.AddSingleton<IMarketDataProvider, SelectableMarketDataProvider>();
         services.AddHostedService<MarketTickGeneratorService>();
 

@@ -11,23 +11,29 @@ public sealed class SelectableMarketDataProvider : IMarketDataProvider
 {
     private readonly YahooFinanceProvider _yahoo;
     private readonly TwelveDataProvider _twelveData;
+    private readonly AlphaVantageProvider _alphaVantage;
     private readonly IMarketProviderState _state;
 
     public SelectableMarketDataProvider(
         YahooFinanceProvider yahoo,
         TwelveDataProvider twelveData,
+        AlphaVantageProvider alphaVantage,
         IMarketProviderState state)
     {
         _yahoo = yahoo;
         _twelveData = twelveData;
+        _alphaVantage = alphaVantage;
         _state = state;
     }
 
     public Task<MarketQuote> GetLatestAsync(string symbol, DateTime timestampUtc, CancellationToken cancellationToken = default)
     {
-        var provider = string.Equals(_state.Current, "TwelveData", StringComparison.OrdinalIgnoreCase)
-            ? (IMarketDataProvider)_twelveData
-            : _yahoo;
+        var provider = _state.Current switch
+        {
+            var p when string.Equals(p, "TwelveData", StringComparison.OrdinalIgnoreCase) => (IMarketDataProvider)_twelveData,
+            var p when string.Equals(p, "AlphaVantage", StringComparison.OrdinalIgnoreCase) => _alphaVantage,
+            _ => _yahoo,
+        };
         return provider.GetLatestAsync(symbol, timestampUtc, cancellationToken);
     }
 }

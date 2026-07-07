@@ -1391,8 +1391,9 @@
             fetch('/api/provider').then(function (r) { return r.ok ? r.json() : null; }).then(function (info) {
                 if (!info) return;
                 if (info.current) sel.value = info.current;
-                if (hint) hint.textContent = (info.current === 'TwelveData' && !info.twelveDataKeyConfigured)
-                    ? '⚠ sin API key' : '';
+                const noKey = (info.current === 'TwelveData' && !info.twelveDataKeyConfigured)
+                    || (info.current === 'AlphaVantage' && !info.alphaVantageKeyConfigured);
+                if (hint) hint.textContent = noKey ? '⚠ sin API key' : '';
             }).catch(function () { });
         }
         refreshInfo();

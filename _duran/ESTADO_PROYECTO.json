@@ -95,8 +95,8 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.28.0-velas-japonesas",
-                   "ultima_actualizacion":  "2026-07-06",
+                   "version_actual":  "1.29.0-alphavantage",
+                   "ultima_actualizacion":  "2026-07-07",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
                },
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-042",
+                                               "titulo":  "Tercer proveedor de datos - Alpha Vantage",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-07-07",
+                                               "fechaInicio":  "2026-07-07",
+                                               "fechaCompletado":  "2026-07-07",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-042.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Fase 3: Alpha Vantage como 3er proveedor conmutable, mismo patron que Twelve Data. AlphaVantageOptions + AlphaVantageProvider (GLOBAL_QUOTE: precio+volumen, sin divisa; AV responde 200 tambien en cuota/error con Note/Information/Error Message -> mensaje claro sin stack) + AlphaVantageHistoryProvider (TIME_SERIES_INTRADAY/DAILY/WEEKLY; clave de serie localizada dinamicamente; OHLC HV-041; recorte a N recientes por rango; YTD por anio con TimeProvider; sin key o cuota -> degrada a vacio) + AlphaVantageInstrumentSearchProvider (SYMBOL_SEARCH). MarketProviderState.Available + 3 wrappers Selectable* + DI (opciones + HttpClient AlphaVantage + concretos). ProviderController expone alphaVantageKeyConfigured. UI: opcion Alpha Vantage + aviso sin API key. 15 tests nuevos (6 feed + 5 historico + 4 busqueda) + MarketProviderStateTests adaptado (3 proveedores). 171 verdes. Smoke cableado sin key: /api/provider lista AlphaVantage + alphaVantageKeyConfigured false; POST AlphaVantage -> dashboard providerType=AlphaVantage; historico/busqueda -> vacio (0 stacks, aviso una linea); POST invalido -> 400; Playwright: selector 3 opciones + aviso; vuelta a Yahoo. Limitacion: plan gratuito de AV = 25 req/dia, insuficiente para el feed en vivo. Key en user-secrets (no en repo). Rama feature/HV-042-alphavantage."
+                                           },
+                                           {
                                                "codigo":  "HV-041",
                                                "titulo":  "Switch de grafico linea a velas japonesas (OHLC)",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-041.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Switch Velas para alternar el grafico de precios entre lineal y velas japonesas (OHLC). Backend: PricePoint gana Open/High/Low (default 0; Price=cierre; anadidos al final del record, no rompe llamadas); YahooHistoryProvider y TwelveDataHistoryProvider parsean OHLC de indicators.quote[0] y values[] (fallback al cierre si falta). 2 tests nuevos de parseo OHLC. Frontend: switch candleSwitch, estado chartType (line|candle) persistido en localStorage; plugin propio candlePlugin dibuja mecha (max->min) y cuerpo (apertura<->cierre) verde/rojo por categoria, sin libreria externa, respetando el eje de categorias de HV-038 (sin huecos de findes). En velas la linea se oculta (borderColor transparente, se conserva para escalado/hover; etiqueta de valor usa $valueColor), techo/suelo con max de maximos y min de minimos, tooltip Apert./Max/Min/Cierre; solo con un unico simbolo (con Todos cae a linea). 156 verdes. Smoke Playwright: velas ON -> 21 velas en 1M, linea transparente, techo/suelo 1725/1060; OFF -> linea #0d6efd restaurada; persistencia tras reload; 0 errores. Recompilar obligatorio (cambia .cshtml y C#). Rama feature/HV-041-velas."
+                                               "notas":  "Switch Velas para alternar el grafico de precios entre lineal y velas japonesas (OHLC). Backend: PricePoint gana Open/High/Low (default 0; Price=cierre; anadidos al final del record, no rompe llamadas); YahooHistoryProvider y TwelveDataHistoryProvider parsean OHLC de indicators.quote[0] y values[] (fallback al cierre si falta). 2 tests nuevos de parseo OHLC. Frontend: switch candleSwitch, estado chartType (line|candle) persistido en localStorage; plugin propio candlePlugin dibuja mecha (max-\u003emin) y cuerpo (apertura\u003c-\u003ecierre) verde/rojo por categoria, sin libreria externa, respetando el eje de categorias de HV-038 (sin huecos de findes). En velas la linea se oculta (borderColor transparente, se conserva para escalado/hover; etiqueta de valor usa $valueColor), techo/suelo con max de maximos y min de minimos, tooltip Apert./Max/Min/Cierre; solo con un unico simbolo (con Todos cae a linea). 156 verdes. Smoke Playwright: velas ON -\u003e 21 velas en 1M, linea transparente, techo/suelo 1725/1060; OFF -\u003e linea #0d6efd restaurada; persistencia tras reload; 0 errores. Recompilar obligatorio (cambia .cshtml y C#). Rama feature/HV-041-velas."
                                            },
                                            {
                                                "codigo":  "HV-040",
@@ -997,24 +1014,25 @@
                                        ]
                    },
     "ultimaSesion":  {
-                         "fecha":  "2026-07-06",
+                         "fecha":  "2026-07-07",
                          "evolutivoActivo":  null,
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037 (variacion del rango + eliminar En vivo), HV-038 (eje de categorias sin findes/festivos), HV-039 (techo/suelo), HV-040 (selector de margen del eje Y) y HV-041 (switch linea/velas japonesas OHLC). Backend solo tocado en HV-041 (OHLC en PricePoint + proveedores). 156 tests verdes; smokes Playwright OK con Yahoo activo.",
+                         "resumenSesion":  "HV-037..041 (mejoras del grafico de precios: variacion del rango, eje de categorias, techo/suelo, margen, velas japonesas) y HV-042 (Alpha Vantage como 3er proveedor conmutable). 171 tests verdes; smokes Playwright/cableado OK con Yahoo activo.",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
+                                                     "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 38 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-06 OK (156 tests verdes; HV-041 switch linea/velas japonesas OHLC: PricePoint+proveedores con Open/High/Low + plugin propio de velas sobre eje de categorias; smoke Playwright verde con Yahoo)",
+                     "ultimo_build":  "2026-07-07 OK (171 tests verdes; HV-042 Alpha Vantage como 3er proveedor conmutable: feed/historico/busqueda + selector; smoke de cableado verde sin API key, degradacion limpia)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  41
+                     "evolutivos_completados_mes":  42
                  },
     "alertas":  {
                     "activas":  [
