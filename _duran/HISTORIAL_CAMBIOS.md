@@ -18,6 +18,13 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.38.2-s3776-complejidad] - 2026-07-07
+
+### Changed
+- ♻️ **S3776** (SonarLint, complejidad cognitiva): `DashboardService.GetPortfolioMetricsAsync` bajaba de 27 a las 15 permitidas. Refactorizado extrayendo 5 helpers privados `static` — `ComputeProfitFactor`, `BuildReturnIndex`, `ComputeDrawdown`, `ComputeDailyReturnIndices`, `ComputeSharpeVolatility` — dejando el método principal como una secuencia lineal de llamadas (complejidad ~4; el helper mayor, `ComputeDrawdown`, ~9). **Sin cambios de comportamiento** (mismos cálculos, invariante y mensajes; el early-return `count<2` calcula el capital una vez y lo reutiliza). Build 0/0, 190 tests verdes; sigue en 0 IDE / 0 CA. Nota: SonarLint es plugin del IDE (no hay `SonarAnalyzer` en los `.csproj`), así que S3776 no sale en `dotnet build`; la reducción se verifica por construcción.
+
+---
+
 ## [1.38.1-checklist-barrido] - 2026-07-07
 
 ### Changed
