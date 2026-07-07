@@ -67,6 +67,10 @@ public static class DependencyInjection
         services.AddSingleton<AlphaVantageInstrumentSearchProvider>();
         services.AddSingleton<IInstrumentSearchProvider, SelectableInstrumentSearchProvider>();
 
+        // Pronóstico de precio con ML.NET (SSA) para señales (HV-043). Usa el histórico del
+        // proveedor activo (IMarketHistoryProvider) como serie de entrada.
+        services.AddSingleton<IPriceForecaster, SsaPriceForecaster>();
+
         // Conversión de divisas (totales en divisa base). Usa el HttpClient de Yahoo.
         services.AddOptions<FxOptions>()
             .Bind(configuration.GetSection(FxOptions.SectionName))

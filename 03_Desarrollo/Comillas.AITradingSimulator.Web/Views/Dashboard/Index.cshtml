@@ -111,6 +111,11 @@
                             <input class="form-check-input" type="checkbox" role="switch" id="candleSwitch">
                             <label class="form-check-label text-muted" for="candleSwitch">🕯️ Velas</label>
                         </div>
+                        <div class="form-check form-switch mb-0 small" title="Pronóstico ML.NET (SSA) del cierre: proyecta los próximos puntos con banda de confianza y una señal. Requiere un único símbolo seleccionado">
+                            <input class="form-check-input" type="checkbox" role="switch" id="forecastSwitch">
+                            <label class="form-check-label text-muted" for="forecastSwitch">🔮 Pronóstico</label>
+                        </div>
+                        <span id="forecastSignal" class="small fw-semibold"></span>
                         <label class="d-flex align-items-center gap-1 mb-0 small">
                             <span class="text-muted">Símbolo:</span>
                             <select id="symbolSelect" class="form-select form-select-sm w-auto py-0"></select>

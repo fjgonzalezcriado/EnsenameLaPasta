@@ -18,6 +18,19 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.30.0-mlnet-senales] - 2026-07-07
+
+### Added
+- 🔮 **HV-043** Señales con **ML.NET** (`Microsoft.ML.TimeSeries`, SSA): pronóstico del cierre a N puntos con banda de confianza y señal Alcista/Bajista/Neutral. `GET /api/forecast` + switch "🔮 Pronóstico" con overlay (línea + banda) en el gráfico.
+
+### Changed
+- 🔧 `Directory.Build.props` nuevo: suprime el advisory NuGet `GHSA-2m69-gcr7-jv3q` (vuln. transitiva de la lib nativa de SQLite vía EF Core; preexistente, destapada por el restore de ML.NET). Auditoría activa para el resto.
+
+### Métricas
+- 175 tests verdes (171 + 4 nuevos de SSA). Smoke real (Yahoo): `HY9H.F 6M` → Alcista +39 % con banda; degradación limpia (histórico insuficiente / símbolo inválido). Caveat: SSA en series cortas extrapola con fuerza (banda ancha refleja incertidumbre).
+
+---
+
 ## [1.29.0-alphavantage] - 2026-07-07
 
 ### Added

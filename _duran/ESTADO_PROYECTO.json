@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.29.0-alphavantage",
+                   "version_actual":  "1.30.0-mlnet-senales",
                    "ultima_actualizacion":  "2026-07-07",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-043",
+                                               "titulo":  "Senales con ML.NET - pronostico de precio (SSA)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-07-07",
+                                               "fechaInicio":  "2026-07-07",
+                                               "fechaCompletado":  "2026-07-07",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-043.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Primer uso de ML.NET (Microsoft.ML.TimeSeries 4.0.2): pronostico de precio con SSA sobre los cierres del historico del simbolo. IPriceForecaster + SsaPriceForecaster (entrena al vuelo con IMarketHistoryProvider; ForecastBySsa horizonte N + banda de confianza 95 por ciento; windowSize ~ serie/3 acotado) deriva senal Alcista/Bajista/Neutral (umbral +-0,5 por ciento). Guardas: min 12 puntos y try/catch -> no lanza, degrada con mensaje. ForecastController GET /api/forecast (horizon 1..60). DI singleton. UI: switch Pronostico persistido + badge de senal + overlay en el grafico (linea naranja discontinua anclada al ultimo cierre + banda sombreada sobre categorias futuras +1..+N; techo/suelo incluyen la banda). Solo con un simbolo. Directory.Build.props nuevo suprime el advisory NuGet GHSA-2m69-gcr7-jv3q (vuln transitiva de la lib nativa de SQLite via EF Core; preexistente, destapada por el restore en fresco de ML.NET; auditoria activa para el resto). 4 tests nuevos. 175 verdes. Smoke real Yahoo: HY9H.F 1M -> Bajista con banda; 6M -> Alcista +39 por ciento (overlay linea+banda, screenshot OK); simbolo inexistente / 1D con pocos puntos hoy -> Insuficiente (degrada limpio). Caveat: SSA en series cortas extrapola con fuerza (banda ancha refleja incertidumbre); no es asesoramiento financiero. Rama feature/HV-043-mlnet-senales."
+                                           },
                                            {
                                                "codigo":  "HV-042",
                                                "titulo":  "Tercer proveedor de datos - Alpha Vantage",
@@ -1019,7 +1036,7 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037..041 (mejoras del grafico de precios: variacion del rango, eje de categorias, techo/suelo, margen, velas japonesas) y HV-042 (Alpha Vantage como 3er proveedor conmutable). 171 tests verdes; smokes Playwright/cableado OK con Yahoo activo.",
+                         "resumenSesion":  "HV-037..041 (mejoras del grafico), HV-042 (Alpha Vantage 3er proveedor) y HV-043 (ML.NET SSA: pronostico de precio + senal Alcista/Bajista + overlay linea/banda). 175 tests verdes; smokes reales OK con Yahoo. Nuevo Directory.Build.props suprime un advisory NuGet transitivo de SQLite.",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
                                                      "_duran/METRICAS.json"
@@ -1028,10 +1045,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-07 OK (171 tests verdes; HV-042 Alpha Vantage 3er proveedor; smoke REAL con API key: historico IBM 1M=22 velas OHLC, busqueda microsoft=6 resultados; feed degrada limpio bajo la rafaga 1 req/s de AV)",
+                     "ultimo_build":  "2026-07-07 OK (175 tests verdes; HV-043 ML.NET SSA pronostico de precio + senal + overlay; Microsoft.ML.TimeSeries 4.0.2; smoke real Yahoo 6M Alcista +39 por ciento con banda)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  42
+                     "evolutivos_completados_mes":  43
                  },
     "alertas":  {
                     "activas":  [
