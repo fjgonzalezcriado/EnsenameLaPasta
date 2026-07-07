@@ -48,7 +48,10 @@ public sealed class YahooInstrumentSearchProvider(IHttpClientFactory httpFactory
     }
 
     private static string? FirstNonEmpty(string? a, string? b)
-        => !string.IsNullOrWhiteSpace(a) ? a : (!string.IsNullOrWhiteSpace(b) ? b : null);
+    {
+        if (!string.IsNullOrWhiteSpace(a)) return a;
+        return string.IsNullOrWhiteSpace(b) ? null : b;
+    }
 
     // DTOs para deserializar /v1/finance/search.
     private sealed record SearchResponse(

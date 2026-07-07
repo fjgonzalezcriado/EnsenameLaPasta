@@ -87,7 +87,7 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
                 var m = ml.BinaryClassification.Evaluate(model.Transform(testData), labelColumnName: nameof(FeatureRow.Label));
                 var acc = double.IsNaN(m.Accuracy) ? 0 : m.Accuracy;
                 var auc = double.IsNaN(m.AreaUnderRocCurve) ? 0 : m.AreaUnderRocCurve;
-                if (best is null || auc > best.Value.Auc || (auc == best.Value.Auc && acc > best.Value.Acc))
+                if (best is null || auc > best.Value.Auc || (Math.Abs(auc - best.Value.Auc) < 1e-9 && acc > best.Value.Acc))
                     best = (Name, model, acc, auc);
             }
 
@@ -98,7 +98,12 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
 
             var pUp = Math.Clamp(pred.Probability, 0f, 1f);
             var direction = pUp >= 0.5f ? "Sube" : "Baja";
-            var sig = pUp >= 0.55f ? "Comprar" : pUp <= 0.45f ? "Vender" : "Mantener";
+            var sig = pUp switch
+            {
+                >= 0.55f => "Comprar",
+                <= 0.45f => "Vender",
+                _ => "Mantener",
+            };
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("Clasificación {Symbol} {Range}: {Dir} P(sube)={P:F2} modelo {Model} acc={Acc:F2} auc={Auc:F2} (n={N}).",
@@ -109,7 +114,7 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
         }
         catch (Exception ex)
         {
-            _logger.LogWarning("Clasificación {Symbol} {Range} falló: {Error}", symbol, range, ex.Message);
+            _logger.LogWarning(ex, "Clasificación {Symbol} {Range} falló.", symbol, range);
             return Insufficient("No se pudo calcular la señal.");
         }
     }
@@ -145,7 +150,12 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
     private static double Mean(double[] a, int lo, int hi)
     {
         double sum = 0; var n = 0;
-        for (var k = lo; k <= hi; k++) { if (k < 0) continue; sum += a[k]; n++; }
+        for (var k = lo; k <= hi; k++)
+        {
+            if (k < 0) continue;
+            sum += a[k];
+            n++;
+        }
         return n > 0 ? sum / n : 0;
     }
 
@@ -191,7 +201,12 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
     {
         var mean = Mean(c, i - window + 1, i);
         double sq = 0; var n = 0;
-        for (var k = i - window + 1; k <= i; k++) { if (k < 0) continue; sq += (c[k] - mean) * (c[k] - mean); n++; }
+        for (var k = i - window + 1; k <= i; k++)
+        {
+            if (k < 0) continue;
+            sq += (c[k] - mean) * (c[k] - mean);
+            n++;
+        }
         if (n == 0) return 0.5;
         var sd = Math.Sqrt(sq / n);
         if (sd == 0) return 0.5;
@@ -222,8 +237,7 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
     private sealed class DirectionPrediction
     {
         [ColumnName("PredictedLabel")] public bool PredictedLabel { get; set; }
-        public float Probability { get; set; }
-        public float Score { get; set; }
+        [ColumnName("Probability")] public float Probability { get; set; }
     }
 }
 

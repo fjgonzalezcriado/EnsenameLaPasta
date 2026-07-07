@@ -18,4 +18,14 @@
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
   </ItemGroup>
 
+  <!--
+    Análisis estático SonarAnalyzer.CSharp (mismas reglas Sxxxx que SonarLint/SonarQube), ahora
+    también en build/CLI (antes solo en el IDE). PrivateAssets="all": es solo analizador, no se
+    propaga como dependencia. La calibración de severidad (qué rompe el build vs. informativo) vive
+    en .editorconfig. Ver regla .claude/rules/dotnet-code-style.md y DURAN.
+  -->
+  <ItemGroup>
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.28.0.143324" PrivateAssets="all" />
+  </ItemGroup>
+
 </Project>

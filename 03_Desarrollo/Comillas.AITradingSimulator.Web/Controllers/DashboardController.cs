@@ -26,8 +26,8 @@ public sealed class DashboardController(IDashboardService service, IMarketHistor
     public async Task<IActionResult> AccountHistory(int points = 500, CancellationToken cancellationToken = default)
     {
         var maxPoints = Math.Clamp(points, 10, 5000);
-        var history = await _service.GetAccountHistoryAsync(maxPoints, cancellationToken);
-        return Json(history);
+        var accountHistory = await _service.GetAccountHistoryAsync(maxPoints, cancellationToken);
+        return Json(accountHistory);
     }
 
     // Métricas avanzadas de cartera (drawdown, Sharpe, volatilidad, profit factor) (HV-048).

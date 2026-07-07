@@ -70,7 +70,7 @@ public sealed class PortfolioSnapshotService(
         // priceSeriesPoints mínimo: no necesitamos la serie de precios para el snapshot.
         var snap = await dashboard.GetSnapshotAsync(priceSeriesPoints: 10, cancellationToken: ct);
 
-        // El valor de cuenta puede ser negativo en casos límite (retiradas > saldo);
+        // El valor de cuenta puede ser negativo en casos límite (retiradas mayores que el saldo):
         // la entidad no admite capital negativo, así que en ese caso omitimos el punto.
         if (snap.AccountValue < 0m)
         {

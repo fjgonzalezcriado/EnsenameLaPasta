@@ -84,9 +84,9 @@ public sealed class AlphaVantageHistoryProvider(
         {
             root = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
-            _logger.LogWarning("Alpha Vantage histórico {Symbol} {Range}: respuesta no deserializable; sin datos.", symbol, range);
+            _logger.LogWarning(ex, "Alpha Vantage histórico {Symbol} {Range}: respuesta no deserializable; sin datos.", symbol, range);
             return [];
         }
         if (root.ValueKind != JsonValueKind.Object)

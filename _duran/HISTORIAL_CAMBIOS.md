@@ -18,6 +18,20 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.39.0-sonaranalyzer] - 2026-07-07
+
+### Added
+- 🔎 **SonarAnalyzer.CSharp 10.28.0** integrado como analizador de build (`Directory.Build.props`, `PrivateAssets="all"`): las reglas `Sxxxx` (antes solo en SonarLint/IDE) ahora se analizan en `dotnet build`/CLI y, con `TreatWarningsAsErrors=true`, **bloquean el build**. Política elegida: **enforced + limpio**.
+- ⚙️ Nuevo `03_Desarrollo/.editorconfig` con la **calibración** (severidad por regla, justificada): `S6967`/`S6931`/`S6964` → `none` (opinionadas de ASP.NET; API interna personal sin `[ApiController]`, rutas absolutas por acción, sin under-posting), `S1135` (TODOs) → `suggestion`. El resto de reglas Sonar quedan a *warning* (bloquean).
+
+### Fixed
+- 🧹 Resueltos los **19 hallazgos Sonar de valor** para dejar el build verde con Sonar activo: **S6667** (pasar la excepción al logger en `catch`; 5 sitios — 1 excepción documentada con `#pragma` en `MarketTickGeneratorService` por ser fallo recurrente por símbolo sin stack a propósito), **S3358** (ternarios anidados → `switch`/`if`; 3), **S1066** (fusionar `if`; 2, en `StrategyExecutionService`), **S2681** (cuerpos de bucle de una línea → bloque; 2), **S6966** (sobrecargas async `CancelAsync`/`RunAsync`; 2), **S125** (2 falsos positivos en comentarios de prosa con `;`/`>` → reescritos), **S3459+S1144** (`Probability` de un DTO ML.NET → `[ColumnName]`; `Score` sin uso → eliminado), **S6562** (`DateTimeKind.Utc`), **S1244** (comparación float exacta → tolerancia `1e-9`), **S3267** (`foreach` → `Select(p => p.Index)`), **S1117** (`history` local que ocultaba el parámetro → `accountHistory`).
+
+### Métricas
+- **Build 0/0 con SonarAnalyzer + `TreatWarningsAsErrors=true`**; **190 tests verdes**; sigue en 0 IDE / 0 CA. Inventario inicial: 52 hallazgos únicos (17 reglas) → 33 calibrados + 19 arreglados.
+
+---
+
 ## [1.38.2-s3776-complejidad] - 2026-07-07
 
 ### Changed

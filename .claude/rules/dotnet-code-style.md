@@ -133,6 +133,43 @@ dotnet format analyzers <sln> --diagnostics CA1861 --severity info
   por sistema**; el arreglo correcto de alto rendimiento es `LoggerMessage` (CA1848), reservado a
   rutas calientes. Documenta la decisión si lo dejas sin aplicar.
 
+## Análisis Sonar (SonarAnalyzer.CSharp) — opcional pero recomendado
+
+Las reglas `Sxxxx` (p. ej. **S3776** complejidad cognitiva, **S6667** logging en `catch`) vienen de
+**SonarLint** (plugin del IDE) o de **SonarAnalyzer.CSharp** (paquete NuGet). Sin el paquete, solo se
+ven en el IDE; **con** el paquete se analizan también en `dotnet build`/CI. Para integrarlo:
+
+```xml
+<!-- Directory.Build.props (aplica a toda la solución) -->
+<ItemGroup>
+  <PackageReference Include="SonarAnalyzer.CSharp" Version="10.*" PrivateAssets="all" />
+</ItemGroup>
+```
+
+- `PrivateAssets="all"`: es solo analizador, **no** se propaga como dependencia.
+- Con `TreatWarningsAsErrors=true`, las reglas Sonar a *warning* **rompen el build** → hay que
+  arreglar o **calibrar** antes. Mide primero sin romper: `dotnet build <sln> -p:TreatWarningsAsErrors=false 2>&1 | grep -oE 'warning S[0-9]+' | sort | uniq -c | sort -rn`.
+- **Calibración** en `.editorconfig` (severidad por regla, con justificación) — desactiva las
+  opinionadas que no encajen y deja el resto bloqueando:
+
+  ```ini
+  [*.cs]
+  dotnet_diagnostic.S6967.severity = none        # ModelState (API interna sin [ApiController])
+  dotnet_diagnostic.S6931.severity = none        # rutas absolutas por acción
+  dotnet_diagnostic.S1135.severity = suggestion  # TODOs informativos
+  ```
+- **Falsos positivos frecuentes** y su arreglo honesto:
+  - **S125** (código comentado) salta en **comentarios de prosa** con `;`/`>` → reescribe el comentario.
+  - **S3459/S1144** en DTOs de **ML.NET** (propiedades que rellena el framework por reflexión) → añade
+    `[ColumnName("...")]` (Sonar reconoce el binding) o suprime con `#pragma` justificado.
+  - **S6667** (pasar la excepción al logger en `catch`) es correcto **salvo** cuando se decide loguear
+    solo el mensaje a propósito (p. ej. fallos recurrentes sin stack) → `#pragma warning disable S6667`
+    con comentario del porqué.
+- **Fixes mecánicos comunes**: S3776 (extraer helpers), S3358 (deshacer ternario anidado → `switch`/`if`),
+  S1066 (fusionar `if`), S2681 (expandir cuerpos de bucle de una línea a bloque), S6966 (usar sobrecarga
+  async: `CancelAsync`/`RunAsync`), S6562 (`DateTimeKind` al crear `DateTime`), S1244 (no comparar float
+  con `==`: usar tolerancia), S1117 (renombrar local que oculta un parámetro).
+
 ## Comprobación de barrido a cero (checklist pre-commit / cierre de evolutivo)
 
 Ni `IDExxxx` ni las `CAxxxx` a nivel *info* aparecen en `dotnet build` — un build verde **no**
@@ -156,7 +193,13 @@ dotnet format analyzers <sln> --severity info --verify-no-changes
   dotnet format style     <sln> --severity info --verify-no-changes 2>&1 | grep -oE 'IDE[0-9]{4}' | sort | uniq -c
   dotnet format analyzers <sln> --severity info --verify-no-changes 2>&1 | grep -oE 'CA[0-9]{4}'  | sort | uniq -c
   ```
-- **Cierre**: tras arreglar, `dotnet build` (0/0) + `dotnet test` (verde) antes de commitear.
+- **Sonar** (si el proyecto tiene `SonarAnalyzer.CSharp`): las `Sxxxx` **sí** salen en `dotnet build`
+  (y con `TreatWarningsAsErrors` bloquean). Inventario por regla sin romper:
+
+  ```bash
+  dotnet build <sln> --no-incremental -p:TreatWarningsAsErrors=false 2>&1 | grep -oE 'warning S[0-9]+' | sort | uniq -c | sort -rn
+  ```
+- **Cierre**: tras arreglar, `dotnet build` (0/0, incluye Sonar si está integrado) + `dotnet test` (verde) antes de commitear.
 - El hook avisa *al escribir*; este barrido es la **red de seguridad** que confirma el cero global.
 
 ## Alcance del hook gemelo
