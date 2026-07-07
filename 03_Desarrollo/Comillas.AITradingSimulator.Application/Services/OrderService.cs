@@ -5,11 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comillas.AITradingSimulator.Application.Services;
 
-public sealed class OrderService : IOrderService
+public sealed class OrderService(ITradingDbContext db) : IOrderService
 {
-    private readonly ITradingDbContext _db;
-
-    public OrderService(ITradingDbContext db) => _db = db;
+    private readonly ITradingDbContext _db = db;
 
     public async Task<Trade?> BuyAsync(string symbol, decimal entryPrice, decimal quantity, DateTime nowUtc, CancellationToken cancellationToken = default)
     {

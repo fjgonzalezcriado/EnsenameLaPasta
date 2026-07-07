@@ -92,10 +92,9 @@ public class TwelveDataHistoryProviderTests
         await Assert.ThrowsAsync<ArgumentException>(() => provider.GetHistoryAsync("AAPL", "10Y"));
     }
 
-    private sealed class Opts : IOptionsMonitor<TwelveDataOptions>
+    private sealed class Opts(TwelveDataOptions value) : IOptionsMonitor<TwelveDataOptions>
     {
-        public Opts(TwelveDataOptions value) => CurrentValue = value;
-        public TwelveDataOptions CurrentValue { get; }
+        public TwelveDataOptions CurrentValue { get; } = value;
         public TwelveDataOptions Get(string? name) => CurrentValue;
         public IDisposable? OnChange(Action<TwelveDataOptions, string?> listener) => null;
     }

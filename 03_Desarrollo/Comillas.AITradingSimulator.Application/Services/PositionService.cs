@@ -9,20 +9,12 @@ using Microsoft.Extensions.Options;
 
 namespace Comillas.AITradingSimulator.Application.Services;
 
-public sealed class PositionService : IPositionService
+public sealed class PositionService(ITradingDbContext db, IWatchlistService watchlist, TimeProvider time, IOptions<BrokerOptions> broker) : IPositionService
 {
-    private readonly ITradingDbContext _db;
-    private readonly IWatchlistService _watchlist;
-    private readonly TimeProvider _time;
-    private readonly IOptions<BrokerOptions> _broker;
-
-    public PositionService(ITradingDbContext db, IWatchlistService watchlist, TimeProvider time, IOptions<BrokerOptions> broker)
-    {
-        _db = db;
-        _watchlist = watchlist;
-        _time = time;
-        _broker = broker;
-    }
+    private readonly ITradingDbContext _db = db;
+    private readonly IWatchlistService _watchlist = watchlist;
+    private readonly TimeProvider _time = time;
+    private readonly IOptions<BrokerOptions> _broker = broker;
 
     private decimal OrderFee => _broker.Value.CommissionPerOrder;
 

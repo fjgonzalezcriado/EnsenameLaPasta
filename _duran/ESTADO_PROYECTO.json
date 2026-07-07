@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.37.0-comisiones-dividendos",
+                   "version_actual":  "1.37.1-ide0290",
                    "ultima_actualizacion":  "2026-07-07",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -315,7 +315,7 @@
                                                "specFile":  "_duran/specs/HV-050.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Comisiones del broker (Trade Republic: 1 EUR fijo por orden, sin porcentaje) y dividendos en el PnL. BrokerOptions (Broker:CommissionPerOrder default 1,00 en base). Trade.Commission + AddCommission; PositionService aplica la tarifa al abrir (compra) y al cerrar (venta) -> round-trip 2 EUR; el import de cerrados (HV-047) aplica ambas. Entidad Dividend (simbolo/importe/divisa/fecha/nota) + DividendService + DividendsController (/api/dividends) + modal Dividendos en la UI (como Caja). DashboardService integra en base: realizedPnL = ventas(bruto) - comisiones(cerradas) + dividendos; unrealizedPnL = abiertas(bruto) - comisiones(compra); cash = aportado - invertido - comisiones(compra) + realizado; invariante accountValue = netDeposits + totalPnL PRESERVADO. Desglose por periodo (HV-049) neto de comisiones + dividendos (DTO gana DividendsBase); profit factor (HV-048) neto. Filas de posiciones siguen en bruto/divisa nativa; los totales y el desglose reflejan comisiones+dividendos. Migracion AddCommissionAndDividends (columna Trade.Commission TEXT default 0 para no romper el parse de filas previas + tabla Dividend). 3 tests nuevos (comision 1+1=2; totales con comision+dividendo=128; dividendos en desglose). 190 verdes. Smoke end-to-end sin tocar la cartera real (app contra BD SQLite temporal): trade cerrado importado (2 EUR comision) + dividendo 30 EUR -> realizedPnL=128 (100-2+30), cash=128, accountValue=128; desglose mayo-2026=128 (98 neto + 30 div); modal operativo; 0 errores; BD temporal borrada. Rama feature/HV-050-comisiones-dividendos."
+                                               "notas":  "Comisiones del broker (Trade Republic: 1 EUR fijo por orden, sin porcentaje) y dividendos en el PnL. BrokerOptions (Broker:CommissionPerOrder default 1,00 en base). Trade.Commission + AddCommission; PositionService aplica la tarifa al abrir (compra) y al cerrar (venta) -\u003e round-trip 2 EUR; el import de cerrados (HV-047) aplica ambas. Entidad Dividend (simbolo/importe/divisa/fecha/nota) + DividendService + DividendsController (/api/dividends) + modal Dividendos en la UI (como Caja). DashboardService integra en base: realizedPnL = ventas(bruto) - comisiones(cerradas) + dividendos; unrealizedPnL = abiertas(bruto) - comisiones(compra); cash = aportado - invertido - comisiones(compra) + realizado; invariante accountValue = netDeposits + totalPnL PRESERVADO. Desglose por periodo (HV-049) neto de comisiones + dividendos (DTO gana DividendsBase); profit factor (HV-048) neto. Filas de posiciones siguen en bruto/divisa nativa; los totales y el desglose reflejan comisiones+dividendos. Migracion AddCommissionAndDividends (columna Trade.Commission TEXT default 0 para no romper el parse de filas previas + tabla Dividend). 3 tests nuevos (comision 1+1=2; totales con comision+dividendo=128; dividendos en desglose). 190 verdes. Smoke end-to-end sin tocar la cartera real (app contra BD SQLite temporal): trade cerrado importado (2 EUR comision) + dividendo 30 EUR -\u003e realizedPnL=128 (100-2+30), cash=128, accountValue=128; desglose mayo-2026=128 (98 neto + 30 div); modal operativo; 0 errores; BD temporal borrada. Rama feature/HV-050-comisiones-dividendos."
                                            },
                                            {
                                                "codigo":  "HV-049",
@@ -1163,7 +1163,7 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-07 OK (190 tests verdes; HV-050 comisiones Trade Republic 1 EUR/orden + dividendos en el PnL; migracion AddCommissionAndDividends; smoke end-to-end en BD temporal: PnL 128 con invariante intacto)",
+                     "ultimo_build":  "2026-07-07 OK (190 tests verdes; estilo: resueltas todas las advertencias IDE0290 constructor primario en 48 archivos con dotnet format, conservando los campos _field; sin cambios de comportamiento)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
                      "evolutivos_completados_mes":  50

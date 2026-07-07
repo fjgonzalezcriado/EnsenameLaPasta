@@ -56,10 +56,9 @@ public class TwelveDataInstrumentSearchProviderTests
         Assert.Empty(await provider.SearchAsync("aapl"));
     }
 
-    private sealed class Opts : IOptionsMonitor<TwelveDataOptions>
+    private sealed class Opts(TwelveDataOptions value) : IOptionsMonitor<TwelveDataOptions>
     {
-        public Opts(TwelveDataOptions value) => CurrentValue = value;
-        public TwelveDataOptions CurrentValue { get; }
+        public TwelveDataOptions CurrentValue { get; } = value;
         public TwelveDataOptions Get(string? name) => CurrentValue;
         public IDisposable? OnChange(Action<TwelveDataOptions, string?> listener) => null;
     }

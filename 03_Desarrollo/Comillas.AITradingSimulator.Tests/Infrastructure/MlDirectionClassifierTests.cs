@@ -67,10 +67,10 @@ public class MlDirectionClassifierTests
         Assert.NotNull(s.Message);
     }
 
-    private sealed class FakeHistory : IMarketHistoryProvider
+    private sealed class FakeHistory(IReadOnlyList<PricePoint> points) : IMarketHistoryProvider
     {
-        private readonly IReadOnlyList<PricePoint> _points;
-        public FakeHistory(IReadOnlyList<PricePoint> points) => _points = points;
+        private readonly IReadOnlyList<PricePoint> _points = points;
+
         public Task<IReadOnlyList<PricePoint>> GetHistoryAsync(string symbol, string range, CancellationToken cancellationToken = default)
             => Task.FromResult(_points);
     }

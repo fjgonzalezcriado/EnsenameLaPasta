@@ -178,6 +178,8 @@ Ejemplos de preferencias:
   - métodos nuevos de interfaz con **implementación por defecto** (`RefreshAsync => GetRateAsync(...)`) → los stubs de test no necesitan implementarlos;
   - campos nuevos en `record` posicionales: insertarlos sin reordenar los previos; ningún test construye los DTO directamente (van por el servicio), así que el cambio es seguro.
 - **Migraciones EF de columnas nuevas**: poner `defaultValue` (p.ej. `"EUR"`) para que las filas existentes queden coherentes.
+- **Columna decimal→TEXT nueva (HasConversion<string>)**: el `defaultValue` de la migración debe ser **`"0"`, no `""`** (el default de EF para string no nulo). Un `""` rompe el parse decimal al leer filas previas. (HV-050: `Trade.Commission`.)
+- **Advertencias IDE (IDExxxx) del editor**: no salen en `dotnet build` (son sugerencias) salvo `EnforceCodeStyleInBuild`. Detectarlas/arreglarlas con `dotnet format style <sln> --diagnostics IDE0290 --severity info` (`--verify-no-changes` para solo listar). IDE0290 (constructor primario) se auto-corrige **conservando los campos `_field`** (`class X(dep) { private readonly T _f = dep; }`) → satisface el analizador sin romper la convención STIC ni el resto del código. (HV/estilo: 48 archivos, 190 tests verdes.)
 
 ---
 

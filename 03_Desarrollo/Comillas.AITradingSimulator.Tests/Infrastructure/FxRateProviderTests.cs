@@ -121,10 +121,9 @@ public class FxRateProviderTests
         Assert.Equal(1m, rate);   // fallback (sin valor previo en caché)
     }
 
-    private sealed class StaticOptionsMonitor : IOptionsMonitor<FxOptions>
+    private sealed class StaticOptionsMonitor(FxOptions value) : IOptionsMonitor<FxOptions>
     {
-        public StaticOptionsMonitor(FxOptions value) => CurrentValue = value;
-        public FxOptions CurrentValue { get; }
+        public FxOptions CurrentValue { get; } = value;
         public FxOptions Get(string? name) => CurrentValue;
         public IDisposable? OnChange(Action<FxOptions, string?> listener) => null;
     }

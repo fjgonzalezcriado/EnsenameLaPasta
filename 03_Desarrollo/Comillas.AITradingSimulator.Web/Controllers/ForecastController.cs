@@ -6,11 +6,9 @@ namespace Comillas.AITradingSimulator.Web.Controllers;
 /// <summary>
 /// Pronóstico de precio (ML.NET SSA) para señales del panel (HV-043).
 /// </summary>
-public sealed class ForecastController : Controller
+public sealed class ForecastController(IPriceForecaster forecaster) : Controller
 {
-    private readonly IPriceForecaster _forecaster;
-
-    public ForecastController(IPriceForecaster forecaster) => _forecaster = forecaster;
+    private readonly IPriceForecaster _forecaster = forecaster;
 
     // GET /api/forecast?symbol=IBM&range=1M&horizon=10
     [HttpGet("/api/forecast")]

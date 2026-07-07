@@ -6,14 +6,9 @@ namespace Comillas.AITradingSimulator.Web.Controllers;
 /// <summary>
 /// Alta/cierre/borrado de posiciones reales del usuario (tracker de cartera).
 /// </summary>
-public sealed class PositionsController : Controller
+public sealed class PositionsController(IPositionService positions) : Controller
 {
-    private readonly IPositionService _positions;
-
-    public PositionsController(IPositionService positions)
-    {
-        _positions = positions;
-    }
+    private readonly IPositionService _positions = positions;
 
     [HttpPost("/api/positions")]
     public async Task<IActionResult> Open([FromBody] OpenPositionRequest? request, CancellationToken cancellationToken)

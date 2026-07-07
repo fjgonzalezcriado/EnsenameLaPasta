@@ -7,24 +7,16 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// Histórico que delega en el proveedor activo (resuelto en cada llamada), en coherencia
 /// con el feed en vivo. Cambiable en runtime desde la UI.
 /// </summary>
-public sealed class SelectableMarketHistoryProvider : IMarketHistoryProvider
+public sealed class SelectableMarketHistoryProvider(
+    YahooHistoryProvider yahoo,
+    TwelveDataHistoryProvider twelveData,
+    AlphaVantageHistoryProvider alphaVantage,
+    IMarketProviderState state) : IMarketHistoryProvider
 {
-    private readonly YahooHistoryProvider _yahoo;
-    private readonly TwelveDataHistoryProvider _twelveData;
-    private readonly AlphaVantageHistoryProvider _alphaVantage;
-    private readonly IMarketProviderState _state;
-
-    public SelectableMarketHistoryProvider(
-        YahooHistoryProvider yahoo,
-        TwelveDataHistoryProvider twelveData,
-        AlphaVantageHistoryProvider alphaVantage,
-        IMarketProviderState state)
-    {
-        _yahoo = yahoo;
-        _twelveData = twelveData;
-        _alphaVantage = alphaVantage;
-        _state = state;
-    }
+    private readonly YahooHistoryProvider _yahoo = yahoo;
+    private readonly TwelveDataHistoryProvider _twelveData = twelveData;
+    private readonly AlphaVantageHistoryProvider _alphaVantage = alphaVantage;
+    private readonly IMarketProviderState _state = state;
 
     public Task<IReadOnlyList<PricePoint>> GetHistoryAsync(string symbol, string range, CancellationToken cancellationToken = default)
     {

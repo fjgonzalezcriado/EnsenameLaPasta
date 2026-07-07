@@ -4,18 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Comillas.AITradingSimulator.Web.Controllers;
 
-public sealed class DashboardController : Controller
+public sealed class DashboardController(IDashboardService service, IMarketHistoryProvider history, ILogger<DashboardController> logger) : Controller
 {
-    private readonly IDashboardService _service;
-    private readonly IMarketHistoryProvider _history;
-    private readonly ILogger<DashboardController> _logger;
-
-    public DashboardController(IDashboardService service, IMarketHistoryProvider history, ILogger<DashboardController> logger)
-    {
-        _service = service;
-        _history = history;
-        _logger = logger;
-    }
+    private readonly IDashboardService _service = service;
+    private readonly IMarketHistoryProvider _history = history;
+    private readonly ILogger<DashboardController> _logger = logger;
 
     [HttpGet]
     public IActionResult Index() => View();

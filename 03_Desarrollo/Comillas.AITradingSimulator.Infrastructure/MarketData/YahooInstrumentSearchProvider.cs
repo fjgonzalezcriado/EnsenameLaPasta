@@ -12,16 +12,10 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// (WKN no está soportado por Yahoo: devuelve 0 resultados.)
 /// Reutiliza el HttpClient "YahooFinance".
 /// </summary>
-public sealed class YahooInstrumentSearchProvider : IInstrumentSearchProvider
+public sealed class YahooInstrumentSearchProvider(IHttpClientFactory httpFactory, ILogger<YahooInstrumentSearchProvider> logger) : IInstrumentSearchProvider
 {
-    private readonly IHttpClientFactory _httpFactory;
-    private readonly ILogger<YahooInstrumentSearchProvider> _logger;
-
-    public YahooInstrumentSearchProvider(IHttpClientFactory httpFactory, ILogger<YahooInstrumentSearchProvider> logger)
-    {
-        _httpFactory = httpFactory;
-        _logger = logger;
-    }
+    private readonly IHttpClientFactory _httpFactory = httpFactory;
+    private readonly ILogger<YahooInstrumentSearchProvider> _logger = logger;
 
     public async Task<IReadOnlyList<InstrumentSearchResult>> SearchAsync(string query, CancellationToken cancellationToken = default)
     {

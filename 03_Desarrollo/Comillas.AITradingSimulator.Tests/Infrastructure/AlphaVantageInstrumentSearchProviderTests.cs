@@ -72,10 +72,9 @@ public class AlphaVantageInstrumentSearchProviderTests
         Assert.Contains("apikey=K9", req.RequestUri.Query);
     }
 
-    private sealed class Opts : IOptionsMonitor<AlphaVantageOptions>
+    private sealed class Opts(AlphaVantageOptions value) : IOptionsMonitor<AlphaVantageOptions>
     {
-        public Opts(AlphaVantageOptions value) => CurrentValue = value;
-        public AlphaVantageOptions CurrentValue { get; }
+        public AlphaVantageOptions CurrentValue { get; } = value;
         public AlphaVantageOptions Get(string? name) => CurrentValue;
         public IDisposable? OnChange(Action<AlphaVantageOptions, string?> listener) => null;
     }

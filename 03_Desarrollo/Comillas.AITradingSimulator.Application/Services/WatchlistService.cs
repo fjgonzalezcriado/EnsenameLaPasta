@@ -5,16 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comillas.AITradingSimulator.Application.Services;
 
-public sealed class WatchlistService : IWatchlistService
+public sealed class WatchlistService(ITradingDbContext db, TimeProvider time) : IWatchlistService
 {
-    private readonly ITradingDbContext _db;
-    private readonly TimeProvider _time;
-
-    public WatchlistService(ITradingDbContext db, TimeProvider time)
-    {
-        _db = db;
-        _time = time;
-    }
+    private readonly ITradingDbContext _db = db;
+    private readonly TimeProvider _time = time;
 
     public async Task<IReadOnlyList<TrackedSymbolDto>> GetAllAsync(CancellationToken cancellationToken = default)
         => await _db.TrackedSymbols

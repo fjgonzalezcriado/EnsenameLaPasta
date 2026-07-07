@@ -15,24 +15,16 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// <see cref="FxOptions.RefreshSeconds"/>. Así el dashboard nunca hace la llamada HTTP
 /// a la fuente FX en el hot path: siempre lee de una caché ya poblada (HV-023).
 /// </summary>
-public sealed class FxRefreshService : BackgroundService
+public sealed class FxRefreshService(
+    IServiceScopeFactory scopeFactory,
+    IFxRateProvider fx,
+    IOptionsMonitor<FxOptions> options,
+    ILogger<FxRefreshService> logger) : BackgroundService
 {
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IFxRateProvider _fx;
-    private readonly IOptionsMonitor<FxOptions> _options;
-    private readonly ILogger<FxRefreshService> _logger;
-
-    public FxRefreshService(
-        IServiceScopeFactory scopeFactory,
-        IFxRateProvider fx,
-        IOptionsMonitor<FxOptions> options,
-        ILogger<FxRefreshService> logger)
-    {
-        _scopeFactory = scopeFactory;
-        _fx = fx;
-        _options = options;
-        _logger = logger;
-    }
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    private readonly IFxRateProvider _fx = fx;
+    private readonly IOptionsMonitor<FxOptions> _options = options;
+    private readonly ILogger<FxRefreshService> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

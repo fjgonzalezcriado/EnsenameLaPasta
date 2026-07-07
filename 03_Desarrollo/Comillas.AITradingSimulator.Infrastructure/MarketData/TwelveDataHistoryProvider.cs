@@ -13,24 +13,16 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// Histórico de precios+volumen desde Twelve Data (<c>/time_series</c>). Alternativa a
 /// <see cref="YahooHistoryProvider"/>; se registra cuando el proveedor activo es "TwelveData".
 /// </summary>
-public sealed class TwelveDataHistoryProvider : IMarketHistoryProvider
+public sealed class TwelveDataHistoryProvider(
+    IHttpClientFactory httpFactory,
+    IOptionsMonitor<TwelveDataOptions> options,
+    TimeProvider time,
+    ILogger<TwelveDataHistoryProvider> logger) : IMarketHistoryProvider
 {
-    private readonly IHttpClientFactory _httpFactory;
-    private readonly IOptionsMonitor<TwelveDataOptions> _options;
-    private readonly TimeProvider _time;
-    private readonly ILogger<TwelveDataHistoryProvider> _logger;
-
-    public TwelveDataHistoryProvider(
-        IHttpClientFactory httpFactory,
-        IOptionsMonitor<TwelveDataOptions> options,
-        TimeProvider time,
-        ILogger<TwelveDataHistoryProvider> logger)
-    {
-        _httpFactory = httpFactory;
-        _options = options;
-        _time = time;
-        _logger = logger;
-    }
+    private readonly IHttpClientFactory _httpFactory = httpFactory;
+    private readonly IOptionsMonitor<TwelveDataOptions> _options = options;
+    private readonly TimeProvider _time = time;
+    private readonly ILogger<TwelveDataHistoryProvider> _logger = logger;
 
     // Rango de la UI -> (interval, outputsize) de Twelve Data. YTD se calcula aparte.
     private static readonly IReadOnlyDictionary<string, (string Interval, int OutputSize)> RangeMap =

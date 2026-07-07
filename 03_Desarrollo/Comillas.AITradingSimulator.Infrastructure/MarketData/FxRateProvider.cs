@@ -13,26 +13,18 @@ namespace Comillas.AITradingSimulator.Infrastructure.MarketData;
 /// con caché en memoria por par de divisas y TTL configurable. Degrada a último valor
 /// conocido o a 1 si la fuente falla (no rompe el dashboard).
 /// </summary>
-public sealed class FxRateProvider : IFxRateProvider
+public sealed class FxRateProvider(
+    IHttpClientFactory httpFactory,
+    IOptionsMonitor<FxOptions> options,
+    TimeProvider time,
+    ILogger<FxRateProvider> logger) : IFxRateProvider
 {
-    private readonly IHttpClientFactory _httpFactory;
-    private readonly IOptionsMonitor<FxOptions> _options;
-    private readonly TimeProvider _time;
-    private readonly ILogger<FxRateProvider> _logger;
+    private readonly IHttpClientFactory _httpFactory = httpFactory;
+    private readonly IOptionsMonitor<FxOptions> _options = options;
+    private readonly TimeProvider _time = time;
+    private readonly ILogger<FxRateProvider> _logger = logger;
 
     private readonly ConcurrentDictionary<string, CacheEntry> _cache = new();
-
-    public FxRateProvider(
-        IHttpClientFactory httpFactory,
-        IOptionsMonitor<FxOptions> options,
-        TimeProvider time,
-        ILogger<FxRateProvider> logger)
-    {
-        _httpFactory = httpFactory;
-        _options = options;
-        _time = time;
-        _logger = logger;
-    }
 
     public async Task<decimal> GetRateAsync(string from, string to, CancellationToken cancellationToken = default)
     {

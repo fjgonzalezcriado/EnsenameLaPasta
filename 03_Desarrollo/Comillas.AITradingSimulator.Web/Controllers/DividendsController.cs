@@ -6,11 +6,9 @@ namespace Comillas.AITradingSimulator.Web.Controllers;
 /// <summary>
 /// Dividendos cobrados por el usuario (HV-050). Suman al PnL y al efectivo.
 /// </summary>
-public sealed class DividendsController : Controller
+public sealed class DividendsController(IDividendService dividends) : Controller
 {
-    private readonly IDividendService _dividends;
-
-    public DividendsController(IDividendService dividends) => _dividends = dividends;
+    private readonly IDividendService _dividends = dividends;
 
     [HttpGet("/api/dividends")]
     public async Task<IActionResult> All(CancellationToken cancellationToken)
