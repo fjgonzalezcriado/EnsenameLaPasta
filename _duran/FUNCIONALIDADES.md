@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-046 Dashboard visor puro (modo solo lectura) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: `_duran/specs/HV-046.md`
+- **Resumen**: Botón **"👁 Visor"** que pone el panel en **solo lectura** (ideal para mostrar en pantalla). Añade `viewer-mode` al contenedor y oculta vía CSS (`.js-editor-only`) los controles que mutan datos: selector de proveedor, "Buscar/añadir", "Caja", "Importar CSV", "Nueva posición", el "✕" de quitar símbolo y la columna "Acciones" (`renderOpenTrades` no la dibuja y ajusta el colspan). Se **conservan** los controles de vista (rango, símbolo, velas, señales ML, margen) y toda la visualización. Persistido en `localStorage`. Solo frontend. 178 verdes (sin cambios). Smoke Playwright: OFF muestra todo, ON oculta la edición, persiste tras reload, 0 errores.
+
 #### HV-045 ML — más features + segundo modelo (FastTree) con selección ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo (Fase 3)
 - **Spec**: `_duran/specs/HV-045.md`

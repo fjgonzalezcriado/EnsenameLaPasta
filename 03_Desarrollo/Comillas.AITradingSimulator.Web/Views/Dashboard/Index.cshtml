@@ -7,7 +7,9 @@
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
         <h1 class="h3 mb-0">🤖 AI Trading Simulator</h1>
         <div class="d-flex flex-wrap align-items-center gap-3 small text-muted">
-            <label class="d-flex align-items-center gap-1 mb-0" title="Proveedor de datos de mercado (feed en vivo e histórico). Se cambia en caliente.">
+            <button type="button" id="viewerToggle" class="btn btn-outline-secondary btn-sm py-0"
+                    title="Modo visor: oculta los controles de edición (añadir/cerrar/importar/caja/proveedor) y deja el panel en solo lectura.">👁 Visor</button>
+            <label class="d-flex align-items-center gap-1 mb-0 js-editor-only" title="Proveedor de datos de mercado (feed en vivo e histórico). Se cambia en caliente.">
                 <span>Proveedor:</span>
                 <select id="providerSelect" class="form-select form-select-sm w-auto py-0">
                     <option value="YahooFinance">Yahoo Finance</option>
@@ -90,7 +92,7 @@
     </div>
 
     <!-- Acciones (modales) -->
-    <div class="mb-3 d-flex flex-wrap gap-2">
+    <div class="mb-3 d-flex flex-wrap gap-2 js-editor-only">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#searchModal">
             🔎 Buscar / añadir instrumento
         </button>
@@ -120,7 +122,7 @@
                         <label class="d-flex align-items-center gap-1 mb-0 small">
                             <span class="text-muted">Símbolo:</span>
                             <select id="symbolSelect" class="form-select form-select-sm w-auto py-0"></select>
-                            <button type="button" id="removeSymbolBtn" class="btn btn-outline-danger btn-sm py-0"
+                            <button type="button" id="removeSymbolBtn" class="btn btn-outline-danger btn-sm py-0 js-editor-only"
                                     title="Dejar de seguir el símbolo seleccionado (borra su histórico)">✕</button>
                         </label>
                     </div>
@@ -190,7 +192,7 @@
                 <div class="card-body">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
                         <h5 class="card-title mb-0">🟢 Posiciones abiertas</h5>
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 js-editor-only">
                             <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
                                 📥 Importar CSV
                             </button>
@@ -211,7 +213,7 @@
                                     <th>PnL</th>
                                     <th>%</th>
                                     <th>Abierto</th>
-                                    <th class="text-end">Acciones</th>
+                                    <th class="text-end js-editor-only">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="openTradesBody">
