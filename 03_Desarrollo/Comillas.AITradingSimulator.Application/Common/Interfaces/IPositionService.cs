@@ -22,8 +22,9 @@ public interface IPositionService
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Importa posiciones desde un CSV (symbol, entry, qty[, date]). Las filas con
-    /// error se reportan y no abortan el resto. Devuelve el recuento y los errores.
+    /// Importa posiciones desde un CSV: <c>symbol, entry, qty[, date[, exit[, closeDate]]]</c>.
+    /// Si la fila trae precio de salida (<c>exit</c>), se importa como trade CERRADO (se abre y se
+    /// cierra); si no, como posición abierta. Las filas con error se reportan y no abortan el resto.
     /// </summary>
     Task<ImportResultDto> ImportCsvAsync(string csv, CancellationToken cancellationToken = default);
 }

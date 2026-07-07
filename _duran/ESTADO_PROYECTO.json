@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.33.0-visor-puro",
+                   "version_actual":  "1.34.0-import-cerrados",
                    "ultima_actualizacion":  "2026-07-07",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -301,6 +301,23 @@
                                       ],
                        "completados":  [
                                            {
+                                               "codigo":  "HV-047",
+                                               "titulo":  "Importar trades cerrados por CSV",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-07-07",
+                                               "fechaInicio":  "2026-07-07",
+                                               "fechaCompletado":  "2026-07-07",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-047.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Amplia el import de HV-018 (que solo abria posiciones) para importar tambien trades cerrados. PositionService.ImportCsvAsync acepta symbol, entry, qty[, date[, exit[, closeDate]]]: si la fila trae exit (>0) se abre y se cierra (CloseAsync(exit, closeDate ?? openedAt)); si no, posicion abierta (compat HV-018). Pre-validacion por fila para no dejar posiciones a medio abrir: exit invalido -> error; closeDate sin exit -> error; closeDate anterior a la apertura -> error (rechaza antes de abrir). Reutiliza el parser (cabecera opcional, delimitador ,/; con coma decimal, fechas multiples). Modal Importar CSV actualizado con el nuevo formato y ejemplo (abierta vs cerrada). Solo Application, sin migracion. 3 tests nuevos (exit -> trade cerrado con RealizedPnL 150; exit invalido -> error; cierre anterior a apertura -> error sin abrir). 181 verdes. Smoke real sin ensuciar la cartera: closeDate<apertura -> 'La fecha de cierre es anterior a la de apertura'; exit no numerico -> 'Precio de salida invalido'; ambos imported:0/failed:1. Camino feliz cubierto por tests unitarios (SQLite en memoria). Rama feature/HV-047-import-cerrados."
+                                           },
+                                           {
                                                "codigo":  "HV-046",
                                                "titulo":  "Dashboard visor puro (modo solo lectura)",
                                                "estado":  "completado",
@@ -315,7 +332,7 @@
                                                "specFile":  "_duran/specs/HV-046.md",
                                                "rutaCodigo":  "03_Desarrollo",
                                                "creadoPor":  "Francisco Javier Gonzalez Criado",
-                                               "notas":  "Modo visor puro (solo lectura) para mostrar en pantalla sin riesgo de editar. Boton Visor en la cabecera (persistido en localStorage) anade la clase viewer-mode al contenedor .dashboard; CSS .dashboard.viewer-mode .js-editor-only { display:none }. Se marcan js-editor-only los controles que mutan: selector de proveedor, botones Buscar/anadir, Caja, Importar CSV, Nueva posicion, el x de quitar simbolo y la columna Acciones. renderOpenTrades no dibuja la celda de acciones en modo visor y ajusta el colspan (9->8). Se conservan los controles de VISTA (rango, simbolo, velas, senales ML, margen, rango de cuenta) y toda la visualizacion. Solo frontend (.cshtml/.css/.js), sin backend ni tests nuevos; 178 verdes sin cambios. Smoke Playwright: visor OFF muestra todo; ON oculta proveedor/Buscar/Caja/Nueva posicion/Importar CSV/Acciones con rango y simbolo intactos; persiste tras reload (aria-pressed true, proveedor oculto); 0 errores. Rama feature/HV-046-visor-puro."
+                                               "notas":  "Modo visor puro (solo lectura) para mostrar en pantalla sin riesgo de editar. Boton Visor en la cabecera (persistido en localStorage) anade la clase viewer-mode al contenedor .dashboard; CSS .dashboard.viewer-mode .js-editor-only { display:none }. Se marcan js-editor-only los controles que mutan: selector de proveedor, botones Buscar/anadir, Caja, Importar CSV, Nueva posicion, el x de quitar simbolo y la columna Acciones. renderOpenTrades no dibuja la celda de acciones en modo visor y ajusta el colspan (9-\u003e8). Se conservan los controles de VISTA (rango, simbolo, velas, senales ML, margen, rango de cuenta) y toda la visualizacion. Solo frontend (.cshtml/.css/.js), sin backend ni tests nuevos; 178 verdes sin cambios. Smoke Playwright: visor OFF muestra todo; ON oculta proveedor/Buscar/Caja/Nueva posicion/Importar CSV/Acciones con rango y simbolo intactos; persiste tras reload (aria-pressed true, proveedor oculto); 0 errores. Rama feature/HV-046-visor-puro."
                                            },
                                            {
                                                "codigo":  "HV-045",
@@ -1087,7 +1104,7 @@
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML: SSA + clasificacion sube/baja con 12 features y 2 modelos) y HV-046 (modo visor puro solo lectura). 178 tests verdes; smokes reales/Playwright OK con Yahoo. Senales ML son indicadores educativos (calidad ~azar, reportada con transparencia).",
+                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML SSA + clasificacion sube/baja con 12 features y 2 modelos), HV-046 (visor puro) y HV-047 (importar trades cerrados por CSV). 181 tests verdes; smokes reales/Playwright OK con Yahoo. Backlog de la sesion completado.",
                          "archivosModificados":  [
                                                      ".claude/settings.json",
                                                      "_duran/METRICAS.json"
@@ -1096,10 +1113,10 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-07 OK (178 tests verdes; HV-046 modo visor puro solo lectura; solo frontend; smoke Playwright verde)",
+                     "ultimo_build":  "2026-07-07 OK (181 tests verdes; HV-047 importar trades cerrados por CSV: columnas opcionales exit/closeDate; smoke valida sin escribir en la cartera)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  46
+                     "evolutivos_completados_mes":  47
                  },
     "alertas":  {
                     "activas":  [

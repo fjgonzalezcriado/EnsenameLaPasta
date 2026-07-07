@@ -194,5 +194,56 @@ public sealed class PositionServiceTests : IDisposable
         Assert.Equal(0, result.Failed);
     }
 
+    [Fact]
+    public async Task ImportCsvAsync_ConExit_ImportaTradeCerrado()
+    {
+        // Con precio de salida (y fecha de cierre) la fila se importa como trade CERRADO (HV-047).
+        const string csv = "symbol,entry,qty,date,exit,closeDate\nAAPL,180,10,2026-05-20,195,2026-06-10";
+
+        await using var ctx = NewContext();
+        var result = await NewService(ctx).ImportCsvAsync(csv);
+
+        Assert.Equal(1, result.Imported);
+        Assert.Equal(0, result.Failed);
+
+        await using var verify = NewContext();
+        var trade = await verify.Trades.FirstAsync(t => t.Symbol == "AAPL");
+        Assert.Equal(TradeStatus.Closed, trade.Status);
+        Assert.Equal(195m, trade.ExitPrice);
+        Assert.Equal(150m, trade.RealizedPnL);   // (195 - 180) * 10
+        Assert.Equal(new DateTime(2026, 6, 10, 0, 0, 0, DateTimeKind.Utc), trade.ClosedAt);
+    }
+
+    [Fact]
+    public async Task ImportCsvAsync_ExitInvalido_ReportaError()
+    {
+        const string csv = "AAPL,180,10,2026-05-20,noesnumero";
+
+        await using var ctx = NewContext();
+        var result = await NewService(ctx).ImportCsvAsync(csv);
+
+        Assert.Equal(0, result.Imported);
+        Assert.Equal(1, result.Failed);
+
+        await using var verify = NewContext();
+        Assert.False(await verify.Trades.AnyAsync());
+    }
+
+    [Fact]
+    public async Task ImportCsvAsync_CierreAnteriorApertura_ReportaErrorSinAbrir()
+    {
+        // La fecha de cierre no puede ser anterior a la de apertura → error, sin dejar la posición abierta.
+        const string csv = "AAPL,180,10,2026-06-10,195,2026-06-01";
+
+        await using var ctx = NewContext();
+        var result = await NewService(ctx).ImportCsvAsync(csv);
+
+        Assert.Equal(0, result.Imported);
+        Assert.Equal(1, result.Failed);
+
+        await using var verify = NewContext();
+        Assert.Equal(0, await verify.Trades.CountAsync());   // ni siquiera abierta
+    }
+
     public void Dispose() => _connection.Dispose();
 }

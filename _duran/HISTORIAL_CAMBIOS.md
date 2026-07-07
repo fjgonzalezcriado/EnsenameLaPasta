@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.34.0-import-cerrados] - 2026-07-07
+
+### Added
+- 📥 **HV-047** Importar **trades cerrados** por CSV: `symbol, entry, qty[, date[, exit[, closeDate]]]`. Si la fila trae `exit`, se importa como trade cerrado (abre+cierra); si no, posición abierta (compat HV-018). Validación por fila sin dejar posiciones a medio abrir.
+
+### Métricas
+- 181 tests verdes (178 + 3). Smoke: endpoint valida el formato extendido sin escribir en la cartera (cierre<apertura y exit inválido reportan error). Camino feliz cubierto por tests unitarios.
+
+---
+
 ## [1.33.0-visor-puro] - 2026-07-07
 
 ### Added
