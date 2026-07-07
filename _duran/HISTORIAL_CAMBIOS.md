@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.35.0-metricas-avanzadas] - 2026-07-07
+
+### Added
+- 📐 **HV-048** Métricas avanzadas de cartera: **Max Drawdown** (+ actual), **Sharpe** y **volatilidad** anualizados y **Profit Factor**. Endpoint `GET /api/account/metrics` + tarjeta en el panel. Cálculo sobre el índice de retorno (neutral a aportaciones); Sharpe/vol con gate ≥ 10 retornos diarios (si no, "insuficiente").
+
+### Métricas
+- 185 tests verdes (181 + 4). Smoke real: Max Drawdown −7,69 % mostrado; Sharpe/vol insuficientes con 3 días (honesto). Corrección: el cálculo inicial sobre valor de cuenta bruto daba cifras absurdas por las aportaciones → índice de retorno.
+
+---
+
 ## [1.34.0-import-cerrados] - 2026-07-07
 
 ### Added

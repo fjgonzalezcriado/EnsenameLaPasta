@@ -16,4 +16,10 @@ public interface IDashboardService
     Task<IReadOnlyList<AccountHistoryPointDto>> GetAccountHistoryAsync(
         int maxPoints = 500,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Métricas avanzadas de la cartera (HV-048): max/actual drawdown de la curva de capital,
+    /// Sharpe y volatilidad anualizados (retornos diarios) y profit factor de los trades cerrados.
+    /// </summary>
+    Task<PortfolioMetricsDto> GetPortfolioMetricsAsync(CancellationToken cancellationToken = default);
 }

@@ -792,6 +792,32 @@
         }
     }
 
+    // ── Métricas avanzadas de cartera (HV-048): drawdown, Sharpe, volatilidad, profit factor ──
+    async function fetchMetrics() {
+        try {
+            const r = await fetch('/api/account/metrics');
+            if (!r.ok) return;
+            const m = await r.json();
+            const set = function (id, text, cls) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = text;
+                el.className = 'fs-4 fw-semibold ' + (cls || 'text-body');
+            };
+            const enoughDd = (m.snapshotCount || 0) >= 2;
+            set('mMaxDd', enoughDd ? pctSigned(m.maxDrawdownPct) : '—', enoughDd && m.maxDrawdownPct < 0 ? 'text-danger' : 'text-body');
+            const curEl = document.getElementById('mCurDd');
+            if (curEl) curEl.textContent = enoughDd ? pctSigned(m.currentDrawdownPct) : '—';
+            set('mSharpe', m.hasEnoughData ? Number(m.sharpeRatio).toFixed(2) : '—', m.hasEnoughData ? signClass(m.sharpeRatio) : 'text-muted');
+            set('mVol', m.hasEnoughData ? Number(m.annualizedVolatilityPct).toFixed(2) + '%' : '—', 'text-body');
+            if (m.profitFactorInfinite) set('mPf', '∞', 'text-success');
+            else if (m.profitFactor > 0) set('mPf', Number(m.profitFactor).toFixed(2), m.profitFactor >= 1 ? 'text-success' : 'text-danger');
+            else set('mPf', '—', 'text-muted');
+            const hint = document.getElementById('metricsHint');
+            if (hint) hint.textContent = m.message ? ('· ' + m.message) : '· Sharpe/volatilidad sobre retornos diarios (√252), aproximados con pocos datos';
+        } catch (e) { /* silencioso */ }
+    }
+
     async function fetchAccountHistory() {
         try {
             const resp = await fetch('/api/account/history?points=5000');
@@ -1617,7 +1643,9 @@
         fetchAndRender(true).then(function () { loadHistory(chartMode); });
     });
     fetchAccountHistory(); // histórico del valor de cuenta (refresco propio, los snapshots son cada pocos min)
+    fetchMetrics();        // métricas avanzadas (HV-048)
     metricsTimer = setInterval(function () { fetchAndRender(false); }, METRICS_MS);
     setInterval(fetchAccountHistory, 60000);
+    setInterval(fetchMetrics, 60000);
     setInterval(refreshTrackedCurrencies, 60000);
 })();

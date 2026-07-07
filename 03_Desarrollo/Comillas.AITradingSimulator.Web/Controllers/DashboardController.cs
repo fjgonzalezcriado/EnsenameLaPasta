@@ -37,6 +37,11 @@ public sealed class DashboardController : Controller
         return Json(history);
     }
 
+    // Métricas avanzadas de cartera (drawdown, Sharpe, volatilidad, profit factor) (HV-048).
+    [HttpGet("/api/account/metrics")]
+    public async Task<IActionResult> Metrics(CancellationToken cancellationToken = default)
+        => Json(await _service.GetPortfolioMetricsAsync(cancellationToken));
+
     [HttpGet("/api/history")]
     public async Task<IActionResult> History(string symbol, string range, CancellationToken cancellationToken)
     {

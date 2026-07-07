@@ -185,6 +185,36 @@
         </div>
     </div>
 
+    <!-- Métricas avanzadas de cartera (HV-048) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-2">📐 Métricas avanzadas <small class="text-muted fw-normal" id="metricsHint"></small></h5>
+                    <div class="row text-center g-3">
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small" title="Peor caída pico→valle de la curva de valor de cuenta">Max Drawdown</div>
+                            <div class="fs-4 fw-semibold" id="mMaxDd">—</div>
+                            <div class="text-muted small">actual <span id="mCurDd">—</span></div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small" title="Rentabilidad ajustada por riesgo (retornos diarios anualizados, rf=0)">Sharpe (anual.)</div>
+                            <div class="fs-4 fw-semibold" id="mSharpe">—</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small" title="Volatilidad anualizada de los retornos diarios">Volatilidad (anual.)</div>
+                            <div class="fs-4 fw-semibold" id="mVol">—</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small" title="Σ ganancias / Σ pérdidas de los trades cerrados (&gt;1 es rentable)">Profit Factor</div>
+                            <div class="fs-4 fw-semibold" id="mPf">—</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tablas -->
     <div class="row g-3">
         <div class="col-12 col-xl-6">
