@@ -21,4 +21,5 @@ public sealed record DirectionSignal(
     double Auc,
     int TrainSamples,
     int FeatureCount,
+    string ModelUsed,
     string? Message);
