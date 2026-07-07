@@ -11,23 +11,29 @@ public sealed class SelectableMarketHistoryProvider : IMarketHistoryProvider
 {
     private readonly YahooHistoryProvider _yahoo;
     private readonly TwelveDataHistoryProvider _twelveData;
+    private readonly AlphaVantageHistoryProvider _alphaVantage;
     private readonly IMarketProviderState _state;
 
     public SelectableMarketHistoryProvider(
         YahooHistoryProvider yahoo,
         TwelveDataHistoryProvider twelveData,
+        AlphaVantageHistoryProvider alphaVantage,
         IMarketProviderState state)
     {
         _yahoo = yahoo;
         _twelveData = twelveData;
+        _alphaVantage = alphaVantage;
         _state = state;
     }
 
     public Task<IReadOnlyList<PricePoint>> GetHistoryAsync(string symbol, string range, CancellationToken cancellationToken = default)
     {
-        var provider = string.Equals(_state.Current, "TwelveData", StringComparison.OrdinalIgnoreCase)
-            ? (IMarketHistoryProvider)_twelveData
-            : _yahoo;
+        var provider = _state.Current switch
+        {
+            var p when string.Equals(p, "TwelveData", StringComparison.OrdinalIgnoreCase) => (IMarketHistoryProvider)_twelveData,
+            var p when string.Equals(p, "AlphaVantage", StringComparison.OrdinalIgnoreCase) => _alphaVantage,
+            _ => _yahoo,
+        };
         return provider.GetHistoryAsync(symbol, range, cancellationToken);
     }
 }

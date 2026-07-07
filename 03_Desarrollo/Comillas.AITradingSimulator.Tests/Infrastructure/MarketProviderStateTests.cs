@@ -37,10 +37,13 @@ public sealed class MarketProviderStateTests : IDisposable
         state.Set("twelvedata");                 // normaliza a TwelveData
         Assert.Equal("TwelveData", state.Current);
 
+        state.Set("alphavantage");               // normaliza a AlphaVantage (3er proveedor)
+        Assert.Equal("AlphaVantage", state.Current);
+
         state.Set("proveedor-inexistente");      // desconocido → fallback al primero
         Assert.Equal("YahooFinance", state.Current);
 
-        Assert.Equal(2, state.Available.Count);
+        Assert.Equal(3, state.Available.Count);
     }
 
     [Fact]

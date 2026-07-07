@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.29.0-alphavantage] - 2026-07-07
+
+### Added
+- 🟢 **HV-042** Tercer proveedor de datos: **Alpha Vantage** (feed `GLOBAL_QUOTE`, histórico `TIME_SERIES_*` con OHLC, búsqueda `SYMBOL_SEARCH`), seleccionable en runtime como Yahoo/Twelve Data. Opción en el selector + aviso "⚠ sin API key". Mensaje claro en límite de cuota; histórico/búsqueda degradan a vacío sin key.
+
+### Métricas
+- 171 tests verdes (156 + 15 nuevos; `MarketProviderStateTests` adaptado a 3 proveedores). Smoke de cableado: DI arranca con 3 proveedores, switch refleja en dashboard, degradación limpia sin key, POST inválido→400, UI con aviso. Limitación: plan gratuito de AV = 25 req/día.
+
+---
+
 ## [1.28.0-velas-japonesas] - 2026-07-06
 
 ### Added

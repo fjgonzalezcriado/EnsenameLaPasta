@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-042 Tercer proveedor de datos — Alpha Vantage ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo (Fase 3)
+- **Spec**: `_duran/specs/HV-042.md`
+- **Resumen**: Añade **Alpha Vantage** como 3er proveedor conmutable, reutilizando el patrón de Twelve Data. `AlphaVantageOptions` + `AlphaVantageProvider` (`GLOBAL_QUOTE`: precio+volumen; sin divisa; mensaje claro en cuota/error — AV responde 200 con `Note`/`Information`/`Error Message`) + `AlphaVantageHistoryProvider` (`TIME_SERIES_INTRADAY/DAILY/WEEKLY`, clave de serie localizada dinámicamente, OHLC, recorte a N recientes, YTD por año; degrada a vacío sin key) + `AlphaVantageInstrumentSearchProvider` (`SYMBOL_SEARCH`). `MarketProviderState`/wrappers `Selectable*`/DI extendidos; `ProviderController` expone `alphaVantageKeyConfigured`; opción "Alpha Vantage" + aviso "⚠ sin API key" en la UI. 15 tests nuevos (+1 adaptado). 171 verdes. Smoke de cableado (sin key): switch refleja en dashboard, histórico/búsqueda degradan a vacío (0 stacks), POST inválido→400, selector con 3 opciones. **Limitación**: plan gratuito de AV = 25 req/día (insuficiente para el feed en vivo). Key en user-secrets (no en repo).
+
 #### HV-041 Switch de gráfico línea ↔ velas japonesas (OHLC) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-06 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: `_duran/specs/HV-041.md`

@@ -12,11 +12,16 @@ public sealed class ProviderController : Controller
 {
     private readonly IMarketProviderState _state;
     private readonly IOptionsMonitor<TwelveDataOptions> _twelveData;
+    private readonly IOptionsMonitor<AlphaVantageOptions> _alphaVantage;
 
-    public ProviderController(IMarketProviderState state, IOptionsMonitor<TwelveDataOptions> twelveData)
+    public ProviderController(
+        IMarketProviderState state,
+        IOptionsMonitor<TwelveDataOptions> twelveData,
+        IOptionsMonitor<AlphaVantageOptions> alphaVantage)
     {
         _state = state;
         _twelveData = twelveData;
+        _alphaVantage = alphaVantage;
     }
 
     [HttpGet("/api/provider")]
@@ -24,7 +29,8 @@ public sealed class ProviderController : Controller
     {
         current = _state.Current,
         available = _state.Available,
-        twelveDataKeyConfigured = !string.IsNullOrWhiteSpace(_twelveData.CurrentValue.ApiKey)
+        twelveDataKeyConfigured = !string.IsNullOrWhiteSpace(_twelveData.CurrentValue.ApiKey),
+        alphaVantageKeyConfigured = !string.IsNullOrWhiteSpace(_alphaVantage.CurrentValue.ApiKey)
     });
 
     [HttpPost("/api/provider")]
