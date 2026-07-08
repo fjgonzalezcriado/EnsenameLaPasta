@@ -18,6 +18,14 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.39.1-manual-glosario] - 2026-07-07
+
+### Added
+- 📘 **Manual de usuario** `06_Documentacion/Manuales/MANUAL_USUARIO.md` (según la plantilla STIC `PLANTILLA_DOC_FUNCIONAL.md`): cubre todo el panel actual (tracker de precios reales, sin auto-trading) — acceso local, tarjetas de resumen, buscador/watchlist, selector de proveedor, gráfico de precios (rango, velas, volumen, techo/suelo, margen, variación), señales ML (SSA + clasificación), posiciones/cierre/comisiones, caja, dividendos, evolución de cuenta, métricas avanzadas, resultados por periodo, modo Visor, importar CSV, FAQ y solución de problemas.
+- 📖 **Glosario de términos** `06_Documentacion/Manuales/GLOSARIO.md`: consolida los términos de negocio (Trade, Posición, PnL, Drawdown, Winrate, Profit Factor, Sharpe…), de mercado (OHLC, velas, volumen, spread, slippage, FX/divisa base, YTD), de indicadores técnicos (SMA/EMA, RSI, MACD, Bollinger %B, estocástico), de ML (SSA, SDCA, FastTree, AUC, hold-out) y técnicos (proveedores, API key, feed, snapshot, ISIN/WKN, SQLite, modo Visor). Enlazado desde el manual.
+
+---
+
 ## [1.39.0-sonaranalyzer] - 2026-07-07
 
 ### Added
