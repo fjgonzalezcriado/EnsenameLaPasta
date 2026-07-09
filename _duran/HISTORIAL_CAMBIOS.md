@@ -18,6 +18,13 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.40.2-guia-instalacion] - 2026-07-08
+
+### Added
+- 📦 **Guía de instalación** `06_Documentacion/Manuales/GUIA_INSTALACION.md`: pasos para que otra persona ponga en marcha la app en su equipo — requisitos (.NET 10 SDK, Git, acceso al repo privado, Internet), `git clone` + `dotnet dev-certs https --trust` + `dotnet run` (URLs `https://localhost:7299` / `http://localhost:5177`), alternativa con Visual Studio (`.slnx` + F5), qué pasa en el 1er arranque (BD SQLite auto-creada + migraciones auto, watchlist sembrada, cartera vacía), configuración opcional de API keys por *user-secrets*, aviso de **NO ejecutar `arranque.ps1`** (go-dark) y tabla de solución de problemas. Enlaza con el manual y el glosario.
+
+---
+
 ## [1.40.1-nombre-producto] - 2026-07-08
 
 ### Changed

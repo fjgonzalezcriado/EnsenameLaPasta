@@ -1,4 +1,4 @@
-﻿{
+{
     "_comentario":  "Este archivo mantiene el estado actual del proyecto. Claude lo lee automaticamente.",
     "ecosistema":  {
                        "nombre":  "STIC.IA",
@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.40.1-nombre-producto",
+                   "version_actual": "1.40.2-guia-instalacion",
                    "ultima_actualizacion":  "2026-07-09",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -1157,7 +1157,6 @@
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
                          "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML), HV-046 (visor puro), HV-047 (importar cerrados), HV-048 (metricas avanzadas), HV-049 (desglose por periodo) y HV-050 (comisiones Trade Republic + dividendos en el PnL). 190 tests verdes; smokes reales/Playwright OK con Yahoo. Nueva migracion AddCommissionAndDividends (se auto-aplica al arrancar).",
                          "archivosModificados":  [
-                                                     "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 38 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte."
