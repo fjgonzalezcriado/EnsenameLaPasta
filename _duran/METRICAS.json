@@ -13,20 +13,6 @@
 
                                       },
                          "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-06-15 13:53:27"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
                          "fecha":  "2026-06-15 14:04:42"
                      },
                      {
@@ -697,6 +683,20 @@
                                       },
                          "versionProyecto":  "1.40.0-rename-solucion",
                          "fecha":  "2026-07-09 09:40:21"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.40.1-nombre-producto",
+                         "fecha":  "2026-07-09 09:51:25"
                      }
                  ]
 }
