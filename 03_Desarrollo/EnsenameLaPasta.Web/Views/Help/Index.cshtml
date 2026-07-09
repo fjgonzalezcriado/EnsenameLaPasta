@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Ayuda";
+}
+<div class="container">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">❓ Ayuda</h1>
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-sm btn-outline-secondary ms-auto">🍝 Volver al panel</a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5 card-title">📘 Manual de usuario</h2>
+                    <p class="card-text text-muted small">Cómo usar el panel: watchlist, posiciones, caja, dividendos, gráficos, señales ML, métricas…</p>
+                    <a asp-action="Doc" asp-route-doc="manual" class="btn btn-sm btn-primary">Abrir</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5 card-title">📖 Glosario de términos</h2>
+                    <p class="card-text text-muted small">Definiciones de negocio, mercado, indicadores técnicos y ML (PnL, drawdown, OHLC, RSI, SSA…).</p>
+                    <a asp-action="Doc" asp-route-doc="glosario" class="btn btn-sm btn-primary">Abrir</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5 card-title">📦 Guía de instalación</h2>
+                    <p class="card-text text-muted small">Cómo poner en marcha la app en otro equipo (requisitos, clonar, arrancar).</p>
+                    <a asp-action="Doc" asp-route-doc="instalacion" class="btn btn-sm btn-primary">Abrir</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -18,6 +18,16 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.41.0-ayuda-in-app] - 2026-07-08
+
+### Added
+- ❓ **Sección de Ayuda in-app**: nuevo enlace **"❓ Ayuda"** en la cabecera del panel → página `/ayuda` con tarjetas a **Manual de usuario**, **Glosario de términos** y **Guía de instalación**. `HelpController` (`/ayuda`, `/ayuda/{doc}`) renderiza los **mismos ficheros Markdown** de `06_Documentacion/Manuales` (fuente única, sin duplicar) a HTML con **Markdig 1.3.2**. Los `.md` se incluyen como `Content` con `CopyToOutputDirectory` (copiados a `Help/` en la salida; el controlador los lee de `AppContext.BaseDirectory`). Slug validado por **lista blanca** (manual/glosario/instalacion) → sin path traversal (slug inválido = 404). Vistas `Views/Help/Index.cshtml` + `Doc.cshtml` con estilos `.help-content` theme-aware en `site.css` (tablas, code, blockquote).
+
+### Métricas
+- Build 0/0 (SonarAnalyzer activo). Smoke con BD temporal (cartera real intacta): `/ayuda` lista los 3 docs; `/ayuda/glosario` y `/ayuda/manual` renderizan Markdown→HTML (tablas incluidas); enlace en el navbar; slug inválido → 404.
+
+---
+
 ## [1.40.2-guia-instalacion] - 2026-07-08
 
 ### Added
