@@ -1,4 +1,4 @@
-{
+﻿{
     "_comentario":  "Este archivo mantiene el estado actual del proyecto. Claude lo lee automaticamente.",
     "ecosistema":  {
                        "nombre":  "STIC.IA",
@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual": "1.40.1-nombre-producto",
+                   "version_actual":  "1.40.1-nombre-producto",
                    "ultima_actualizacion":  "2026-07-09",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
