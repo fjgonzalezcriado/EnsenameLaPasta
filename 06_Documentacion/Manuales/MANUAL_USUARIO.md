@@ -64,7 +64,7 @@ login ni multiusuario.
 La app corre en local. Arráncala desde la carpeta del proyecto web:
 
 ```bash
-cd 03_Desarrollo/Comillas.AITradingSimulator.Web
+cd 03_Desarrollo/EnsenameLaPasta.Web
 dotnet run
 ```
 

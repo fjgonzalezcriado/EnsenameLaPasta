@@ -18,6 +18,17 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.40.0-rename-solucion] - 2026-07-08
+
+### Changed
+- 🏷️ **Renombrado completo de la solución** `Comillas.AITradingSimulator` → **`EnsenameLaPasta`** (de-marcado de Comillas; proyecto personal). Alcance: fichero de solución (`EnsenameLaPasta.slnx`), los **5 proyectos** y sus carpetas/`.csproj` (`EnsenameLaPasta.Domain/Application/Infrastructure/Web/Tests`), y el **namespace raíz en 133 ficheros `.cs`** + `using`/referencias + 2 `.cshtml` (Razor) + referencias en DURAN/manual. Sustitución mecánica del token exacto `Comillas.AITradingSimulator` → `EnsenameLaPasta` (no toca la marca «Comillas» de la org ni el nombre de producto «AI Trading Simulator»).
+- Sin `RootNamespace`/`AssemblyName` explícitos → se derivan de los nuevos nombres de `.csproj` (alineados con los namespaces). Las **migraciones EF no se ven afectadas** (el historial `__EFMigrationsHistory` guarda IDs por nombre, no por namespace). Limpieza de `bin`/`obj`/`.vs` para evitar ensamblados obsoletos.
+
+### Métricas
+- **Build 0/0** (con SonarAnalyzer activo) y **190 tests verdes** tras el renombrado. Rama `refactor/rename-solucion`.
+
+---
+
 ## [1.39.1-manual-glosario] - 2026-07-07
 
 ### Added
@@ -726,7 +737,7 @@ Pivote de **simulador** a **tracker de precios reales**.
   - Eliminados placeholders `Domain/Class1.cs` y `Tests/UnitTest1.cs`
 
 - **HV-001** Scaffold inicial Clean Architecture (.NET 10)
-  - Solución `Comillas.AITradingSimulator.slnx` (formato XML slnx por defecto en SDK 10.0.300)
+  - Solución `EnsenameLaPasta.slnx` (formato XML slnx por defecto en SDK 10.0.300)
   - 5 proyectos: `Domain` (classlib), `Application` (classlib), `Infrastructure` (classlib), `Web` (mvc), `Tests` (xunit)
   - Referencias entre proyectos respetando Clean Architecture (Domain sin deps, Application → Domain, Infrastructure → Application+Domain, Web → Application+Infrastructure, Tests → todos)
   - `TreatWarningsAsErrors=true` en los 5 csproj (build verde con 0 warnings)

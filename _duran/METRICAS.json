@@ -13,34 +13,6 @@
 
                                       },
                          "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-06-15 13:22:47"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-06-15 13:35:36"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
                          "fecha":  "2026-06-15 13:41:39"
                      },
                      {
@@ -696,6 +668,35 @@
                                       },
                          "versionProyecto":  "1.39.0-sonaranalyzer",
                          "fecha":  "2026-07-07 14:35:24"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.39.1-manual-glosario",
+                         "fecha":  "2026-07-08 07:38:32"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.39.1-manual-glosario",
+                         "fecha":  "2026-07-08 07:46:09"
                      }
                  ]
 }

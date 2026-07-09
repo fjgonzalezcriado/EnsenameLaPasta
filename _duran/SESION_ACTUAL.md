@@ -156,7 +156,7 @@ Git: main = origin/main (50926cd), GitHub privado, árbol limpio
 
 ### Notas importantes
 - **Go-dark activo**: no reinstalar context7 ni ejecutar comandos que contacten Comillas (ver memoria `go-dark-comillas`). Yahoo Finance **sí** está permitido (feed y FX).
-- **Tras un smoke con `dotnet run`, matar el proceso `Comillas.AITradingSimulator.Web` antes de recompilar** o el build falla por DLL bloqueada (MSB3027). Ver memoria `smoke-test-mata-proceso-web`.
+- **Tras un smoke con `dotnet run`, matar el proceso `EnsenameLaPasta.Web` antes de recompilar** o el build falla por DLL bloqueada (MSB3027). Ver memoria `smoke-test-mata-proceso-web`.
 - Editar valores con `>` dentro de `ESTADO_PROYECTO.json` falla con Edit (PowerShell los escribe como `>`); usar PowerShell regex y validar con `ConvertFrom-Json`.
 - FX y feed requieren Internet (Yahoo). Recargar la web con `Ctrl+F5` tras cambios de JS/CSS.
 - Credenciales GitHub cacheadas correctamente (cuenta `fjgonzalezcriado`); puedo commitear/push directamente.
