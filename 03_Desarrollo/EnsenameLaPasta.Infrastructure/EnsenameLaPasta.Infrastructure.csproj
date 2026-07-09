@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\EnsenameLaPasta.Domain\EnsenameLaPasta.Domain.csproj" />
+    <ProjectReference Include="..\EnsenameLaPasta.Application\EnsenameLaPasta.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.8" />
+    <!-- ML.NET: pronóstico de series temporales (SSA) para señales (HV-043). -->
+    <PackageReference Include="Microsoft.ML.TimeSeries" Version="4.0.2" />
+    <!-- ML.NET: clasificación binaria sube/baja con features técnicas (HV-044). Trae SDCA. -->
+    <PackageReference Include="Microsoft.ML" Version="4.0.2" />
+    <!-- ML.NET: FastTree (árboles con boosting) como 2º modelo a comparar (HV-045). -->
+    <PackageReference Include="Microsoft.ML.FastTree" Version="4.0.2" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

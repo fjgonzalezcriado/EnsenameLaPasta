@@ -134,7 +134,7 @@
 
 ## Paquetes NuGet (planificados al hacer scaffold)
 
-### Web (Comillas.AITradingSimulator.Web)
+### Web (EnsenameLaPasta.Web)
 | Paquete | Version (target) | Proposito |
 |---|---|---|
 | Microsoft.AspNetCore.App | 10.0.* | Framework MVC |
@@ -157,7 +157,7 @@
 ### Domain
 Sin paquetes (capa pura, solo BCL).
 
-### Tests (Comillas.AITradingSimulator.Tests)
+### Tests (EnsenameLaPasta.Tests)
 | Paquete | Version (target) | Proposito |
 |---|---|---|
 | xunit | 2.* | Framework de tests |

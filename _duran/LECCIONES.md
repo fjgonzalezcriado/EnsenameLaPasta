@@ -153,9 +153,9 @@ Ejemplos de preferencias:
 
 ### L-003 (Error/Build) — Proceso `*.Web` del smoke bloquea las DLLs y rompe el siguiente build
 - **Fecha**: 2026-06-29 (sesión HV-015..023)
-- **Síntoma**: `dotnet test`/`build` falla con `MSB3026`/`MSB3027` "The process cannot access the file ...Infrastructure.dll because it is being used by another process: Comillas.AITradingSimulator.Web (PID)".
-- **Causa**: tras un smoke con `dotnet run` en background, matar el wrapper (`kill <pid>` de bash) no siempre mata el proceso real `Comillas.AITradingSimulator.Web`, que queda vivo bloqueando `bin/Debug/net10.0`.
-- **Fix/Prevención**: parar la app antes de recompilar — `Get-Process -Name "Comillas.AITradingSimulator.Web" | Stop-Process -Force` y confirmar 0 procesos. La app ignora `ASPNETCORE_URLS` y usa el puerto de `launchSettings.json` (5177); sacar el puerto real del log.
+- **Síntoma**: `dotnet test`/`build` falla con `MSB3026`/`MSB3027` "The process cannot access the file ...Infrastructure.dll because it is being used by another process: EnsenameLaPasta.Web (PID)".
+- **Causa**: tras un smoke con `dotnet run` en background, matar el wrapper (`kill <pid>` de bash) no siempre mata el proceso real `EnsenameLaPasta.Web`, que queda vivo bloqueando `bin/Debug/net10.0`.
+- **Fix/Prevención**: parar la app antes de recompilar — `Get-Process -Name "EnsenameLaPasta.Web" | Stop-Process -Force` y confirmar 0 procesos. La app ignora `ASPNETCORE_URLS` y usa el puerto de `launchSettings.json` (5177); sacar el puerto real del log.
 
 ### L-004 (Técnica/DURAN) — `ESTADO_PROYECTO.json` escapa `>` como `>`; Edit literal falla
 - **Fecha**: 2026-06-29
