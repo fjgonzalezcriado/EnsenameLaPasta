@@ -4,20 +4,6 @@
                      {
                          "archivosModificados":  0,
                          "agentsDisponibles":  0,
-                         "modoProyecto":  null,
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  null,
-                         "fecha":  "2026-06-16 13:18:42"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
                          "modoProyecto":  "desarrollo",
                          "commitsHoy":  0,
                          "skillsTocados":  [
@@ -694,6 +680,20 @@
                          "archivos":  "_duran/METRICAS.json",
                          "versionProyecto":  "1.40.1-nombre-producto",
                          "fecha":  "2026-07-09 10:03:15"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.40.2-guia-instalacion",
+                         "fecha":  "2026-07-09 11:16:57"
                      }
                  ]
 }

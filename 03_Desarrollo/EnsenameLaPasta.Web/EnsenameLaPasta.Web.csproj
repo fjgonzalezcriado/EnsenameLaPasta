@@ -5,7 +5,21 @@
     <ProjectReference Include="..\EnsenameLaPasta.Infrastructure\EnsenameLaPasta.Infrastructure.csproj" />
   </ItemGroup>
 
+  <!-- Manuales (fuente única en 06_Documentacion) copiados a la salida para servirlos como Ayuda in-app. -->
   <ItemGroup>
+    <Content Include="..\..\06_Documentacion\Manuales\MANUAL_USUARIO.md" Link="Help\MANUAL_USUARIO.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\06_Documentacion\Manuales\GLOSARIO.md" Link="Help\GLOSARIO.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\06_Documentacion\Manuales\GUIA_INSTALACION.md" Link="Help\GUIA_INSTALACION.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Markdig" Version="1.3.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

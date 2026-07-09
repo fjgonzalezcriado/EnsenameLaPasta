@@ -18,7 +18,8 @@
         <nav class="navbar navbar-expand-sm bg-body-tertiary border-bottom shadow-sm mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand fw-semibold" asp-area="" asp-controller="Dashboard" asp-action="Index">🍝 Enseñame la Pasta</a>
-                <button id="themeToggle" type="button" class="btn btn-sm btn-outline-secondary ms-auto" title="Cambiar tema claro/oscuro">
+                <a class="btn btn-sm btn-outline-secondary ms-auto me-2" asp-controller="Help" asp-action="Index" title="Ayuda y glosario de términos">❓ Ayuda</a>
+                <button id="themeToggle" type="button" class="btn btn-sm btn-outline-secondary" title="Cambiar tema claro/oscuro">
                     <span id="themeIcon">🌙</span>
                 </button>
             </div>
