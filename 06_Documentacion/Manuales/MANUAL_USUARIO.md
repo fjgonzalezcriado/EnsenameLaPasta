@@ -1,4 +1,4 @@
-# Manual de Usuario — AI Trading Simulator
+# Manual de Usuario — Enseñame la Pasta
 
 > Tracker de cartera y precios reales (ASP.NET Core MVC · .NET 10). Panel web para seguir
 > instrumentos financieros, registrar tus posiciones reales y ver métricas de rendimiento.
@@ -9,7 +9,7 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Aplicación** | AI Trading Simulator |
+| **Aplicación** | Enseñame la Pasta |
 | **Versión de la app** | 1.39.0 |
 | **Tipo** | Aplicación web local (uso personal) |
 | **Idioma** | Español (es-ES), formato monetario europeo |
@@ -26,7 +26,7 @@
 
 ## 1. Introducción
 
-### 1.1 ¿Qué es AI Trading Simulator?
+### 1.1 ¿Qué es Enseñame la Pasta?
 
 Es una aplicación web **personal** para **seguir precios reales** de instrumentos financieros
 (acciones, índices, cripto, ETFs…) y **llevar el control de tu cartera**. Nació como simulador de
