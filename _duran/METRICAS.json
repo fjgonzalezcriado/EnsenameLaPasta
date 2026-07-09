@@ -4,34 +4,6 @@
                      {
                          "archivosModificados":  0,
                          "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-06-15 14:45:40"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.0.0-MVP",
-                         "fecha":  "2026-06-16 07:55:45"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
                          "modoProyecto":  null,
                          "commitsHoy":  0,
                          "skillsTocados":  [
@@ -696,6 +668,32 @@
                                       ],
                          "versionProyecto":  "1.40.1-nombre-producto",
                          "fecha":  "2026-07-09 09:59:09"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.40.1-nombre-producto",
+                         "fecha":  "2026-07-09 10:00:18"
+                     },
+                     {
+                         "archivosModificados":  1,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  "_duran/METRICAS.json",
+                         "versionProyecto":  "1.40.1-nombre-producto",
+                         "fecha":  "2026-07-09 10:03:15"
                      }
                  ]
 }
