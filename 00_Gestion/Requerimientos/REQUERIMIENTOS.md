@@ -1,4 +1,4 @@
-# AI Trading Simulator - ASP.NET Core MVC
+# Enseñame la Pasta - ASP.NET Core MVC
 
 ## Objetivo del proyecto
 

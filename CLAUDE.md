@@ -32,7 +32,7 @@ Este archivo guía a Claude Code (claude.ai/code) cuando trabaja con código en 
 
 | Campo | Valor |
 |-------|-------|
-| **Nombre** | AI Trading Simulator |
+| **Nombre** | Enseñame la Pasta |
 | **Tipo** | ASP.NET Core MVC (Web App) — proyecto personal |
 | **Framework** | .NET 10 / C# 13 |
 | **Arquitectura** | Clean Architecture (Domain / Application / Infrastructure / Web) |

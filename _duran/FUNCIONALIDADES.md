@@ -1,4 +1,4 @@
-# Catalogo de Funcionalidades - AI Trading Simulator
+# Catalogo de Funcionalidades - Enseñame la Pasta
 
 > Simulador de trading algoritmico personal. Fuente de verdad: `00_Gestion/Requerimientos/REQUERIMIENTOS.md`.
 

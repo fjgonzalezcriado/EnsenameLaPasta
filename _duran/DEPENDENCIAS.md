@@ -1,4 +1,4 @@
-# Mapa de Dependencias - AI Trading Simulator
+# Mapa de Dependencias - Enseñame la Pasta
 
 > Documenta dependencias entre componentes, paquetes NuGet y sistemas externos.
 > Actualizar tras crear nuevas dependencias.

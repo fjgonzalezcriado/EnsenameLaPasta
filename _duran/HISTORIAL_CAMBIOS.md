@@ -18,10 +18,17 @@ Seguimos el formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/):
 
 ---
 
+## [1.40.1-nombre-producto] - 2026-07-08
+
+### Changed
+- 🏷️ **Nombre de producto** «AI Trading Simulator» → **«Enseñame la Pasta»** (nombre visible, con ñ y espacios; distinto del identificador de código `EnsenameLaPasta`). Reemplazado en 15 ficheros: UI Razor (`_Layout.cshtml` título/marca/pie, `Dashboard/Index.cshtml` cabecera), banner de `.claude/settings.json`, `CLAUDE.md`, `_duran/*` (ESTADO, FUNCIONALIDADES, manual, glosario, specs) y `.gitignore`. Solo cadenas de presentación — **ningún `.cs` modificado** → build 0/0 (SonarAnalyzer activo), tests no afectados.
+
+---
+
 ## [1.40.0-rename-solucion] - 2026-07-08
 
 ### Changed
-- 🏷️ **Renombrado completo de la solución** `Comillas.AITradingSimulator` → **`EnsenameLaPasta`** (de-marcado de Comillas; proyecto personal). Alcance: fichero de solución (`EnsenameLaPasta.slnx`), los **5 proyectos** y sus carpetas/`.csproj` (`EnsenameLaPasta.Domain/Application/Infrastructure/Web/Tests`), y el **namespace raíz en 133 ficheros `.cs`** + `using`/referencias + 2 `.cshtml` (Razor) + referencias en DURAN/manual. Sustitución mecánica del token exacto `Comillas.AITradingSimulator` → `EnsenameLaPasta` (no toca la marca «Comillas» de la org ni el nombre de producto «AI Trading Simulator»).
+- 🏷️ **Renombrado completo de la solución** `Comillas.AITradingSimulator` → **`EnsenameLaPasta`** (de-marcado de Comillas; proyecto personal). Alcance: fichero de solución (`EnsenameLaPasta.slnx`), los **5 proyectos** y sus carpetas/`.csproj` (`EnsenameLaPasta.Domain/Application/Infrastructure/Web/Tests`), y el **namespace raíz en 133 ficheros `.cs`** + `using`/referencias + 2 `.cshtml` (Razor) + referencias en DURAN/manual. Sustitución mecánica del token exacto `Comillas.AITradingSimulator` → `EnsenameLaPasta` (no toca la marca «Comillas» de la org ni el nombre de producto «Enseñame la Pasta»).
 - Sin `RootNamespace`/`AssemblyName` explícitos → se derivan de los nuevos nombres de `.csproj` (alineados con los namespaces). Las **migraciones EF no se ven afectadas** (el historial `__EFMigrationsHistory` guarda IDs por nombre, no por namespace). Limpieza de `bin`/`obj`/`.vs` para evitar ensamblados obsoletos.
 
 ### Métricas
@@ -577,7 +584,7 @@ Pivote de **simulador** a **tracker de precios reales**.
 
 ### Completado
 
-**MVP del AI Trading Simulator** entregado en una sesión:
+**MVP del Enseñame la Pasta** entregado en una sesión:
 
 - ✅ HV-001 Scaffold Clean Architecture (5 proyectos .NET 10)
 - ✅ HV-002 Modelo de dominio (Trade, MarketTick, PortfolioSnapshot, TradeStatus, TradeSignal)
@@ -610,7 +617,7 @@ Pivote de **simulador** a **tracker de precios reales**.
 
 ### Changed (UI dashboard)
 
-- **Layout a ancho completo**: `_Layout.cshtml` usa `container-fluid` (nav, main, footer). `lang="es"`, título y brand → "🤖 AI Trading Simulator" enlazando al Dashboard.
+- **Layout a ancho completo**: `_Layout.cshtml` usa `container-fluid` (nav, main, footer). `lang="es"`, título y brand → "🤖 Enseñame la Pasta" enlazando al Dashboard.
 - **Modo oscuro** (Bootstrap 5.3 `data-bs-theme`): toggle en navbar + persistencia en `localStorage` + script anti-parpadeo en `<head>`. Navbar adaptable (`bg-body-tertiary`).
 - **Gráfico de precios en valor real con eje a la derecha** (estilo trading): eje Y `position: 'right'` con formato de precio, margen derecho (~12% extra en el `max` del eje X) para que la línea no quede pegada al borde, y plugin `currentValueLabels` que dibuja el último valor de cada serie como etiqueta coloreada **sobre el propio eje derecho** (estilo TradingView), con una flechita que apunta al nivel del precio. (Sustituye la normalización a % de cambio previa.)
 - **Selector de símbolo del gráfico**: `<select>` que se autopobla con las series disponibles (+ "Todos"), persistido en `localStorage` (`chartSymbol`). Por defecto muestra un único símbolo (escala legible); evita el aplastamiento por mezclar magnitudes (BTC vs acciones). Cambiarlo re-renderiza y reescala al instante.
@@ -744,7 +751,7 @@ Pivote de **simulador** a **tracker de precios reales**.
   - `App_Data/.gitkeep` en Web (placeholder para futura `trading.db`)
   - `.gitignore` raíz cubriendo `bin/`, `obj/`, `*.db`, `App_Data/*.db*`, `.vs/`, secrets, STIC.IA download, MCP credentials
   - Visual Studio Solution Folders configuradas vía `integracion-vs.ps1` (89 carpetas, 306 archivos)
-- Onboarding completado con DURAN configurado para "AI Trading Simulator" (proyecto personal, .NET 10, MVC + Clean Architecture + SQLite)
+- Onboarding completado con DURAN configurado para "Enseñame la Pasta" (proyecto personal, .NET 10, MVC + Clean Architecture + SQLite)
 - Spec `_duran/specs/HV-001.md`
 
 ### Verificación

@@ -1,4 +1,4 @@
-# Deuda Tecnica - AI Trading Simulator
+# Deuda Tecnica - Enseñame la Pasta
 
 > Registro de issues conocidos, hacks temporales y refactors pendientes.
 > Actualizar tras descubrir/crear deuda. Marcar resuelta cuando se cierre.

@@ -19,7 +19,7 @@
                                        }
                    },
     "proyecto":  {
-                     "nombre":  "AI Trading Simulator",
+                     "nombre":  "Enseñame la Pasta",
                      "descripcion":  "Simulador de trading algoritmico personal en ASP.NET Core MVC .NET 10 con Clean Architecture, EF Core + SQLite. Evolucionado a tracker de precios reales: buscador de instrumentos (Yahoo), watchlist persistida editable y feed 100% real (sin simulacion ni auto-trading). Roadmap: APIs adicionales (Binance/AlphaVantage), ML.NET, paper trading.",
                      "owner":  "Personal (fuera de scope STIC Comillas)",
                      "jefe_proyecto":  "stic.claude3",
@@ -80,7 +80,7 @@
                                               "formato":  "slnx",
                                               "_formato_nota":  "Formato XML nuevo de .NET 10 (default en SDK 10.0.300). Soportado por VS 2022 17.10+.",
                                               "framework":  ".NET 10",
-                                              "descripcion":  "Solucion principal AI Trading Simulator (Clean Architecture: Domain/Application/Infrastructure/Web/Tests)",
+                                              "descripcion":  "Solucion principal Enseñame la Pasta (Clean Architecture: Domain/Application/Infrastructure/Web/Tests)",
                                               "esActiva":  true
                                           }
                                       ],
@@ -95,8 +95,8 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual": "1.40.0-rename-solucion",
-                   "ultima_actualizacion": "2026-07-08",
+                   "version_actual": "1.40.1-nombre-producto",
+                   "ultima_actualizacion":  "2026-07-09",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
                },
@@ -1150,7 +1150,7 @@
                                        ]
                    },
     "ultimaSesion":  {
-                         "fecha":  "2026-07-08",
+                         "fecha":  "2026-07-09",
                          "evolutivoActivo":  null,
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  null,
@@ -1164,7 +1164,7 @@
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build": "2026-07-08 OK (190 tests verdes; solucion+proyectos+namespaces renombrados Comillas.AITradingSimulator -> EnsenameLaPasta; SonarAnalyzer activo, 0/0)",
+                     "ultimo_build":  "2026-07-08 OK (190 tests verdes; solucion+proyectos+namespaces renombrados Comillas.AITradingSimulator -\u003e EnsenameLaPasta; SonarAnalyzer activo, 0/0)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
                      "evolutivos_completados_mes":  50

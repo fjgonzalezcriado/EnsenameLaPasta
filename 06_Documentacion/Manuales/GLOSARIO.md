@@ -1,4 +1,4 @@
-# Glosario de Términos — AI Trading Simulator
+# Glosario de Términos — Enseñame la Pasta
 
 > Definiciones de los términos de negocio y técnicos usados en la aplicación y en el
 > [Manual de Usuario](MANUAL_USUARIO.md). Consolida el glosario de dominio del proyecto.
@@ -104,4 +104,4 @@
 
 ---
 
-*Glosario del proyecto AI Trading Simulator. Fuente de dominio: `CLAUDE.md` y `_duran/`.*
+*Glosario del proyecto Enseñame la Pasta. Fuente de dominio: `CLAUDE.md` y `_duran/`.*
