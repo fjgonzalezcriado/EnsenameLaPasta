@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-051 Modo privacidad (ocultar importes económicos) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-07-23 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: `_duran/specs/HV-051.md`
+- **Resumen**: Switch **"🙈 Privacidad"** en la cabecera (junto a "👁 Visor" de HV-046) para **desenfocar los importes económicos** y evitar curiosos por encima del hombro. Añade `privacy-mode` al contenedor `.dashboard`; CSS `.privacy-mode .js-sensitive { filter: blur(0.5rem) }` con **hover-reveal** (`:hover { filter: none }`). Se marcan `js-sensitive`: las 4 tarjetas monetarias (Valor de cuenta +%, Efectivo +aportado, Valor de cartera +invertido, PnL total real./no real.), las **métricas avanzadas** (HV-048), la curva de **valor de cuenta**, el **desglose por periodo** (HV-049) y las tablas de **posiciones abiertas/cerradas**. **NO** desenfoca (a propósito) etiquetas, nº de posiciones, winrate ni el **gráfico de precios del instrumento** (mercado público). `initPrivacyMode()`: toggle de clase + persistencia `localStorage` (sin re-render; los datos siguen en el DOM, solo ocultación visual). Independiente del modo Visor (combinables). Solo frontend (`.cshtml`/`.css`/`.js`), sin backend/migración/tests nuevos. Build 0/0.
+
 #### HV-050 Comisiones (Trade Republic) y dividendos en el PnL ✅
 - **Estado**: ✅ Completado · **Período**: 2026-07-07 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: `_duran/specs/HV-050.md`

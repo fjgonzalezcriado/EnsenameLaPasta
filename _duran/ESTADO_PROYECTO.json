@@ -1,4 +1,4 @@
-{
+﻿{
     "_comentario":  "Este archivo mantiene el estado actual del proyecto. Claude lo lee automaticamente.",
     "ecosistema":  {
                        "nombre":  "STIC.IA",
@@ -95,8 +95,8 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual": "1.41.0-ayuda-in-app",
-                   "ultima_actualizacion":  "2026-07-09",
+                   "version_actual":  "1.42.0-modo-privacidad",
+                   "ultima_actualizacion":  "2026-07-23",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
                },
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-051",
+                                               "titulo":  "Modo privacidad (ocultar importes economicos)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-07-23",
+                                               "fechaInicio":  "2026-07-23",
+                                               "fechaCompletado":  "2026-07-23",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  "_duran/specs/HV-051.md",
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "Switch de privacidad para curiosos: boton 🙈 Privacidad en la cabecera (junto al 👁 Visor de HV-046) que desenfoca los importes economicos. Anade la clase privacy-mode al contenedor .dashboard; CSS .privacy-mode .js-sensitive { filter: blur(0.5rem); user-select:none } con hover-reveal (:hover { filter:none }). Marcados js-sensitive: 4 tarjetas monetarias (valor de cuenta +%, efectivo +aportado, cartera +invertido, PnL total real./no real.), metricas avanzadas (HV-048), curva de valor de cuenta, desglose por periodo (HV-049) y tablas de posiciones abiertas/cerradas. NO se desenfoca (a proposito) etiquetas, nº de posiciones, winrate ni el grafico de precios del instrumento (dato de mercado publico). initPrivacyMode(): toggle de clase + persistencia en localStorage (privacyMode), sin re-render (los datos siguen en el DOM, solo ocultacion visual). Independiente del modo Visor (combinables). Solo frontend (.cshtml/.css/.js); sin backend, sin migracion, sin tests nuevos. Build 0/0. Rama feature/HV-051-modo-privacidad."
+                                           },
                                            {
                                                "codigo":  "HV-050",
                                                "titulo":  "Comisiones (Trade Republic) y dividendos en el PnL",
@@ -1150,20 +1167,25 @@
                                        ]
                    },
     "ultimaSesion":  {
-                         "fecha":  "2026-07-09",
+                         "fecha":  "2026-07-23",
                          "evolutivoActivo":  null,
                          "usuario":  "Francisco Javier Gonzalez Criado",
-                         "ramaActiva":  null,
+                         "ramaActiva":  "feature/HV-051-modo-privacidad",
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML), HV-046 (visor puro), HV-047 (importar cerrados), HV-048 (metricas avanzadas), HV-049 (desglose por periodo) y HV-050 (comisiones Trade Republic + dividendos en el PnL). 190 tests verdes; smokes reales/Playwright OK con Yahoo. Nueva migracion AddCommissionAndDividends (se auto-aplica al arrancar).",
+                         "resumenSesion":  "HV-051 (modo privacidad): switch 🙈 Privacidad en la cabecera que desenfoca los importes economicos (tarjetas monetarias, metricas avanzadas, curva de patrimonio, desglose por periodo y tablas de posiciones) para evitar curiosos; hover revela, persiste en localStorage, independiente del modo Visor. Solo frontend, build 0/0. Sesiones previas: HV-037..050.",
                          "archivosModificados":  [
+                                                     ".claude/settings.json",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/Views/Dashboard/Index.cshtml",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/css/site.css",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/js/dashboard.js",
+                                                     "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 38 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build": "2026-07-08 OK (Ayuda in-app: HelpController + Markdig renderiza manual/glosario/instalacion; build 0/0 con Sonar; smoke endpoints OK)",
+                     "ultimo_build":  "2026-07-08 OK (Ayuda in-app: HelpController + Markdig renderiza manual/glosario/instalacion; build 0/0 con Sonar; smoke endpoints OK)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
                      "evolutivos_completados_mes":  50
