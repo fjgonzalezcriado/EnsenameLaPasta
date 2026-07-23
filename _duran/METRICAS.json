@@ -12,20 +12,6 @@
                          "archivos":  {
 
                                       },
-                         "versionProyecto":  "1.2.0-portfolio",
-                         "fecha":  "2026-06-16 14:43:03"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
                          "versionProyecto":  "1.3.0-cash",
                          "fecha":  "2026-06-16 14:52:17"
                      },
@@ -703,6 +689,20 @@
                                       ],
                          "versionProyecto":  "1.41.0-ayuda-in-app",
                          "fecha":  "2026-07-23 08:27:16"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.42.0-modo-privacidad",
+                         "fecha":  "2026-07-23 08:32:02"
                      }
                  ]
 }
