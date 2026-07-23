@@ -101,6 +101,17 @@ body {
 .dashboard.viewer-mode .js-editor-only { display: none !important; }
 #viewerToggle.active { background-color: var(--comillas-azul, #003366); color: #fff; }
 
+/* Modo privacidad (HV-051): desenfoca los importes sensibles para que no los vean
+   por encima del hombro. Los datos siguen en el DOM; pasar el ratón por encima los
+   revela puntualmente (tú controlas el ratón; el curioso detrás, no). */
+.dashboard.privacy-mode .js-sensitive {
+  filter: blur(0.5rem);
+  transition: filter .15s ease;
+  user-select: none;
+}
+.dashboard.privacy-mode .js-sensitive:hover { filter: none; }
+#privacyToggle.active { background-color: var(--comillas-azul, #003366); color: #fff; }
+
 /* Ayuda in-app (HelpController): estilo del Markdown renderizado, theme-aware. */
 .help-content { max-width: 60rem; }
 .help-content h1 { font-size: 1.6rem; margin: .5rem 0 1rem; }
