@@ -1,6 +1,6 @@
 {
     "companyAnnouncements":  [
-                                 "STIC.IA v3.9.0 | Enseñame la Pasta | rama: main | modo: desarrollo\nFalta: Roslyn, Context7, dotnet/skills\n/sos para ayuda rapida"
+                                 "STIC.IA v3.9.0 | Enseñame la Pasta | rama: main | modo: desarrollo\nMCPs: dotnet/skills | Falta: Roslyn, Context7\n/sos para ayuda rapida"
                              ],
     "hooks":  {
                   "SessionStart":  [

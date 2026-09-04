@@ -1174,10 +1174,6 @@
                          "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
                          "resumenSesion":  "HV-051 (modo privacidad): switch 🙈 Privacidad en la cabecera que desenfoca los importes economicos (tarjetas monetarias, metricas avanzadas, curva de patrimonio, desglose por periodo y tablas de posiciones) para evitar curiosos; hover revela, persiste en localStorage, independiente del modo Visor. Solo frontend, build 0/0. Sesiones previas: HV-037..050.",
                          "archivosModificados":  [
-                                                     ".claude/settings.json",
-                                                     "03_Desarrollo/EnsenameLaPasta.Web/Views/Dashboard/Index.cshtml",
-                                                     "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/css/site.css",
-                                                     "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/js/dashboard.js",
                                                      "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/METRICAS.json"
                                                  ],
