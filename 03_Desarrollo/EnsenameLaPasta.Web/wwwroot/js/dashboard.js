@@ -864,7 +864,9 @@
                 const el = document.getElementById(id);
                 if (!el) return;
                 el.textContent = text;
-                el.className = 'fs-4 fw-semibold ' + (cls || 'text-body');
+                // 'js-sensitive' viene del template (HV-051, modo privacidad) y hay que
+                // reponerlo: reasignar className entero lo borraría en cada refresco.
+                el.className = 'fs-4 fw-semibold js-sensitive ' + (cls || 'text-body');
             };
             const enoughDd = (m.snapshotCount || 0) >= 2;
             set('mMaxDd', enoughDd ? pctSigned(m.maxDrawdownPct) : '—', enoughDd && m.maxDrawdownPct < 0 ? 'text-danger' : 'text-body');
@@ -893,7 +895,8 @@
             const cur = d.baseCurrency || baseCurrency;
             if (totalEl) {
                 totalEl.textContent = 'Total: ' + money(d.totalPnLBase, cur) + ' · ' + d.totalTrades + ' trades';
-                totalEl.className = 'small fw-semibold ' + signClass(d.totalPnLBase);
+                // 'js-sensitive' (HV-051): reponerlo, reasignar className lo borraría cada refresco.
+                totalEl.className = 'small fw-semibold js-sensitive ' + signClass(d.totalPnLBase);
             }
             if (!d.years || d.years.length === 0) {
                 body.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin trades cerrados</td></tr>';
