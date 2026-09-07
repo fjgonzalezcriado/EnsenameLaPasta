@@ -23,8 +23,8 @@ public class MlDirectionClassifierTests
         return list;
     }
 
-    private static MlDirectionClassifier NewClassifier(IReadOnlyList<PricePoint> series)
-        => new(new FakeHistory(series), NullLogger<MlDirectionClassifier>.Instance);
+    private static MlDirectionClassifier NewClassifier(IReadOnlyList<PricePoint> series, IReadOnlyList<PricePoint>? vixSeries = null)
+        => new(new FakeHistory(series, vixSeries), NullLogger<MlDirectionClassifier>.Instance);
 
     [Fact]
     public async Task ClassifyAsync_SerieMixta_DevuelvePrediccionConCalidad()
@@ -40,10 +40,25 @@ public class MlDirectionClassifierTests
         Assert.Contains(s.Direction, ValidDirections);
         Assert.Equal(s.Direction, s.Probability >= 0.5 ? "Sube" : "Baja");
         Assert.True(s.TrainSamples > 0);
-        Assert.Equal(12, s.FeatureCount);
+        Assert.Equal(14, s.FeatureCount);
         Assert.Contains(s.ModelUsed, ValidModels);   // selección de modelo (HV-045)
         Assert.InRange(s.Accuracy, 0.0, 1.0);
         Assert.InRange(s.Auc, 0.0, 1.0);
+    }
+
+    [Fact]
+    public async Task ClassifyAsync_SinDatosDeVix_DegradaAFeatureNeutraSinRomper()
+    {
+        // El VIX no tiene histórico disponible (fuente sin datos) → features de VIX a 0, pero la
+        // clasificación del símbolo sigue funcionando con normalidad (HV-052: degrada sin lanzar).
+        var classifier = NewClassifier(
+            Series(80, i => 100m + (decimal)(i * 0.3) + (decimal)(4 * Math.Sin(i * 0.7))),
+            vixSeries: []);
+
+        var s = await classifier.ClassifyAsync("TEST", "6M");
+
+        Assert.True(s.HasPrediction);
+        Assert.Equal(14, s.FeatureCount);
     }
 
     [Fact]
@@ -70,11 +85,14 @@ public class MlDirectionClassifierTests
         Assert.NotNull(s.Message);
     }
 
-    private sealed class FakeHistory(IReadOnlyList<PricePoint> points) : IMarketHistoryProvider
+    // Por defecto "^VIX" cae al mismo fallback que el símbolo bajo test (simula tener datos de VIX
+    // disponibles); pasar vixSeries explícito (p.ej. []) simula ausencia real de histórico del VIX.
+    private sealed class FakeHistory(IReadOnlyList<PricePoint> points, IReadOnlyList<PricePoint>? vixSeries = null) : IMarketHistoryProvider
     {
         private readonly IReadOnlyList<PricePoint> _points = points;
+        private readonly IReadOnlyList<PricePoint>? _vixSeries = vixSeries;
 
         public Task<IReadOnlyList<PricePoint>> GetHistoryAsync(string symbol, string range, CancellationToken cancellationToken = default)
-            => Task.FromResult(_points);
+            => Task.FromResult(symbol == "^VIX" ? (_vixSeries ?? _points) : _points);
     }
 }

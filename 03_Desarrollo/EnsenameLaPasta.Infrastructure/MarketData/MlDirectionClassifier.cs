@@ -9,16 +9,18 @@ namespace EnsenameLaPasta.Infrastructure.MarketData;
 
 /// <summary>
 /// Clasifica la dirección del próximo periodo (sube/baja) con ML.NET sobre features técnicas del
-/// histórico (HV-044, ampliado en HV-045). Entrena DOS modelos — regresión logística SDCA y
-/// árboles con boosting FastTree — con split cronológico 80/20 y se queda con el mejor por AUC en
-/// el hold-out (reporta accuracy/AUC y el modelo elegido). Honestidad: la dirección de precio
-/// ronda el azar; es un indicador, no asesoramiento.
+/// histórico (HV-044, ampliado en HV-045) más el VIX como proxy de régimen de mercado (HV-052).
+/// Entrena DOS modelos — regresión logística SDCA y árboles con boosting FastTree — con split
+/// cronológico 80/20 y se queda con el mejor por AUC en el hold-out (reporta accuracy/AUC y el
+/// modelo elegido). Honestidad: la dirección de precio ronda el azar; es un indicador, no
+/// asesoramiento.
 /// </summary>
 public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogger<MlDirectionClassifier> logger) : IDirectionClassifier
 {
     private const int Lookback = 26;      // warmup del EMA26 (MACD) marca el mínimo por muestra
     private const int MinPoints = 60;     // mínimo para tener muestras de entrenamiento suficientes
-    public const int FeatureCount = 12;
+    private const string VixSymbol = "^VIX";
+    public const int FeatureCount = 14;
 
     private readonly IMarketHistoryProvider _history = history;
     private readonly ILogger<MlDirectionClassifier> _logger = logger;
@@ -38,6 +40,11 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
 
         try
         {
+            // VIX alineado por día con la serie del símbolo (proxy de régimen de mercado, HV-052).
+            // Si no hay datos (símbolo ya es el VIX, fuente caída, etc.) se degrada a 0 = neutro,
+            // sin romper la clasificación — mismo principio de "degrada sin lanzar" del resto del proyecto.
+            var vix = await GetAlignedVixAsync(symbol, range, series, cancellationToken);
+
             // Indicadores acumulativos precomputados (EMAs para MACD).
             var ema12 = Ema(closes, 12);
             var ema26 = Ema(closes, 26);
@@ -47,7 +54,7 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
 
             var samples = new List<FeatureRow>();
             for (var i = Lookback; i <= closes.Length - 2; i++)
-                samples.Add(new FeatureRow { Features = BuildFeatures(closes, volumes, macd, signal, i), Label = closes[i + 1] > closes[i] });
+                samples.Add(new FeatureRow { Features = BuildFeatures(closes, volumes, macd, signal, vix, i), Label = closes[i + 1] > closes[i] });
 
             if (samples.Count < 20)
                 return Insufficient("Muestras de entrenamiento insuficientes.");
@@ -93,7 +100,7 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
 
             var winner = best!.Value;
             var engine = ml.Model.CreatePredictionEngine<FeatureRow, DirectionPrediction>(winner.Model);
-            var latest = new FeatureRow { Features = BuildFeatures(closes, volumes, macd, signal, closes.Length - 1) };
+            var latest = new FeatureRow { Features = BuildFeatures(closes, volumes, macd, signal, vix, closes.Length - 1) };
             var pred = engine.Predict(latest);
 
             var pUp = Math.Clamp(pred.Probability, 0f, 1f);
@@ -119,8 +126,9 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
         }
     }
 
-    // 12 features técnicas en el índice i (requiere i >= Lookback).
-    private static float[] BuildFeatures(double[] c, double[] v, double[] macd, double[] signal, int i)
+    // 14 features técnicas en el índice i (requiere i >= Lookback): 12 propias del símbolo (HV-045)
+    // + 2 del VIX como proxy de régimen de mercado (HV-052).
+    private static float[] BuildFeatures(double[] c, double[] v, double[] macd, double[] signal, double[] vix, int i)
     {
         var ret1 = Change(c[i - 1], c[i]);
         var ret5 = Change(c[i - 5], c[i]);
@@ -138,11 +146,57 @@ public sealed class MlDirectionClassifier(IMarketHistoryProvider history, ILogge
         var macdHist = c[i] != 0 ? (macd[i] - signal[i]) / c[i] : 0;
         var pctB = BollingerPctB(c, i, 20);                       // ~0..1 (posición en las bandas)
         var stochK = StochasticK(c, i, 14);                       // 0..1
+        var vixLevel = vix[i];                                    // nivel bruto (~10-80); NormalizeMinMax lo escala
+        var vixChange1 = Change(vix[i - 1], vix[i]);              // variación diaria del "miedo" del mercado
         return
         [
             (float)ret1, (float)ret5, (float)ret10, (float)maRatio, (float)priceVsSma10, (float)priceVsSma20,
-            (float)rsi, (float)vol, (float)volRatio, (float)macdHist, (float)pctB, (float)stochK
+            (float)rsi, (float)vol, (float)volRatio, (float)macdHist, (float)pctB, (float)stochK,
+            (float)vixLevel, (float)vixChange1
         ];
+    }
+
+    // Obtiene el histórico del VIX y lo alinea por día UTC con la serie del símbolo (forward-fill
+    // sobre huecos de calendario, como findes/festivos que no casan entre bolsas — mismo criterio
+    // que HV-038). Si no hay datos (símbolo ya es "^VIX", fuente caída, histórico corto…) degrada
+    // a un array de ceros: la clasificación sigue funcionando, solo sin la señal de mercado.
+    private async Task<double[]> GetAlignedVixAsync(string symbol, string range, PricePoint[] series,
+        CancellationToken cancellationToken)
+    {
+        var flat = new double[series.Length];
+        if (string.Equals(symbol, VixSymbol, StringComparison.OrdinalIgnoreCase))
+            return flat;
+
+        try
+        {
+            var vixPoints = await _history.GetHistoryAsync(VixSymbol, range, cancellationToken);
+            var byDay = vixPoints
+                .Where(p => p.Price > 0)
+                .GroupBy(p => p.Timestamp.Date)
+                .ToDictionary(g => g.Key, g => (double)g.Last().Price);
+
+            if (byDay.Count == 0) return flat;
+
+            var last = 0.0;
+            var result = new double[series.Length];
+            for (var k = 0; k < series.Length; k++)
+            {
+                if (byDay.TryGetValue(series[k].Timestamp.Date, out var v)) last = v;
+                result[k] = last;
+            }
+            // Relleno hacia atrás si el primer tramo no tenía aún dato de VIX.
+            if (result[0] == 0 && byDay.Count > 0)
+            {
+                var first = byDay.OrderBy(kv => kv.Key).First().Value;
+                for (var k = 0; k < result.Length && result[k] == 0; k++) result[k] = first;
+            }
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "No se pudo obtener el VIX para {Symbol} {Range}; se usa neutro (0).", symbol, range);
+            return flat;
+        }
     }
 
     private static double Change(double from, double to) => from != 0 ? (to - from) / from : 0;
