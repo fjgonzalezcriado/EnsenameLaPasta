@@ -5,6 +5,8 @@
 @section HeaderExtra {
     <button type="button" id="viewerToggle" class="btn btn-outline-secondary btn-sm py-0"
             title="Modo visor: oculta los controles de edición (añadir/cerrar/importar/caja/proveedor) y deja el panel en solo lectura.">👁 Visor</button>
+    <button type="button" id="privacyToggle" class="btn btn-outline-secondary btn-sm py-0"
+            title="Modo privacidad: desenfoca los importes (valor de cuenta, efectivo, cartera, PnL, métricas y curva de patrimonio) para que no los vean por encima del hombro. Pasa el ratón por encima para revelarlos puntualmente.">🙈 Privacidad</button>
     <label class="d-flex align-items-center gap-1 mb-0 js-editor-only" title="Proveedor de datos de mercado (feed en vivo e histórico). Se cambia en caliente.">
         <span>Proveedor:</span>
         <select id="providerSelect" class="form-select form-select-sm w-auto py-0">
@@ -32,8 +34,8 @@
             <div class="card metric-card shadow-sm h-100">
                 <div class="card-body">
                     <h6 class="card-subtitle text-muted text-uppercase small">Valor de cuenta</h6>
-                    <div class="fs-3 fw-semibold"><span id="accountValue">—</span></div>
-                    <small><span id="returnPct" class="fw-semibold">—</span> <span class="text-muted">sobre aportado</span></small>
+                    <div class="fs-3 fw-semibold js-sensitive"><span id="accountValue">—</span></div>
+                    <small><span id="returnPct" class="fw-semibold js-sensitive">—</span> <span class="text-muted">sobre aportado</span></small>
                 </div>
             </div>
         </div>
@@ -41,8 +43,8 @@
             <div class="card metric-card shadow-sm h-100">
                 <div class="card-body">
                     <h6 class="card-subtitle text-muted text-uppercase small">Efectivo</h6>
-                    <div class="fs-3 fw-semibold"><span id="cash">—</span></div>
-                    <small class="text-muted">Aportado: <span id="netDeposits">—</span></small>
+                    <div class="fs-3 fw-semibold js-sensitive"><span id="cash">—</span></div>
+                    <small class="text-muted">Aportado: <span id="netDeposits" class="js-sensitive">—</span></small>
                 </div>
             </div>
         </div>
@@ -50,8 +52,8 @@
             <div class="card metric-card shadow-sm h-100">
                 <div class="card-body">
                     <h6 class="card-subtitle text-muted text-uppercase small">Valor de cartera</h6>
-                    <div class="fs-3 fw-semibold"><span id="marketValue">—</span></div>
-                    <small class="text-muted">Invertido: <span id="invested">—</span></small>
+                    <div class="fs-3 fw-semibold js-sensitive"><span id="marketValue">—</span></div>
+                    <small class="text-muted">Invertido: <span id="invested" class="js-sensitive">—</span></small>
                 </div>
             </div>
         </div>
@@ -59,10 +61,10 @@
             <div class="card metric-card shadow-sm h-100">
                 <div class="card-body">
                     <h6 class="card-subtitle text-muted text-uppercase small">PnL total</h6>
-                    <div class="fs-3 fw-semibold" id="totalPnL">—</div>
+                    <div class="fs-3 fw-semibold js-sensitive" id="totalPnL">—</div>
                     <small class="text-muted">
-                        Real.: <span id="realizedPnL">—</span> ·
-                        No real.: <span id="unrealizedPnL">—</span>
+                        Real.: <span id="realizedPnL" class="js-sensitive">—</span> ·
+                        No real.: <span id="unrealizedPnL" class="js-sensitive">—</span>
                     </small>
                 </div>
             </div>
@@ -175,7 +177,7 @@
                             </select>
                         </label>
                     </div>
-                    <div class="chart-wrap" style="height: 280px;">
+                    <div class="chart-wrap js-sensitive" style="height: 280px;">
                         <canvas id="chartAccount"></canvas>
                     </div>
                     <div id="accountHistoryHint" class="text-muted small mt-2">Se toma un snapshot al arrancar y luego cada pocos minutos.</div>
@@ -193,20 +195,20 @@
                     <div class="row text-center g-3">
                         <div class="col-6 col-md-3">
                             <div class="text-muted small" title="Peor caída pico→valle de la curva de valor de cuenta">Max Drawdown</div>
-                            <div class="fs-4 fw-semibold" id="mMaxDd">—</div>
-                            <div class="text-muted small">actual <span id="mCurDd">—</span></div>
+                            <div class="fs-4 fw-semibold js-sensitive" id="mMaxDd">—</div>
+                            <div class="text-muted small">actual <span id="mCurDd" class="js-sensitive">—</span></div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="text-muted small" title="Rentabilidad ajustada por riesgo (retornos diarios anualizados, rf=0)">Sharpe (anual.)</div>
-                            <div class="fs-4 fw-semibold" id="mSharpe">—</div>
+                            <div class="fs-4 fw-semibold js-sensitive" id="mSharpe">—</div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="text-muted small" title="Volatilidad anualizada de los retornos diarios">Volatilidad (anual.)</div>
-                            <div class="fs-4 fw-semibold" id="mVol">—</div>
+                            <div class="fs-4 fw-semibold js-sensitive" id="mVol">—</div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="text-muted small" title="Σ ganancias / Σ pérdidas de los trades cerrados (&gt;1 es rentable)">Profit Factor</div>
-                            <div class="fs-4 fw-semibold" id="mPf">—</div>
+                            <div class="fs-4 fw-semibold js-sensitive" id="mPf">—</div>
                         </div>
                     </div>
                 </div>
@@ -221,7 +223,7 @@
                 <div class="card-body">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
                         <h5 class="card-title mb-0">🗓️ Resultados por periodo <small class="text-muted fw-normal">(neto de comisiones + dividendos, en divisa base)</small></h5>
-                        <span id="breakdownTotal" class="small fw-semibold"></span>
+                        <span id="breakdownTotal" class="small fw-semibold js-sensitive"></span>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover align-middle mb-0">
@@ -233,7 +235,7 @@
                                     <th class="text-end">Ganados / Perdidos</th>
                                 </tr>
                             </thead>
-                            <tbody id="breakdownBody">
+                            <tbody id="breakdownBody" class="js-sensitive">
                                 <tr><td colspan="4" class="text-center text-muted">—</td></tr>
                             </tbody>
                         </table>
@@ -259,7 +261,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="table-responsive table-scroll">
+                    <div class="table-responsive table-scroll js-sensitive">
                         <table class="table table-sm table-hover align-middle mb-0">
                             <thead class="table-light sticky-top">
                                 <tr>
@@ -286,7 +288,7 @@
             <div class="card shadow-sm h-100">
                 <div class="card-body">
                     <h5 class="card-title">📋 Trades cerrados recientes</h5>
-                    <div class="table-responsive table-scroll">
+                    <div class="table-responsive table-scroll js-sensitive">
                         <table class="table table-sm table-hover align-middle mb-0">
                             <thead class="table-light sticky-top">
                                 <tr>

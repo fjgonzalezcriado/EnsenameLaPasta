@@ -10,6 +10,7 @@
     let lastRenderedSeries = null;   // última serie dibujada (para re-render al cambiar el margen)
     let chartType = 'line';          // 'line' | 'candle' (velas japonesas, HV-041)
     let viewerMode = false;          // modo visor puro: solo lectura, sin controles de edición (HV-046)
+    let privacyMode = false;         // modo privacidad: desenfoca los importes sensibles (HV-051)
     let forecastActive = false;      // señales ML.NET (SSA + clasificación) (HV-043/044)
     let lastForecast = null;         // último PriceForecast recibido (símbolo+rango propios)
     let lastSignal = null;           // última DirectionSignal (clasificación sube/baja, HV-044)
@@ -1833,7 +1834,28 @@
         }
     }
 
+    // ── Modo privacidad (HV-051): desenfoca los importes sensibles (curiosos detrás) ──
+    // Solo CSS (toggle de clase); no necesita re-render porque los datos ya están en el DOM.
+    function initPrivacyMode() {
+        try { if (localStorage.getItem('privacyMode') === '1') privacyMode = true; } catch (e) { }
+        const container = document.querySelector('.dashboard');
+        const btn = document.getElementById('privacyToggle');
+        function apply() {
+            if (container) container.classList.toggle('privacy-mode', privacyMode);
+            if (btn) { btn.classList.toggle('active', privacyMode); btn.setAttribute('aria-pressed', privacyMode ? 'true' : 'false'); }
+        }
+        apply();
+        if (btn) {
+            btn.addEventListener('click', function () {
+                privacyMode = !privacyMode;
+                try { localStorage.setItem('privacyMode', privacyMode ? '1' : '0'); } catch (e) { }
+                apply();
+            });
+        }
+    }
+
     initViewerMode();
+    initPrivacyMode();
     initProviderControl();
     initChartRefreshControl();
     initSymbolControl();
