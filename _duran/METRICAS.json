@@ -12,48 +12,6 @@
                          "archivos":  {
 
                                       },
-                         "versionProyecto":  "1.5.0-pos-return",
-                         "fecha":  "2026-06-29 13:44:58"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.6.0-account-history",
-                         "fecha":  "2026-06-29 13:58:32"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.7.0-csv-import",
-                         "fecha":  "2026-06-29 14:07:43"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
                          "versionProyecto":  "1.8.0-currency",
                          "fecha":  "2026-06-29 14:21:24"
                      },
@@ -702,6 +660,48 @@
                                       ],
                          "versionProyecto":  "1.42.0-modo-privacidad",
                          "fecha":  "2026-07-23 10:59:47"
+                     },
+                     {
+                         "archivosModificados":  1,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  "_duran/ESTADO_PROYECTO.json",
+                         "versionProyecto":  "1.42.0-modo-privacidad",
+                         "fecha":  "2026-09-04 13:46:37"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.42.0-modo-privacidad",
+                         "fecha":  "2026-09-04 13:47:39"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.42.0-modo-privacidad",
+                         "fecha":  "2026-09-04 13:48:08"
                      }
                  ]
 }

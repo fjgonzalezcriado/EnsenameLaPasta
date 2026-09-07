@@ -96,7 +96,7 @@
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
                    "version_actual":  "1.42.0-modo-privacidad",
-                   "ultima_actualizacion":  "2026-07-23",
+                   "ultima_actualizacion":  "2026-09-04",
                    "actualizado_por":  "Francisco Javier Gonzalez Criado",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
                },
@@ -1167,7 +1167,7 @@
                                        ]
                    },
     "ultimaSesion":  {
-                         "fecha":  "2026-07-23",
+                         "fecha":  "2026-09-04",
                          "evolutivoActivo":  null,
                          "usuario":  "Francisco Javier Gonzalez Criado",
                          "ramaActiva":  "feature/HV-051-modo-privacidad",
