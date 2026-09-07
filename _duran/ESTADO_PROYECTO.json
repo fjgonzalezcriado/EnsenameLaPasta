@@ -1,4 +1,4 @@
-{
+﻿{
     "_comentario":  "Este archivo mantiene el estado actual del proyecto. Claude lo lee automaticamente.",
     "ecosistema":  {
                        "nombre":  "STIC.IA",
@@ -95,9 +95,9 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual": "1.41.0-ayuda-in-app",
-                   "ultima_actualizacion":  "2026-07-09",
-                   "actualizado_por":  "Francisco Javier Gonzalez Criado",
+                   "version_actual":  "1.43.0-vix-feature-ml",
+                   "ultima_actualizacion":  "2026-08-31",
+                   "actualizado_por":  "RemitiraLaLluvia",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
                },
     "stack":  {
@@ -300,6 +300,41 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-052",
+                                               "titulo":  "VIX como feature de regimen de mercado en el clasificador ML (sube/baja)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-08-31",
+                                               "fechaInicio":  "2026-08-31",
+                                               "fechaCompletado":  "2026-08-31",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  null,
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "El usuario pregunto si el seguimiento del VIX (indice de volatilidad implicita del S\u0026P500, proxy de sentimiento/miedo de mercado) podia ser util para las previsiones del ML, y pidio anadirlo. Amplia MlDirectionClassifier (HV-044/045): FeatureCount 12 -\u003e 14, dos features nuevas: nivel bruto del VIX (la normalizacion MinMax del pipeline ya lo escala) y variacion diaria del VIX (Change(vix[i-1], vix[i])), en el mismo indice temporal que las 12 features existentes (sin look-ahead adicional al ya inherente al diseno). GetAlignedVixAsync obtiene el historico de ^VIX via el mismo IMarketHistoryProvider (Yahoo) para el mismo range del simbolo, y lo alinea por dia UTC contra la serie del simbolo (forward-fill sobre huecos de calendario entre bolsas, mismo criterio que HV-038); si el simbolo bajo analisis YA es ^VIX o no hay datos del VIX (fuente caida, historico corto), degrada a features neutras (0) sin lanzar -- mismo principio de \u0027degrada sin romper\u0027 del resto del proyecto. FakeHistory de los tests ampliado para simular VIX por simbolo (fallback a la serie principal o serie vacia explicita). 1 test nuevo (ClassifyAsync_SinDatosDeVix_DegradaAFeatureNeutraSinRomper); 191 verdes (antes 190). Smoke real Yahoo: AAPL 6M -\u003e SDCA, featureCount 14, Comprar (Sube 92%); HY9H.F 6M -\u003e FastTree, featureCount 14 (VIX alineado entre Frankfurt y el calendario US del VIX); ^VIX 6M como simbolo propio -\u003e featureCount 14 con features de VIX a 0 (guard de auto-referencia), sigue prediciendo con normalidad. Honestidad sin cambios: accuracy/AUC siguen rondando 0,45-0,65; el VIX es una feature de contexto adicional, no mejora estructuralmente el poder predictivo documentado en HV-044/045; indicador educativo, no asesoramiento financiero. Sin migracion, sin cambios en Domain/Infrastructure de persistencia. Rama: sin control de versiones Git activo en este repo (is_git_repo=false)."
+                                           },
+                                           {
+                                               "codigo":  "HV-053",
+                                               "titulo":  "Agrupar posiciones abiertas por simbolo con precio medio ponderado (estilo broker)",
+                                               "_notaNumeracion":  "Desarrollada en local como HV-051; renumerada a HV-053 al integrar con el repo remoto (alli HV-051 = Modo privacidad).",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-08-25",
+                                               "fechaInicio":  "2026-08-25",
+                                               "fechaCompletado":  "2026-08-25",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "mejora",
+                                               "specFile":  null,
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "El usuario reporto que en Trade Republic, al comprar varios paquetes de la misma accion, la cartera muestra una unica entrada con el precio de compra medio ponderado, y pidio reflejarlo igual en la app. Solucion no invasiva: se agrupa SOLO en la presentacion (dashboard.js), sin tocar el modelo de datos (cada compra sigue siendo un Trade independiente en BD, preservando comisiones por orden HV-050, importacion CSV HV-018/047 y desglose por periodo HV-049 sin cambios). renderOpenTrades agrupa por simbolo cuando hay mas de 1 lote abierto: fila resumen con precio de entrada = SUM(entry*qty)/SUM(qty), cantidad total, PnL/PnL% agregados (suma de los PnL por lote, coherente con el precio medio) y fecha de la compra mas antigua; fila expandible (clic, icono caret boton/detalle) que despliega cada lote individual con sus botones Cerrar/Eliminar de siempre (accion por Id, sin cambios de comportamiento). Simbolos con una sola compra se siguen mostrando igual que antes (sin agrupar, sin fila extra). Sin cambios en Domain/Application/Infrastructure/BD/tests (0 migraciones, 190 tests intactos). Verificado: dotnet build 0/0; smoke con BD SQLite temporal (3 lotes AAPL 100x10+120x5+90x15 -\u003e precio medio 98,33 y fecha de apertura la mas antigua del lote; 1 lote MSFT sin agrupar) confirmando la logica de agrupacion contra datos reales del endpoint /api/dashboard/data; sintaxis JS validada con node --check. Sin navegador disponible en esta sesion para captura visual (el usuario declino instalar la extension Claude in Chrome); pendiente de verificacion visual manual por el usuario en el proximo arranque. BD temporal borrada tras la prueba, cartera real intacta en todo momento. Rama: sin control de versiones Git activo en este repo (is_git_repo=false)."
+                                           },
                                            {
                                                "codigo":  "HV-050",
                                                "titulo":  "Comisiones (Trade Republic) y dividendos en el PnL",
@@ -1150,20 +1185,25 @@
                                        ]
                    },
     "ultimaSesion":  {
-                         "fecha":  "2026-07-09",
+                         "fecha":  "2026-08-31",
                          "evolutivoActivo":  null,
-                         "usuario":  "Francisco Javier Gonzalez Criado",
+                         "usuario":  "RemitiraLaLluvia",
                          "ramaActiva":  null,
-                         "proximoPaso":  "Opcional: dashboard visor puro, importar trades cerrados, mapeo simbolos Yahoo\u003c-\u003eTwelveData, AlphaVantage/Binance, ML.NET.",
-                         "resumenSesion":  "HV-037..041 (grafico), HV-042 (Alpha Vantage), HV-043/044/045 (ML), HV-046 (visor puro), HV-047 (importar cerrados), HV-048 (metricas avanzadas), HV-049 (desglose por periodo) y HV-050 (comisiones Trade Republic + dividendos en el PnL). 190 tests verdes; smokes reales/Playwright OK con Yahoo. Nueva migracion AddCommissionAndDividends (se auto-aplica al arrancar).",
+                         "proximoPaso":  "Ninguno pendiente. Opcional: aplicar el mismo agrupado de HV-053 en trades cerrados; explorar mas features de regimen de mercado (p.ej. ratio VIX/VIX3M, o VIX de otros indices para instrumentos no-US).",
+                         "resumenSesion":  "Dos cambios: (1) Cabecera del dashboard reorganizada: el estado del feed (Visor, Proveedor, Ticks, BD, Ultimo tick) se movio del bloque duplicado en Index.cshtml al header comun (_Layout.cshtml) via una seccion Razor opcional @section HeaderExtra, eliminando el titulo duplicado; verificado con smoke real (HTML servido por el servidor) confirmando que aparece en el Dashboard y no en Ayuda. (2) HV-052: a peticion del usuario (le comentaron que el VIX podia ser util) se anadio el VIX como feature de regimen de mercado al clasificador ML sube/baja (MlDirectionClassifier, HV-044/045): FeatureCount 12-\u003e14 (nivel + variacion diaria del VIX, alineado por dia UTC con IMarketHistoryProvider/Yahoo), con degradacion a neutro (0) si no hay datos o el simbolo ya es el propio VIX. 191 tests verdes (antes 190, +1 de degradacion). Smoke real Yahoo: AAPL/HY9H.F/^VIX responden featureCount 14 sin errores.",
                          "archivosModificados":  [
-                                                     "_duran/METRICAS.json"
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/Views/Shared/_Layout.cshtml",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/Views/Dashboard/Index.cshtml",
+                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/MarketData/MlDirectionClassifier.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Tests/Infrastructure/MlDirectionClassifierTests.cs",
+                                                     "_duran/ESTADO_PROYECTO.json",
+                                                     "_duran/FUNCIONALIDADES.md"
                                                  ],
-                         "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 38 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte."
+                         "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 40 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte. Header: el estado del feed vive en _Layout.cshtml via seccion Razor HeaderExtra (opcional, solo la vista Dashboard la define)."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build": "2026-07-08 OK (Ayuda in-app: HelpController + Markdig renderiza manual/glosario/instalacion; build 0/0 con Sonar; smoke endpoints OK)",
+                     "ultimo_build":  "2026-07-08 OK (Ayuda in-app: HelpController + Markdig renderiza manual/glosario/instalacion; build 0/0 con Sonar; smoke endpoints OK)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
                      "evolutivos_completados_mes":  50

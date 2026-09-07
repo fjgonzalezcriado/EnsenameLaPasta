@@ -29,6 +29,10 @@
     // Divisa de cotización por símbolo (HV-037): se alimenta de posiciones (openTrades) y de la
     // watchlist (/api/instruments/tracked). Se usa para mostrar la variación del rango en su moneda.
     const symbolCurrency = {};
+    // Símbolos con el detalle de lotes desplegado (HV-053). renderOpenTrades reconstruye el tbody
+    // en cada refresco (polling), así que el estado de expansión debe vivir fuera del DOM o se
+    // pierde y la fila se "auto-colapsa" al siguiente refresco.
+    const expandedGroups = new Set();
 
     // ── Formateadores (es-ES) ──────────────────────────────────────────────
     const EUR = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
@@ -128,6 +132,35 @@
         document.getElementById('winrate').textContent = (Number(d.winrate) || 0).toFixed(2) + '%';
     }
 
+    // Fila de una compra individual. isDetail=true → fila hija de un grupo (indentada); visible solo
+    // si ese grupo está expandido (por defecto oculta).
+    function openTradeRow(t, isDetail, groupSymbol, expanded) {
+        const rowAttrs = isDetail
+            ? (' class="table-light js-lot-detail" data-group="' + groupSymbol + '" style="display:' + (expanded ? '' : 'none') + '"')
+            : '';
+        const symbolCell = isDetail
+            ? '<td class="ps-4"><small class="text-muted">↳ ' + t.symbol + '</small></td>'
+            : '<td><strong>' + t.symbol + '</strong></td>';
+        return '<tr' + rowAttrs + '>'
+            + symbolCell
+            + '<td><span class="badge text-bg-secondary">' + (t.currency || '—') + '</span></td>'
+            + '<td>' + num(t.entryPrice) + '</td>'
+            + '<td>' + num(t.currentPrice) + '</td>'
+            + '<td>' + num(t.quantity) + '</td>'
+            + '<td class="' + signClass(t.unrealizedPnL) + '">' + pnlCell(t.unrealizedPnL, t.currency, t.unrealizedPnLBase) + '</td>'
+            + '<td class="' + signClass(t.returnPct) + '">' + pctSigned(t.returnPct) + '</td>'
+            + '<td><small>' + new Date(t.createdAt).toLocaleString('es-ES') + '</small></td>'
+            + (viewerMode ? '' : ('<td class="text-end text-nowrap">'
+                + '<button type="button" class="btn btn-outline-primary btn-sm py-0 me-1" '
+                + 'data-close="' + t.id + '" data-symbol="' + t.symbol + '" data-price="' + t.currentPrice + '">Cerrar</button>'
+                + '<button type="button" class="btn btn-outline-danger btn-sm py-0" '
+                + 'data-del="' + t.id + '" data-symbol="' + t.symbol + '" title="Eliminar del seguimiento">✕</button>'
+                + '</td>'))
+            + '</tr>';
+    }
+
+    // Varias compras del mismo símbolo se agrupan en una única fila con precio de entrada
+    // medio ponderado (igual que el bróker), con el detalle de cada lote expandible (HV-053).
     function renderOpenTrades(trades) {
         (trades || []).forEach(function (t) { if (t.currency) symbolCurrency[t.symbol] = t.currency; });
         const tbody = document.getElementById('openTradesBody');
@@ -135,23 +168,51 @@
             tbody.innerHTML = '<tr><td colspan="' + (viewerMode ? 8 : 9) + '" class="text-center text-muted">Sin posiciones abiertas</td></tr>';
             return;
         }
-        tbody.innerHTML = trades.map(function (t) {
-            return '<tr>'
-                + '<td><strong>' + t.symbol + '</strong></td>'
-                + '<td><span class="badge text-bg-secondary">' + (t.currency || '—') + '</span></td>'
-                + '<td>' + num(t.entryPrice) + '</td>'
-                + '<td>' + num(t.currentPrice) + '</td>'
-                + '<td>' + num(t.quantity) + '</td>'
-                + '<td class="' + signClass(t.unrealizedPnL) + '">' + pnlCell(t.unrealizedPnL, t.currency, t.unrealizedPnLBase) + '</td>'
-                + '<td class="' + signClass(t.returnPct) + '">' + pctSigned(t.returnPct) + '</td>'
-                + '<td><small>' + new Date(t.createdAt).toLocaleString('es-ES') + '</small></td>'
-                + (viewerMode ? '' : ('<td class="text-end text-nowrap">'
-                    + '<button type="button" class="btn btn-outline-primary btn-sm py-0 me-1" '
-                    + 'data-close="' + t.id + '" data-symbol="' + t.symbol + '" data-price="' + t.currentPrice + '">Cerrar</button>'
-                    + '<button type="button" class="btn btn-outline-danger btn-sm py-0" '
-                    + 'data-del="' + t.id + '" data-symbol="' + t.symbol + '" title="Eliminar del seguimiento">✕</button>'
-                    + '</td>'))
+
+        const groups = [];
+        const bySymbol = {};
+        trades.forEach(function (t) {
+            let g = bySymbol[t.symbol];
+            if (!g) {
+                g = {
+                    symbol: t.symbol, currency: t.currency, quantity: 0, cost: 0,
+                    unrealizedPnL: 0, unrealizedPnLBase: 0, createdAt: t.createdAt,
+                    currentPrice: t.currentPrice, lots: []
+                };
+                bySymbol[t.symbol] = g;
+                groups.push(g);
+            }
+            g.quantity += Number(t.quantity) || 0;
+            g.cost += (Number(t.entryPrice) || 0) * (Number(t.quantity) || 0);
+            g.unrealizedPnL += Number(t.unrealizedPnL) || 0;
+            g.unrealizedPnLBase += Number(t.unrealizedPnLBase) || 0;
+            g.currentPrice = t.currentPrice;
+            if (new Date(t.createdAt) < new Date(g.createdAt)) g.createdAt = t.createdAt;
+            g.lots.push(t);
+        });
+
+        tbody.innerHTML = groups.map(function (g) {
+            if (g.lots.length === 1) return openTradeRow(g.lots[0], false);
+
+            const avgEntry = g.quantity !== 0 ? g.cost / g.quantity : 0;
+            const pct = avgEntry !== 0 ? ((g.currentPrice - avgEntry) / avgEntry * 100) : 0;
+            const expanded = expandedGroups.has(g.symbol);
+
+            const summaryRow = '<tr class="js-lot-toggle" data-toggle-group="' + g.symbol + '" data-expanded="' + (expanded ? '1' : '0') + '" style="cursor:pointer">'
+                + '<td><span class="js-lot-caret me-1">' + (expanded ? '▾' : '▸') + '</span><strong>' + g.symbol + '</strong> '
+                + '<span class="badge text-bg-light text-muted border">' + g.lots.length + ' lotes</span></td>'
+                + '<td><span class="badge text-bg-secondary">' + (g.currency || '—') + '</span></td>'
+                + '<td>' + num(avgEntry) + ' <small class="text-muted">(prom.)</small></td>'
+                + '<td>' + num(g.currentPrice) + '</td>'
+                + '<td>' + num(g.quantity) + '</td>'
+                + '<td class="' + signClass(g.unrealizedPnL) + '">' + pnlCell(g.unrealizedPnL, g.currency, g.unrealizedPnLBase) + '</td>'
+                + '<td class="' + signClass(pct) + '">' + pctSigned(pct) + '</td>'
+                + '<td><small>' + new Date(g.createdAt).toLocaleString('es-ES') + '</small></td>'
+                + (viewerMode ? '' : '<td class="text-end text-nowrap"><small class="text-muted">ver detalle</small></td>')
                 + '</tr>';
+
+            const detailRows = g.lots.map(function (t) { return openTradeRow(t, true, g.symbol, expanded); }).join('');
+            return summaryRow + detailRows;
         }).join('');
     }
 
@@ -1324,6 +1385,21 @@
         const tbody = document.getElementById('openTradesBody');
         if (!tbody) return;
         tbody.addEventListener('click', async function (e) {
+            const toggleRow = e.target.closest('[data-toggle-group]');
+            if (toggleRow) {
+                const sym = toggleRow.getAttribute('data-toggle-group');
+                const expanded = toggleRow.getAttribute('data-expanded') === '1';
+                // Fuente de verdad fuera del DOM: si no se recuerda aquí, el próximo refresco del
+                // dashboard (polling) reconstruye la tabla ya colapsada de nuevo (bug reportado).
+                if (expanded) expandedGroups.delete(sym); else expandedGroups.add(sym);
+                toggleRow.setAttribute('data-expanded', expanded ? '0' : '1');
+                const caret = toggleRow.querySelector('.js-lot-caret');
+                if (caret) caret.textContent = expanded ? '▸' : '▾';
+                tbody.querySelectorAll('tr.js-lot-detail[data-group="' + sym + '"]').forEach(function (row) {
+                    row.style.display = expanded ? 'none' : '';
+                });
+                return;
+            }
             const closeBtn = e.target.closest('[data-close]');
             const delBtn = e.target.closest('[data-del]');
             if (closeBtn) {

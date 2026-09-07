@@ -2,31 +2,27 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="dashboard px-2 px-lg-3">
-    <!-- Cabecera + estado del feed -->
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <h1 class="h3 mb-0">🍝 Enseñame la Pasta</h1>
-        <div class="d-flex flex-wrap align-items-center gap-3 small text-muted">
-            <button type="button" id="viewerToggle" class="btn btn-outline-secondary btn-sm py-0"
-                    title="Modo visor: oculta los controles de edición (añadir/cerrar/importar/caja/proveedor) y deja el panel en solo lectura.">👁 Visor</button>
-            <label class="d-flex align-items-center gap-1 mb-0 js-editor-only" title="Proveedor de datos de mercado (feed en vivo e histórico). Se cambia en caliente.">
-                <span>Proveedor:</span>
-                <select id="providerSelect" class="form-select form-select-sm w-auto py-0">
-                    <option value="YahooFinance">Yahoo Finance</option>
-                    <option value="TwelveData">Twelve Data</option>
-                    <option value="AlphaVantage">Alpha Vantage</option>
-                </select>
-                <span id="providerHint" class="text-danger small"></span>
-            </label>
-            <span>Ticks: <strong id="tickCount" class="text-body">—</strong></span>
-            <span>BD: <strong id="dbSize" class="text-body">—</strong></span>
-            <span>
-                <span class="live-dot"></span>
-                Último: <strong id="lastTick" class="text-body">—</strong>
-            </span>
-        </div>
-    </div>
+@section HeaderExtra {
+    <button type="button" id="viewerToggle" class="btn btn-outline-secondary btn-sm py-0"
+            title="Modo visor: oculta los controles de edición (añadir/cerrar/importar/caja/proveedor) y deja el panel en solo lectura.">👁 Visor</button>
+    <label class="d-flex align-items-center gap-1 mb-0 js-editor-only" title="Proveedor de datos de mercado (feed en vivo e histórico). Se cambia en caliente.">
+        <span>Proveedor:</span>
+        <select id="providerSelect" class="form-select form-select-sm w-auto py-0">
+            <option value="YahooFinance">Yahoo Finance</option>
+            <option value="TwelveData">Twelve Data</option>
+            <option value="AlphaVantage">Alpha Vantage</option>
+        </select>
+        <span id="providerHint" class="text-danger small"></span>
+    </label>
+    <span>Ticks: <strong id="tickCount" class="text-body">—</strong></span>
+    <span>BD: <strong id="dbSize" class="text-body">—</strong></span>
+    <span>
+        <span class="live-dot"></span>
+        Último: <strong id="lastTick" class="text-body">—</strong>
+    </span>
+}
 
+<div class="dashboard px-2 px-lg-3">
     <!-- Métricas principales -->
     <div class="text-muted small mb-1">
         Totales convertidos a <strong id="baseCcy" class="text-body">EUR</strong> (FX en vivo) · las posiciones se muestran en su divisa.
