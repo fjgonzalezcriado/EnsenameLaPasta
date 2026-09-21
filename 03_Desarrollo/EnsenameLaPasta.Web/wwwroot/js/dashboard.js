@@ -6,27 +6,30 @@
     // (HV-039 fijo → HV-040 seleccionable). 0 = ajustado (máxima extensión); mayor = más
     // compresión. Relativo al precio para que funcione igual en cualquier instrumento.
     const Y_MARGIN_ALLOWED = [0, 0.01, 0.02, 0.05, 0.10, 0.20];
-    let yMarginPct = 0.02;
-    let lastRenderedSeries = null;   // última serie dibujada (para re-render al cambiar el margen)
-    let chartType = 'line';          // 'line' | 'candle' (velas japonesas, HV-041)
     let viewerMode = false;          // modo visor puro: solo lectura, sin controles de edición (HV-046)
     let privacyMode = false;         // modo privacidad: desenfoca los importes sensibles (HV-051)
-    let forecastActive = false;      // señales ML.NET (SSA + clasificación) (HV-043/044)
-    let lastForecast = null;         // último PriceForecast recibido (símbolo+rango propios)
-    let lastSignal = null;           // última DirectionSignal (clasificación sube/baja, HV-044)
     const FORECAST_HORIZON = 10;
     const COLORS = ['#0d6efd', '#fd7e14', '#198754', '#dc3545', '#6f42c1', '#20c997'];
     // En modo "En vivo" los ticks se capturan cada ~30 s, pero entre sesiones (app apagada)
     // hay huecos de horas/días. Si dos ticks consecutivos distan más de esto, cortamos la
     // línea (punto nulo) para no dibujar una diagonal recta engañosa sobre el hueco.
     const LIVE_GAP_MS = 5 * 60 * 1000;
-    let priceChart = null;
-    let selectedSymbol = null;   // símbolo activo en el gráfico, o 'ALL'
-    let lastSeries = [];         // última priceSeries recibida (para re-render al cambiar de símbolo)
+    let lastSeries = [];         // última priceSeries recibida del feed en vivo
     let historyPoints = 50;      // nº de puntos de histórico a pedir por símbolo
     const HISTORY_ALLOWED = [50, 250, 1000, 5000];
-    let chartMode = '1D';        // rango del gráfico de precios (histórico real Yahoo): '1D','5D','1M',…
     let baseCurrency = 'EUR';    // divisa base de los totales (HV-020); para el PnL convertido por fila (HV-022)
+
+    // ── Ventanas de "Evolución de precios" (HV-054) ─────────────────────────
+    // El gráfico dejó de ser único: ahora se abre una ventana independiente por símbolo.
+    // Cada ventana lleva SU PROPIO estado (rango, línea/velas, margen del eje Y, señales ML)
+    // y su propia instancia de Chart.js, así que lo que antes eran variables de módulo
+    // (chartMode, chartType, yMarginPct, forecastActive, lastForecast, lastSignal,
+    // lastRenderedSeries, priceChart) vive ahora dentro de cada objeto "win".
+    const RANGES = ['1D', '5D', '1M', '3M', '6M', 'YTD', '1A', '3A', '5A'];
+    const PRICE_WINDOWS_KEY = 'priceWindows';
+    const MAX_PRICE_WINDOWS = 8;   // tope de cordura: cada ventana = 1 petición de histórico
+    const priceWindows = [];
+    let winSeq = 0;                // contador para generar ids únicos de ventana
     // Divisa de cotización por símbolo (HV-037): se alimenta de posiciones (openTrades) y de la
     // watchlist (/api/instruments/tracked). Se usa para mostrar la variación del rango en su moneda.
     const symbolCurrency = {};
@@ -405,21 +408,21 @@
     }
 
     // Mantiene el <select> de símbolos sincronizado con las series disponibles.
+    // Combo "+ Nueva ventana": lista los símbolos seguidos que todavía no tienen ventana
+    // abierta (HV-054). Se repuebla en cada ciclo de datos, así que un símbolo recién
+    // añadido aparece solo, y uno con ventana abierta desaparece de la lista.
     function ensureSymbolOptions(series) {
-        const sel = document.getElementById('symbolSelect');
+        const sel = document.getElementById('newPriceWindowSelect');
         if (!sel) return;
         const symbols = (series || []).map(function (s) { return s.symbol; });
-        const want = ['ALL'].concat(symbols);
+        const open = priceWindows.map(function (w) { return w.symbol; });
+        const free = symbols.filter(function (s) { return open.indexOf(s) === -1; });
+        const want = [''].concat(free);
         const have = Array.from(sel.options).map(function (o) { return o.value; });
-        if (have.join('|') !== want.join('|')) {
-            sel.innerHTML = '<option value="ALL">Todos</option>'
-                + symbols.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
-        }
-        // Si la selección actual ya no es válida, usar el primer símbolo (vista individual limpia).
-        if (want.indexOf(selectedSymbol) === -1) {
-            selectedSymbol = symbols.length ? symbols[0] : 'ALL';
-        }
-        if (sel.value !== selectedSymbol) sel.value = selectedSymbol;
+        if (have.join('|') === want.join('|')) return;   // sin cambios: no tocar el DOM
+        sel.innerHTML = '<option value="">' + (free.length ? '-- Selecciona --' : '-- Sin símbolos libres --') + '</option>'
+            + free.map(function (s) { return '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>'; }).join('');
+        sel.value = '';
     }
 
     // Inserta un punto nulo entre puntos separados por más de gapMs para que Chart.js
@@ -460,36 +463,37 @@
 
     // Variación acumulada del rango mostrado (HV-037): primer→último cierre de la serie
     // del símbolo seleccionado. Muestra el importe en la divisa del instrumento y el %.
-    function updateChartDelta(series) {
-        const el = document.getElementById('chartDelta');
+    function updateChartDelta(win, series) {
+        const el = win.els.delta;
         if (!el) return;
-        let s = null;
         const list = series || [];
-        if (selectedSymbol && selectedSymbol !== 'ALL') {
-            s = list.find(function (x) { return x.symbol === selectedSymbol; }) || null;
-        } else if (list.length === 1) {
-            s = list[0];   // "Todos" con una sola serie: es inequívoca
-        }
+        const s = list.find(function (x) { return x.symbol === win.symbol; }) || null;
         const pts = (s && s.points)
             ? s.points.map(function (p) { return Number(p.price); }).filter(function (v) { return Number.isFinite(v); })
             : [];
-        if (!s || pts.length < 2) { el.textContent = ''; el.className = 'small fw-semibold'; return; }
+        if (!s || pts.length < 2) { el.textContent = ''; el.className = 'js-win-delta small fw-semibold'; return; }
         const first = pts[0], last = pts[pts.length - 1];
         const delta = last - first;
         const pct = first !== 0 ? (delta / first * 100) : 0;
         const cur = symbolCurrency[s.symbol] || '';
         const sign = delta > 0 ? '+' : '';   // money() ya antepone '−' en negativos
-        el.textContent = chartMode + ': ' + sign + money(delta, cur) + ' (' + pctSigned(pct) + ')';
-        el.className = 'small fw-semibold ' + signClass(delta);
+        el.textContent = win.range + ': ' + sign + money(delta, cur) + ' (' + pctSigned(pct) + ')';
+        el.className = 'js-win-delta small fw-semibold ' + signClass(delta);
     }
 
-    function renderChart(series) {
+    function renderChart(win, series) {
         if (typeof Chart === 'undefined') {
             console.error('[dashboard] Chart.js no está cargado (¿CDN bloqueado o sin conexión?).');
             return;
         }
-        lastRenderedSeries = series;   // para re-render al cambiar el margen del eje (HV-040)
-        updateChartDelta(series);
+        win.lastSeries = series;   // para re-render al cambiar margen/velas sin refetch (HV-040/041)
+        updateChartDelta(win, series);
+        const chartMode = win.range;
+        const chartType = win.chartType;
+        const yMarginPct = win.yMarginPct;
+        const selectedSymbol = win.symbol;
+        const forecastActive = win.forecastActive;
+        const lastForecast = win.forecast;
 
         // Eje de CATEGORÍAS (HV-038): las X son los instantes de cotización, sin huecos de
         // fin de semana/festivos/nocturnos (el eje de tiempo los dejaba en blanco y unía los
@@ -503,7 +507,7 @@
         const perSeries = [];
         const keySet = {};
         (series || []).forEach(function (s, idx) {
-            if (!(selectedSymbol === 'ALL' || s.symbol === selectedSymbol)) return;
+            if (s.symbol !== selectedSymbol) return;   // cada ventana pinta un único símbolo
             const map = {};
             (s.points || []).forEach(function (p) {
                 const t = new Date(p.timestamp).getTime();
@@ -545,7 +549,9 @@
         const volumeDatasets = [];
         let maxVol = 0;
         perSeries.forEach(function (ps) {
-            const color = COLORS[ps.idx % COLORS.length];
+            // El color lo fija la ventana (no el índice dentro de la serie): con una ventana
+            // por símbolo el índice sería siempre 0 y todas saldrían del mismo color.
+            const color = COLORS[win.colorIdx % COLORS.length];
             const priceArr = cats.map(function (t) { const e = ps.map[t]; return e ? e.y : null; });
             // En velas la línea se oculta (borderColor transparente) pero se conserva el dataset
             // para el escalado del eje y el hover; la etiqueta de valor usa $valueColor.
@@ -651,9 +657,9 @@
             }
         }
 
-        if (priceChart === null) {
-            const ctx = document.getElementById('chartPrices').getContext('2d');
-            priceChart = new Chart(ctx, {
+        if (!win.chart) {
+            const ctx = win.els.canvas.getContext('2d');
+            win.chart = new Chart(ctx, {
                 type: 'line',
                 data: { labels: labels, datasets: datasets },
                 plugins: [candlePlugin, highLowLinesPlugin, currentValuePlugin],
@@ -721,44 +727,23 @@
             });
             // Los plugins (velas, techo/suelo, etiqueta de valor) leen estas props; hay que
             // fijarlas antes de dibujar. Tras crear, un update() las aplica al primer render.
-            priceChart.$labelsFull = labelsFull;
-            priceChart.$hiLo = hasHiLo ? { high: hi, low: lo } : null;
-            priceChart.$candleMode = candle;
-            priceChart.$ohlc = ohlc;
-            priceChart.update();
+            win.chart.$labelsFull = labelsFull;
+            win.chart.$hiLo = hasHiLo ? { high: hi, low: lo } : null;
+            win.chart.$candleMode = candle;
+            win.chart.$ohlc = ohlc;
+            win.chart.update();
         } else {
-            priceChart.data.labels = labels;
-            priceChart.data.datasets = datasets;
-            if (priceChart.options.scales.yVol) priceChart.options.scales.yVol.max = volMax;
-            priceChart.options.scales.y.min = yMin;
-            priceChart.options.scales.y.max = yMax;
-            priceChart.$labelsFull = labelsFull;   // título del tooltip (fecha/hora completa)
-            priceChart.$hiLo = hasHiLo ? { high: hi, low: lo } : null;   // techo/suelo (HV-039)
-            priceChart.$candleMode = candle;       // velas japonesas (HV-041)
-            priceChart.$ohlc = ohlc;
-            priceChart.update();
+            win.chart.data.labels = labels;
+            win.chart.data.datasets = datasets;
+            if (win.chart.options.scales.yVol) win.chart.options.scales.yVol.max = volMax;
+            win.chart.options.scales.y.min = yMin;
+            win.chart.options.scales.y.max = yMax;
+            win.chart.$labelsFull = labelsFull;   // título del tooltip (fecha/hora completa)
+            win.chart.$hiLo = hasHiLo ? { high: hi, low: lo } : null;   // techo/suelo (HV-039)
+            win.chart.$candleMode = candle;       // velas japonesas (HV-041)
+            win.chart.$ohlc = ohlc;
+            win.chart.update();
         }
-    }
-
-    // Coloca la cuenta atrás justo debajo de la etiqueta de valor de la serie activa.
-    function positionCountdown() {
-        const el = document.getElementById('tickCountdown');
-        if (!el || !priceChart) return;
-        if (chartMode !== 'LIVE') { el.style.display = 'none'; return; }
-        const datasets = priceChart.data.datasets || [];
-        if (datasets.length === 0) { el.style.display = 'none'; return; }
-        let idx = 0;
-        if (selectedSymbol && selectedSymbol !== 'ALL') {
-            const i = datasets.findIndex(function (d) { return d.label === selectedSymbol; });
-            if (i >= 0) idx = i;
-        }
-        const data = datasets[idx].data || [];
-        const yScale = priceChart.scales.y;
-        if (data.length === 0 || !yScale) { el.style.display = 'none'; return; }
-        const px = yScale.getPixelForValue(data[data.length - 1].y);
-        if (!Number.isFinite(px)) { el.style.display = 'none'; return; }
-        el.style.top = (px + 11) + 'px'; // bajo la etiqueta de valor
-        el.style.display = 'block';
     }
 
     // ── Evolución del valor de cuenta (HV-017) ─────────────────────────────
@@ -954,15 +939,14 @@
         }
     }
 
-    // Métricas/estado/tablas siempre en vivo; el gráfico se redibuja según su
-    // propio intervalo (compuerta temporal). Una sola petición por ciclo.
+    // Métricas/estado/tablas siempre en vivo. Las ventanas de precios (HV-054) ya no
+    // dependen de este ciclo: cada una pinta histórico y se recarga por su cuenta.
     const METRICS_MS = 3000;
     const ALLOWED_MS = [3000, 30000, 60000, 120000, 300000];
     let chartIntervalMs = REFRESH_MS;
-    let lastChartAt = 0;
     let metricsTimer = null;
 
-    async function fetchAndRender(forceChart) {
+    async function fetchAndRender() {
         try {
             const response = await fetch('/api/dashboard/data?points=' + historyPoints);
             if (!response.ok) {
@@ -977,14 +961,9 @@
             renderMetrics(data);
             renderOpenTrades(data.openTrades);
             renderClosedTrades(data.recentClosedTrades);
-            // Gráfico: solo en modo LIVE y según el intervalo elegido (en histórico no se toca).
-            if (chartMode === 'LIVE') {
-                const now = Date.now();
-                if (forceChart || (now - lastChartAt) >= chartIntervalMs) {
-                    renderChart(lastSeries);
-                    lastChartAt = now;
-                }
-            }
+            // Las ventanas de precios (HV-054) se pintan con histórico real de Yahoo y tienen
+            // su propio ciclo de refresco: este polling de 3 s no las toca (abrir N ventanas
+            // no multiplica por N las peticiones al proveedor).
         } catch (err) {
             console.error('Dashboard fetch error', err);
         }
@@ -1009,24 +988,6 @@
         }
     }
 
-    // ── Selector de símbolo del gráfico ─────────────────────────────────────
-    function initSymbolControl() {
-        try {
-            const saved = localStorage.getItem('chartSymbol');
-            if (saved) selectedSymbol = saved;
-        } catch (e) { }
-
-        const sel = document.getElementById('symbolSelect');
-        if (sel) {
-            sel.addEventListener('change', function () {
-                selectedSymbol = sel.value;
-                try { localStorage.setItem('chartSymbol', selectedSymbol); } catch (e) { }
-                if (chartMode === 'LIVE') renderChart(lastSeries); // rescala al nuevo símbolo
-                else loadHistory(chartMode);                        // recarga histórico del símbolo
-            });
-        }
-    }
-
     // ── Selector de histórico (nº de puntos) ────────────────────────────────
     function initHistoryControl() {
         try {
@@ -1046,215 +1007,325 @@
         }
     }
 
-    // ── Selector de margen del eje Y (compresión/extensión) (HV-040) ────────────
-    function initYMarginControl() {
-        try {
-            const saved = parseFloat(localStorage.getItem('chartYMargin'));
-            if (Y_MARGIN_ALLOWED.indexOf(saved) !== -1) yMarginPct = saved;
-        } catch (e) { }
-        const sel = document.getElementById('yMarginSelect');
-        if (!sel) return;
-        sel.value = String(yMarginPct);
-        sel.addEventListener('change', function () {
-            const next = parseFloat(sel.value);
-            yMarginPct = Y_MARGIN_ALLOWED.indexOf(next) !== -1 ? next : 0.02;
-            try { localStorage.setItem('chartYMargin', String(yMarginPct)); } catch (e) { }
-            if (lastRenderedSeries) renderChart(lastRenderedSeries);   // recalcula el eje sin refetch
-        });
-    }
-
-    // ── Switch línea / velas japonesas (HV-041) ─────────────────────────────────
-    function initCandleControl() {
-        try { if (localStorage.getItem('chartType') === 'candle') chartType = 'candle'; } catch (e) { }
-        const sw = document.getElementById('candleSwitch');
-        if (!sw) return;
-        sw.checked = chartType === 'candle';
-        sw.addEventListener('change', function () {
-            chartType = sw.checked ? 'candle' : 'line';
-            try { localStorage.setItem('chartType', chartType); } catch (e) { }
-            if (lastRenderedSeries) renderChart(lastRenderedSeries);   // re-render sin refetch
-        });
-    }
-
-    // ── Pronóstico ML.NET (SSA) (HV-043) ────────────────────────────────────────
-    function renderForecastBadge() {
-        const el = document.getElementById('forecastSignal');
+    // ── Señales ML.NET por ventana (HV-043/044, adaptado a multi-ventana HV-054) ──
+    function renderForecastBadge(win) {
+        const el = win.els.forecastBadge;
         if (!el) return;
-        if (!forecastActive) { el.textContent = ''; el.className = 'small fw-semibold'; return; }
-        if (selectedSymbol === 'ALL') {
-            el.textContent = '🔮 elige un símbolo';
-            el.className = 'small fw-semibold text-muted';
-            return;
-        }
-        const f = lastForecast;
-        if (!f || f.symbol !== selectedSymbol || f.range !== chartMode) {
-            el.textContent = '🔮 …'; el.className = 'small fw-semibold text-muted'; return;
+        if (!win.forecastActive) { el.textContent = ''; el.className = 'js-win-forecast-badge small fw-semibold'; return; }
+        const f = win.forecast;
+        if (!f || f.symbol !== win.symbol || f.range !== win.range) {
+            el.textContent = '🔮 …'; el.className = 'js-win-forecast-badge small fw-semibold text-muted'; return;
         }
         if (!f.hasForecast) {
             el.textContent = '🔮 ' + (f.message || 'sin pronóstico');
-            el.className = 'small fw-semibold text-muted';
+            el.className = 'js-win-forecast-badge small fw-semibold text-muted';
             return;
         }
         const cls = f.signal === 'Alcista' ? 'text-success' : f.signal === 'Bajista' ? 'text-danger' : 'text-secondary';
-        el.textContent = '🔮 ' + chartMode + ': ' + f.signal + ' ' + pctSigned(f.expectedChangePct) + ' (' + f.points.length + 'p)';
-        el.className = 'small fw-semibold ' + cls;
+        el.textContent = '🔮 ' + win.range + ': ' + f.signal + ' ' + pctSigned(f.expectedChangePct) + ' (' + f.points.length + 'p)';
+        el.className = 'js-win-forecast-badge small fw-semibold ' + cls;
     }
 
-    async function loadForecast() {
-        if (!forecastActive) { lastForecast = null; renderForecastBadge(); return; }
-        if (!selectedSymbol || selectedSymbol === 'ALL') { lastForecast = null; renderForecastBadge(); return; }
-        renderForecastBadge();   // muestra "…" mientras llega
-        const sym = selectedSymbol, rng = chartMode;
+    async function loadForecast(win) {
+        if (!win.forecastActive) { win.forecast = null; renderForecastBadge(win); return; }
+        renderForecastBadge(win);   // muestra "…" mientras llega
+        const sym = win.symbol, rng = win.range;
         try {
             const resp = await fetch('/api/forecast?symbol=' + encodeURIComponent(sym)
                 + '&range=' + encodeURIComponent(rng) + '&horizon=' + FORECAST_HORIZON);
-            if (!resp.ok) { lastForecast = null; renderForecastBadge(); return; }
+            if (!resp.ok) { win.forecast = null; renderForecastBadge(win); return; }
             const f = await resp.json();
-            // Ignora respuestas obsoletas (el usuario cambió de símbolo/rango entretanto).
-            if (f.symbol !== selectedSymbol || f.range !== chartMode) return;
-            lastForecast = f;
-            renderForecastBadge();
-            if (lastRenderedSeries) renderChart(lastRenderedSeries);   // pinta el overlay
+            // Ignora respuestas obsoletas (cambió el rango, o se cerró la ventana, entretanto).
+            if (win.closed || f.symbol !== win.symbol || f.range !== win.range) return;
+            win.forecast = f;
+            renderForecastBadge(win);
+            if (win.lastSeries) renderChart(win, win.lastSeries);   // pinta el overlay
         } catch (e) {
-            lastForecast = null; renderForecastBadge();
+            win.forecast = null; renderForecastBadge(win);
         }
     }
 
     // Clasificación sube/baja (HV-044): badge con dirección/señal + calidad del modelo.
-    function renderDirectionBadge() {
-        const el = document.getElementById('directionSignal');
+    function renderDirectionBadge(win) {
+        const el = win.els.signalBadge;
         if (!el) return;
-        if (!forecastActive || selectedSymbol === 'ALL') { el.textContent = ''; el.className = 'small fw-semibold'; el.title = ''; return; }
-        const s = lastSignal;
-        if (!s || s.symbol !== selectedSymbol || s.range !== chartMode) {
-            el.textContent = '📊 …'; el.className = 'small fw-semibold text-muted'; el.title = ''; return;
+        if (!win.forecastActive) { el.textContent = ''; el.className = 'js-win-signal-badge small fw-semibold'; el.title = ''; return; }
+        const s = win.signal;
+        if (!s || s.symbol !== win.symbol || s.range !== win.range) {
+            el.textContent = '📊 …'; el.className = 'js-win-signal-badge small fw-semibold text-muted'; el.title = ''; return;
         }
         if (!s.hasPrediction) {
             el.textContent = '📊 ' + (s.message || 'sin señal');
-            el.className = 'small fw-semibold text-muted'; el.title = '';
+            el.className = 'js-win-signal-badge small fw-semibold text-muted'; el.title = '';
             return;
         }
         const cls = s.signal === 'Comprar' ? 'text-success' : s.signal === 'Vender' ? 'text-danger' : 'text-secondary';
         const pUp = Math.round((s.probability || 0) * 100);
         el.textContent = '📊 ' + s.signal + ' (' + s.direction + ' ' + pUp + '%)';
-        el.className = 'small fw-semibold ' + cls;
+        el.className = 'js-win-signal-badge small fw-semibold ' + cls;
         // Honestidad: modelo elegido + calidad (hold-out) en el tooltip.
         el.title = 'Modelo ' + (s.modelUsed || '-') + ' · ' + (s.featureCount || 0) + ' features técnicas · acierto '
             + Math.round((s.accuracy || 0) * 100) + '% / AUC ' + (s.auc || 0).toFixed(2)
             + ' en hold-out (n=' + s.trainSamples + '). Indicador, no asesoramiento.';
     }
 
-    async function loadSignal() {
-        if (!forecastActive || !selectedSymbol || selectedSymbol === 'ALL') { lastSignal = null; renderDirectionBadge(); return; }
-        renderDirectionBadge();
+    async function loadSignal(win) {
+        if (!win.forecastActive) { win.signal = null; renderDirectionBadge(win); return; }
+        renderDirectionBadge(win);
         try {
-            const resp = await fetch('/api/signal?symbol=' + encodeURIComponent(selectedSymbol)
-                + '&range=' + encodeURIComponent(chartMode));
-            if (!resp.ok) { lastSignal = null; renderDirectionBadge(); return; }
+            const resp = await fetch('/api/signal?symbol=' + encodeURIComponent(win.symbol)
+                + '&range=' + encodeURIComponent(win.range));
+            if (!resp.ok) { win.signal = null; renderDirectionBadge(win); return; }
             const s = await resp.json();
-            if (s.symbol !== selectedSymbol || s.range !== chartMode) return;   // respuesta obsoleta
-            lastSignal = s;
-            renderDirectionBadge();
+            if (win.closed || s.symbol !== win.symbol || s.range !== win.range) return;   // obsoleta
+            win.signal = s;
+            renderDirectionBadge(win);
         } catch (e) {
-            lastSignal = null; renderDirectionBadge();
+            win.signal = null; renderDirectionBadge(win);
         }
     }
 
-    function initForecastControl() {
-        try { if (localStorage.getItem('chartForecast') === '1') forecastActive = true; } catch (e) { }
-        const sw = document.getElementById('forecastSwitch');
-        if (!sw) return;
-        sw.checked = forecastActive;
-        sw.addEventListener('change', function () {
-            forecastActive = sw.checked;
-            try { localStorage.setItem('chartForecast', forecastActive ? '1' : '0'); } catch (e) { }
-            if (forecastActive) {
-                loadForecast();
-                loadSignal();
-            } else {
-                lastForecast = null;
-                lastSignal = null;
-                renderForecastBadge();
-                renderDirectionBadge();
-                if (lastRenderedSeries) renderChart(lastRenderedSeries);   // quita el overlay
-            }
-        });
-    }
-
-    // ── Barra de rango temporal: histórico real de Yahoo (/api/history) ─────────
-    async function loadHistory(range) {
-        const hint = document.getElementById('rangeHint');
-        // Símbolos a pedir: el seleccionado, o todos los del feed en vivo si "Todos".
-        const symbols = (selectedSymbol && selectedSymbol !== 'ALL')
-            ? [selectedSymbol]
-            : (lastSeries || []).map(function (s) { return s.symbol; });
-        if (symbols.length === 0) { if (hint) hint.textContent = 'Sin símbolos disponibles.'; return; }
-
-        if (hint) hint.textContent = 'Cargando histórico ' + range + '…';
+    // ── Histórico real de Yahoo (/api/history) para una ventana ────────────────
+    async function loadHistory(win) {
+        const hint = win.els.rangeHint;
+        if (hint) hint.textContent = 'Cargando histórico ' + win.range + '…';
+        const range = win.range;
         try {
-            const results = await Promise.all(symbols.map(function (sym) {
-                return fetch('/api/history?symbol=' + encodeURIComponent(sym) + '&range=' + encodeURIComponent(range))
-                    .then(function (r) { return r.ok ? r.json() : null; })
-                    .catch(function () { return null; });
-            }));
-            const series = results.filter(function (s) { return s && s.points && s.points.length; });
-            if (series.length === 0) {
+            const resp = await fetch('/api/history?symbol=' + encodeURIComponent(win.symbol)
+                + '&range=' + encodeURIComponent(range));
+            const s = resp.ok ? await resp.json() : null;
+            // La ventana pudo cerrarse o cambiar de rango mientras llegaba la respuesta.
+            if (win.closed || win.range !== range) return;
+            if (!s || !s.points || !s.points.length) {
                 if (hint) hint.textContent = 'Sin datos de histórico para ' + range + '.';
                 return;
             }
-            renderChart(series);
-            if (forecastActive) { loadForecast(); loadSignal(); }   // señales dependen de símbolo+rango (HV-043/044)
+            renderChart(win, [s]);
+            if (win.forecastActive) { loadForecast(win); loadSignal(win); }   // dependen de símbolo+rango
             if (hint) hint.textContent = 'Histórico · ' + range;
         } catch (e) {
             console.error('Error cargando histórico', e);
+            if (win.closed) return;
             if (hint) hint.textContent = 'Error cargando histórico.';
         }
     }
 
-    function initRangeBar() {
-        const bar = document.getElementById('rangeBar');
-        if (!bar) return;
-
-        // Restaura el rango elegido en una sesión anterior (persistencia HV-028).
-        // El default sigue siendo 1D (HV-027) si no hay preferencia guardada.
-        try {
-            const allowed = Array.prototype.map.call(bar.querySelectorAll('button[data-range]'),
-                function (b) { return b.getAttribute('data-range'); });
-            const saved = localStorage.getItem('chartRange');
-            if (saved && allowed.indexOf(saved) !== -1) {
-                chartMode = saved;
-                Array.prototype.forEach.call(bar.querySelectorAll('button'), function (b) {
-                    b.classList.toggle('active', b.getAttribute('data-range') === saved);
-                });
-            }
-        } catch (e) { }
-
-        bar.addEventListener('click', function (e) {
-            const btn = e.target.closest('button[data-range]');
-            if (!btn) return;
-            Array.prototype.forEach.call(bar.querySelectorAll('button'), function (b) { b.classList.remove('active'); });
-            btn.classList.add('active');
-            const range = btn.getAttribute('data-range');
-            const hint = document.getElementById('rangeHint');
-            if (range === 'LIVE') {
-                chartMode = 'LIVE';
-                if (hint) hint.textContent = '';
-                renderChart(lastSeries);    // vuelve a la vista simulada al instante
-                lastChartAt = Date.now();   // reinicia la cuenta atrás del gráfico
-            } else {
-                chartMode = range;
-                loadHistory(range);
-            }
-            try { localStorage.setItem('chartRange', chartMode); } catch (e) { }
-        });
+    // Recarga el histórico de todas las ventanas abiertas de forma SECUENCIAL: en paralelo,
+    // N ventanas dispararían N peticiones simultáneas al proveedor (Yahoo/Twelve Data tienen
+    // límites de tasa: el plan free de TD son 8 req/min).
+    async function reloadAllPriceWindows() {
+        const wins = priceWindows.slice();   // copia: una ventana puede cerrarse durante el bucle
+        for (const w of wins) {
+            if (w.closed) continue;
+            await loadHistory(w);
+        }
     }
 
-    // Cuenta atrás al próximo refresco del gráfico (relativa al selector "Gráfico cada").
-    function tickCountdownLoop() {
-        const el = document.getElementById('tickCountdown');
-        if (!el || el.style.display === 'none' || chartMode !== 'LIVE' || chartIntervalMs <= 0) return;
-        const rem = Math.max(0, lastChartAt + chartIntervalMs - Date.now());
-        el.textContent = '⏱ ' + (rem / 1000).toFixed(1) + 's';
+    // ── Ventanas de precios: creación, cierre y persistencia (HV-054) ──────────
+    function savePriceWindows() {
+        try {
+            localStorage.setItem(PRICE_WINDOWS_KEY, JSON.stringify(priceWindows.map(function (w) {
+                return {
+                    symbol: w.symbol, range: w.range, chartType: w.chartType,
+                    yMarginPct: w.yMarginPct, forecastActive: w.forecastActive
+                };
+            })));
+        } catch (e) { }
+    }
+
+    function closePriceWindow(win) {
+        const i = priceWindows.indexOf(win);
+        if (i === -1) return;
+        win.closed = true;                       // corta los fetch en vuelo de esta ventana
+        priceWindows.splice(i, 1);
+        if (win.chart) { win.chart.destroy(); win.chart = null; }   // libera la instancia de Chart.js
+        if (win.els.card && win.els.card.parentNode) win.els.card.parentNode.removeChild(win.els.card);
+        savePriceWindows();
+        ensureSymbolOptions(lastSeries);         // el símbolo vuelve a estar disponible en el combo
+    }
+
+    function priceWindowMarkup(win) {
+        const sym = escapeHtml(win.symbol);
+        const rangeBtns = RANGES.map(function (r) {
+            return '<button type="button" class="btn btn-outline-secondary' + (r === win.range ? ' active' : '')
+                + '" data-range="' + r + '">' + r + '</button>';
+        }).join('');
+        const marginOpts = [
+            [0, 'Ajustado'], [0.01, '±1 %'], [0.02, '±2 %'],
+            [0.05, '±5 %'], [0.10, '±10 %'], [0.20, '±20 %']
+        ].map(function (o) {
+            return '<option value="' + o[0] + '"' + (o[0] === win.yMarginPct ? ' selected' : '') + '>' + o[1] + '</option>';
+        }).join('');
+
+        return '<div class="card-body">'
+            + '<div class="d-flex flex-wrap align-items-center gap-2 mb-2">'
+            +   '<h6 class="card-title mb-0 me-auto">' + sym
+            +     ' <small class="text-muted fw-normal">(valor, eje a la derecha)</small></h6>'
+            +   '<span class="js-win-delta small fw-semibold" title="Variación acumulada en el rango seleccionado"></span>'
+            +   '<button type="button" class="btn btn-outline-danger btn-sm py-0 js-win-close" '
+            +     'title="Cerrar esta ventana (el símbolo se sigue vigilando)" '
+            +     'aria-label="Cerrar ventana de ' + sym + '">✕</button>'
+            + '</div>'
+            + '<div class="d-flex flex-wrap align-items-center gap-2 mb-2">'
+            +   '<div class="form-check form-switch mb-0 small" title="Línea o velas japonesas (OHLC)">'
+            +     '<input class="form-check-input js-win-candle" type="checkbox" role="switch" id="' + win.id + '-candle"'
+            +       (win.chartType === 'candle' ? ' checked' : '') + '>'
+            +     '<label class="form-check-label text-muted" for="' + win.id + '-candle">🕯️ Velas</label>'
+            +   '</div>'
+            +   '<div class="form-check form-switch mb-0 small" title="Señales ML.NET: pronóstico SSA y clasificación sube/baja. Indicadores, no asesoramiento financiero">'
+            +     '<input class="form-check-input js-win-forecast" type="checkbox" role="switch" id="' + win.id + '-fc"'
+            +       (win.forecastActive ? ' checked' : '') + '>'
+            +     '<label class="form-check-label text-muted" for="' + win.id + '-fc">🔮 Señales ML</label>'
+            +   '</div>'
+            +   '<span class="js-win-forecast-badge small fw-semibold"></span>'
+            +   '<span class="js-win-signal-badge small fw-semibold"></span>'
+            + '</div>'
+            + '<div class="chart-wrap" style="height: 320px;"><canvas class="js-win-canvas"></canvas></div>'
+            + '<div class="d-flex flex-wrap align-items-center gap-2 mt-2">'
+            +   '<div class="btn-group btn-group-sm js-win-range" role="group" aria-label="Rango temporal">' + rangeBtns + '</div>'
+            +   '<span class="js-win-hint text-muted small"></span>'
+            +   '<label class="d-flex align-items-center gap-1 mb-0 small ms-auto" title="Margen del eje Y: menos margen = línea más ampliada">'
+            +     '<span class="text-muted">Margen Y:</span>'
+            +     '<select class="js-win-margin form-select form-select-sm w-auto py-0">' + marginOpts + '</select>'
+            +   '</label>'
+            + '</div>'
+            + '</div>';
+    }
+
+    function createPriceWindow(symbol, opts) {
+        const container = document.getElementById('priceWindowsContainer');
+        if (!container || !symbol) return null;
+        // Una sola ventana por símbolo: si ya existe, la resaltamos en vez de duplicarla.
+        const existing = priceWindows.find(function (w) { return w.symbol === symbol; });
+        if (existing) {
+            existing.els.card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            return existing;
+        }
+        if (priceWindows.length >= MAX_PRICE_WINDOWS) {
+            alert('Máximo ' + MAX_PRICE_WINDOWS + ' ventanas abiertas. Cierra alguna para abrir otra.');
+            return null;
+        }
+
+        const o = opts || {};
+        const win = {
+            id: 'pw' + (++winSeq),
+            symbol: symbol,
+            colorIdx: winSeq - 1,
+            range: RANGES.indexOf(o.range) !== -1 ? o.range : '1D',
+            chartType: o.chartType === 'candle' ? 'candle' : 'line',
+            yMarginPct: Y_MARGIN_ALLOWED.indexOf(o.yMarginPct) !== -1 ? o.yMarginPct : 0.02,
+            forecastActive: !!o.forecastActive,
+            forecast: null,
+            signal: null,
+            chart: null,
+            lastSeries: null,
+            closed: false,
+            els: {}
+        };
+
+        const card = document.createElement('div');
+        card.className = 'card shadow-sm price-window';
+        card.id = win.id;
+        card.innerHTML = priceWindowMarkup(win);
+        container.appendChild(card);
+
+        win.els = {
+            card: card,
+            canvas: card.querySelector('.js-win-canvas'),
+            delta: card.querySelector('.js-win-delta'),
+            rangeHint: card.querySelector('.js-win-hint'),
+            forecastBadge: card.querySelector('.js-win-forecast-badge'),
+            signalBadge: card.querySelector('.js-win-signal-badge'),
+            rangeBar: card.querySelector('.js-win-range')
+        };
+
+        // ── Listeners propios de esta ventana ──
+        card.querySelector('.js-win-close').addEventListener('click', function () {
+            closePriceWindow(win);
+        });
+
+        win.els.rangeBar.addEventListener('click', function (e) {
+            const btn = e.target.closest('button[data-range]');
+            if (!btn) return;
+            Array.prototype.forEach.call(win.els.rangeBar.querySelectorAll('button'),
+                function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            win.range = btn.getAttribute('data-range');
+            win.forecast = null; win.signal = null;   // las señales son por símbolo+rango
+            savePriceWindows();
+            loadHistory(win);
+        });
+
+        card.querySelector('.js-win-margin').addEventListener('change', function (e) {
+            const next = parseFloat(e.target.value);
+            win.yMarginPct = Y_MARGIN_ALLOWED.indexOf(next) !== -1 ? next : 0.02;
+            savePriceWindows();
+            if (win.lastSeries) renderChart(win, win.lastSeries);   // recalcula el eje sin refetch
+        });
+
+        card.querySelector('.js-win-candle').addEventListener('change', function (e) {
+            win.chartType = e.target.checked ? 'candle' : 'line';
+            savePriceWindows();
+            if (win.lastSeries) renderChart(win, win.lastSeries);   // re-render sin refetch
+        });
+
+        card.querySelector('.js-win-forecast').addEventListener('change', function (e) {
+            win.forecastActive = e.target.checked;
+            savePriceWindows();
+            if (win.forecastActive) {
+                loadForecast(win);
+                loadSignal(win);
+            } else {
+                win.forecast = null;
+                win.signal = null;
+                renderForecastBadge(win);
+                renderDirectionBadge(win);
+                if (win.lastSeries) renderChart(win, win.lastSeries);   // quita el overlay
+            }
+        });
+
+        priceWindows.push(win);
+        savePriceWindows();
+        ensureSymbolOptions(lastSeries);   // el símbolo ya no está libre
+        // deferLoad: al restaurar varias ventanas de golpe, el llamante las carga en serie
+        // (reloadAllPriceWindows) en vez de lanzar N peticiones simultáneas al proveedor.
+        if (!o.deferLoad) loadHistory(win);
+        return win;
+    }
+
+    // Preferencias del gráfico único anterior a HV-054 (chartRange/chartType/…): se usan como
+    // valores por defecto de la primera ventana para que el panel no "pierda" los ajustes del
+    // usuario al estrenar el multi-ventana. Si no hay nada guardado, quedan los defaults.
+    function legacyChartPrefs() {
+        const p = {};
+        try {
+            const r = localStorage.getItem('chartRange');
+            if (RANGES.indexOf(r) !== -1) p.range = r;
+            if (localStorage.getItem('chartType') === 'candle') p.chartType = 'candle';
+            const m = parseFloat(localStorage.getItem('chartYMargin'));
+            if (Y_MARGIN_ALLOWED.indexOf(m) !== -1) p.yMarginPct = m;
+            if (localStorage.getItem('chartForecast') === '1') p.forecastActive = true;
+        } catch (e) { }
+        return p;
+    }
+
+    function initPriceWindows() {
+        const sel = document.getElementById('newPriceWindowSelect');
+        if (sel) {
+            sel.addEventListener('change', function () {
+                const sym = sel.value;
+                sel.value = '';
+                if (sym) createPriceWindow(sym);
+            });
+        }
+
+        // Restaura las ventanas de la sesión anterior (con su rango/velas/margen/señales).
+        let saved = [];
+        try {
+            const raw = localStorage.getItem(PRICE_WINDOWS_KEY);
+            if (raw) saved = JSON.parse(raw) || [];
+        } catch (e) { saved = []; }
+        return saved;
     }
 
     // ── Buscador de instrumentos (HV-010) + alta en el panel (HV-011) ──────────
@@ -1296,15 +1367,15 @@
                 body: JSON.stringify({ symbol: symbol, name: name })
             });
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
-            selectedSymbol = symbol;
-            try { localStorage.setItem('chartSymbol', selectedSymbol); } catch (e) { }
             // Cierra la modal del buscador tras añadir.
             const modalEl = document.getElementById('searchModal');
             if (modalEl && window.bootstrap) {
                 window.bootstrap.Modal.getOrCreateInstance(modalEl).hide();
             }
             refreshTrackedCurrencies();
-            fetchAndRender(true).then(function () { loadHistory(chartMode); });
+            // Abre directamente la ventana del símbolo recién añadido (HV-054).
+            createPriceWindow(symbol.toUpperCase());
+            fetchAndRender(true);
         } catch (e) {
             if (btn) { btn.disabled = false; btn.textContent = '+ Añadir'; }
             alert('No se pudo añadir el símbolo: ' + e.message);
@@ -1359,30 +1430,6 @@
         }
     }
 
-    function initRemoveSymbol() {
-        const btn = document.getElementById('removeSymbolBtn');
-        if (!btn) return;
-        btn.addEventListener('click', async function () {
-            if (!selectedSymbol || selectedSymbol === 'ALL') {
-                alert('Selecciona un símbolo concreto para dejar de seguirlo.');
-                return;
-            }
-            const sym = selectedSymbol;
-            if (!confirm('¿Dejar de seguir ' + sym + '? Se borrará su histórico de ticks.')) return;
-            btn.disabled = true;
-            try {
-                const resp = await fetch('/api/instruments/track?symbol=' + encodeURIComponent(sym), { method: 'DELETE' });
-                if (!resp.ok && resp.status !== 404) throw new Error('HTTP ' + resp.status);
-                selectedSymbol = 'ALL';
-                try { localStorage.setItem('chartSymbol', selectedSymbol); } catch (e) { }
-                fetchAndRender(true).then(function () { loadHistory(chartMode); });
-            } catch (e) {
-                alert('No se pudo quitar el símbolo: ' + e.message);
-            } finally {
-                btn.disabled = false;
-            }
-        });
-    }
 
     // ── Posiciones reales del usuario (HV-013): acciones por fila + modal de alta ──
     function initPositionsActions() {
@@ -1468,8 +1515,9 @@
                 now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
                 dateInput.value = now.toISOString().slice(0, 16);
             }
-            if (symInput && !symInput.value && selectedSymbol && selectedSymbol !== 'ALL') {
-                symInput.value = selectedSymbol;
+            // Prefill con el símbolo de la última ventana abierta (antes: el del selector global).
+            if (symInput && !symInput.value && priceWindows.length) {
+                symInput.value = priceWindows[priceWindows.length - 1].symbol;
             }
             if (dlist) {
                 try {
@@ -1507,10 +1555,9 @@
                 if (!resp.ok) throw new Error((await resp.text()) || ('HTTP ' + resp.status));
                 window.bootstrap.Modal.getOrCreateInstance(modalEl).hide();
                 form.reset();
-                selectedSymbol = symbol.toUpperCase();
-                try { localStorage.setItem('chartSymbol', selectedSymbol); } catch (e) { }
                 refreshTrackedCurrencies();
-                fetchAndRender(true).then(function () { loadHistory(chartMode); });
+                createPriceWindow(symbol.toUpperCase());   // abre su ventana si no la tenía (HV-054)
+                fetchAndRender(true);
             } catch (err) {
                 showPosError('No se pudo crear la posición: ' + err.message);
             } finally {
@@ -1703,8 +1750,8 @@
                 return r.json();
             }).then(function () {
                 refreshInfo();
-                fetchAndRender(true);                                 // refresca estado/datos
-                if (chartMode !== 'LIVE') loadHistory(chartMode);     // recarga histórico con el nuevo proveedor
+                fetchAndRender(true);      // refresca estado/datos
+                reloadAllPriceWindows();   // recarga el histórico de cada ventana con el nuevo proveedor
             }).catch(function () {
                 if (hint) hint.textContent = 'Error al cambiar';
             }).finally(function () { sel.disabled = false; });
@@ -1771,7 +1818,7 @@
                 now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
                 dateInput.value = now.toISOString().slice(0, 16);
             }
-            if (symInput && !symInput.value && selectedSymbol && selectedSymbol !== 'ALL') symInput.value = selectedSymbol;
+            if (symInput && !symInput.value && priceWindows.length) symInput.value = priceWindows[priceWindows.length - 1].symbol;
             load();
             if (symInput) symInput.focus();
         });
@@ -1861,25 +1908,31 @@
     initPrivacyMode();
     initProviderControl();
     initChartRefreshControl();
-    initSymbolControl();
     initHistoryControl();
-    initYMarginControl();
-    initCandleControl();
-    initForecastControl();
-    initRangeBar();
     initInstrumentSearch();
-    initRemoveSymbol();
     initPositionsActions();
     initPositionModal();
     initCashModal();
     initDividendModal();
     initImportModal();
     initAccountHistoryControl();
-    // Primer pintado completo; el gráfico de precios arranca en el rango diario real de
-    // Yahoo (1D). Cargamos las divisas primero para que la variación del rango salga en su
-    // moneda desde el primer render, y luego el histórico tras tener símbolos.
+    const savedWindows = initPriceWindows();
+    // Primer pintado completo. Cargamos las divisas primero para que la variación del rango
+    // salga en su moneda desde el primer render; después restauramos las ventanas de precios
+    // de la sesión anterior (o abrimos una con el primer símbolo seguido si no había ninguna).
     refreshTrackedCurrencies().finally(function () {
-        fetchAndRender(true).then(function () { loadHistory(chartMode); });
+        fetchAndRender(true).then(function () {
+            if (savedWindows.length) {
+                savedWindows.forEach(function (w) {
+                    createPriceWindow(w.symbol, Object.assign({}, w, { deferLoad: true }));
+                });
+                reloadAllPriceWindows();   // carga en serie, no N peticiones a la vez
+            } else if (lastSeries.length) {
+                // Arranque limpio: una ventana de cortesía con el primer símbolo seguido,
+                // heredando los ajustes del gráfico único anterior a HV-054.
+                createPriceWindow(lastSeries[0].symbol, legacyChartPrefs());
+            }
+        });
     });
     fetchAccountHistory(); // histórico del valor de cuenta (refresco propio, los snapshots son cada pocos min)
     fetchMetrics();        // métricas avanzadas (HV-048)

@@ -97,6 +97,27 @@ body {
   white-space: nowrap;
 }
 
+/* ── Ventanas de "Evolución de precios" (HV-054) ──────────────────────────
+   Rejilla flexible: 1 columna en pantallas estrechas y un MÁXIMO de 2 columnas
+   a partir de lg, con tantas filas como haga falta. Se usa un número fijo de
+   columnas (no auto-fill) precisamente para que nunca aparezca una tercera. */
+.price-windows {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 992px) {
+  .price-windows { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Número impar de ventanas: la última quedaría sola en su fila dejando un hueco,
+     así que se estira a las dos columnas. :last-child:nth-child(odd) sólo casa cuando
+     el elemento es el último Y ocupa posición impar, es decir, cuando el total es impar
+     (1, 3, 5…). Con total par, la última va en posición par y no casa. */
+  .price-windows > .price-window:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+/* minmax(0,…) + min-width:0 evitan que un canvas ancho desborde su columna. */
+.price-window { min-width: 0; }
+.price-window canvas { max-width: 100%; }
+
 /* Modo visor puro (HV-046): oculta los controles de edición (solo lectura). */
 .dashboard.viewer-mode .js-editor-only { display: none !important; }
 #viewerToggle.active { background-color: var(--comillas-azul, #003366); color: #fff; }
