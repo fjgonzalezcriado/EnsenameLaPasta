@@ -102,61 +102,21 @@
         </button>
     </div>
 
-    <!-- Gráfico -->
-    <div class="row g-3 mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-                        <h5 class="card-title mb-0">📈 Evolución de precios <small class="text-muted fw-normal">(valor, eje a la derecha)</small></h5>
-                        <span id="chartDelta" class="small fw-semibold" title="Variación acumulada en el rango seleccionado (importe en la divisa del instrumento y porcentaje)"></span>
-                        <div class="form-check form-switch mb-0 small" title="Cambiar entre línea y velas japonesas (OHLC). Las velas requieren un único símbolo seleccionado">
-                            <input class="form-check-input" type="checkbox" role="switch" id="candleSwitch">
-                            <label class="form-check-label text-muted" for="candleSwitch">🕯️ Velas</label>
-                        </div>
-                        <div class="form-check form-switch mb-0 small" title="Señales ML.NET (requieren un único símbolo): pronóstico SSA (línea + banda + señal) y clasificación sube/baja (SDCA sobre features técnicas). Indicadores, no asesoramiento financiero">
-                            <input class="form-check-input" type="checkbox" role="switch" id="forecastSwitch">
-                            <label class="form-check-label text-muted" for="forecastSwitch">🔮 Señales ML</label>
-                        </div>
-                        <span id="forecastSignal" class="small fw-semibold"></span>
-                        <span id="directionSignal" class="small fw-semibold"></span>
-                        <label class="d-flex align-items-center gap-1 mb-0 small">
-                            <span class="text-muted">Símbolo:</span>
-                            <select id="symbolSelect" class="form-select form-select-sm w-auto py-0"></select>
-                            <button type="button" id="removeSymbolBtn" class="btn btn-outline-danger btn-sm py-0 js-editor-only"
-                                    title="Dejar de seguir el símbolo seleccionado (borra su histórico)">✕</button>
-                        </label>
-                    </div>
-                    <div class="chart-wrap" style="height: 460px;">
-                        <canvas id="chartPrices"></canvas>
-                    </div>
-                    <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
-                        <div class="btn-group btn-group-sm" role="group" aria-label="Rango temporal" id="rangeBar">
-                            <button type="button" class="btn btn-outline-secondary active" data-range="1D">1D</button>
-                            <button type="button" class="btn btn-outline-secondary" data-range="5D">5D</button>
-                            <button type="button" class="btn btn-outline-secondary" data-range="1M">1M</button>
-                            <button type="button" class="btn btn-outline-secondary" data-range="3M">3M</button>
-                            <button type="button" class="btn btn-outline-secondary" data-range="6M">6M</button>
-                            <button type="button" class="btn btn-outline-secondary" data-range="YTD">YTD</button>
-                            <button type="button" class="btn btn-outline-secondary" data-range="1A">1A</button>
-                            <button type="button" class="btn btn-outline-secondary" data-range="3A">3A</button>
-                            <button type="button" class="btn btn-outline-secondary" data-range="5A">5A</button>
-                        </div>
-                        <span id="rangeHint" class="text-muted small"></span>
-                        <label class="d-flex align-items-center gap-1 mb-0 small ms-auto" title="Margen del eje Y por encima del techo y por debajo del suelo: menos margen = línea más ampliada (extensión); más margen = línea más comprimida">
-                            <span class="text-muted">Margen Y:</span>
-                            <select id="yMarginSelect" class="form-select form-select-sm w-auto py-0">
-                                <option value="0">Ajustado</option>
-                                <option value="0.01">±1 %</option>
-                                <option value="0.02">±2 %</option>
-                                <option value="0.05">±5 %</option>
-                                <option value="0.10">±10 %</option>
-                                <option value="0.20">±20 %</option>
-                            </select>
-                        </label>
-                    </div>
-                </div>
-            </div>
+    <!-- Evolución de precios - Sistema de ventanas múltiples (HV-054) -->
+    <div class="mb-4">
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+            <h5 class="mb-0">📈 Evolución de precios</h5>
+            <label class="d-flex align-items-center gap-1 mb-0 small js-editor-only">
+                <span class="text-muted">+ Nueva ventana:</span>
+                <select id="newPriceWindowSelect" class="form-select form-select-sm w-auto py-0" title="Selecciona un símbolo para crear una nueva ventana">
+                    <option value="">-- Selecciona --</option>
+                </select>
+            </label>
+        </div>
+
+        <!-- Rejilla de ventanas: 1 columna en móvil, máximo 2 en escritorio (ver site.css) -->
+        <div id="priceWindowsContainer" class="price-windows">
+            <!-- Las ventanas de precios se insertan aquí dinámicamente (dashboard.js) -->
         </div>
     </div>
 

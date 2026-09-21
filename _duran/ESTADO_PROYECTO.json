@@ -95,8 +95,8 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.43.0-vix-feature-ml",
-                   "ultima_actualizacion":  "2026-08-31",
+                   "version_actual":  "1.44.0-precios-multiventana",
+                   "ultima_actualizacion":  "2026-09-21",
                    "actualizado_por":  "RemitiraLaLluvia",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
                },
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-054",
+                                               "titulo":  "Evolucion de precios multi-ventana (una por simbolo, rejilla de 2 columnas)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "media",
+                                               "fechaCreacion":  "2026-09-21",
+                                               "fechaInicio":  "2026-09-21",
+                                               "fechaCompletado":  "2026-09-21",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  null,
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "Francisco Javier Gonzalez Criado",
+                                               "notas":  "El usuario pidio que la ventana \u0027Evolucion de precios\u0027 dejara de ser unica y se pudieran crear tantas como valores se seleccionen del combo, cada una con su icono de cierre, en rejilla flex de maximo 2 columnas y las filas necesarias. REFACTOR DE ESTADO: lo que eran variables de modulo del grafico unico (priceChart, chartMode, chartType, yMarginPct, forecastActive, lastForecast, lastSignal, lastRenderedSeries, selectedSymbol) pasa a vivir dentro de un objeto \u0027win\u0027 por ventana; renderChart, loadHistory, updateChartDelta, loadForecast/loadSignal y renderForecastBadge/renderDirectionBadge reciben ahora ese win. Cada ventana tiene su instancia de Chart.js (destroy() al cerrar, sin fugas) y su rango, linea/velas, margen Y y señales ML independientes. UI: cabecera con combo \u0027+ Nueva ventana\u0027 que solo lista simbolos seguidos SIN ventana abierta; cada tarjeta se construye por DOM (createElement/appendChild, primer sitio del proyecto que lo hace: el resto renderiza por innerHTML) con canvas, barra de rangos, margen Y, switches de velas y señales ML, badges y boton ✕. MAQUETACION (site.css): .price-windows en grid, 1 columna por debajo de lg y repeat(2, minmax(0,1fr)) a partir de 992px -- numero FIJO de columnas, no auto-fill, para que nunca aparezca una tercera; con numero impar de ventanas la ultima se estira a todo el ancho con \u0027.price-window:last-child:nth-child(odd) { grid-column: 1 / -1 }\u0027 (casa solo si es la ultima Y esta en posicion impar, o sea, si el total es impar). El reajuste al abrir/cerrar es automatico por CSS, sin JS. PERSISTENCIA: localStorage \u0027priceWindows\u0027 guarda simbolo+rango+tipo+margen+ML de cada ventana y se restauran al recargar; legacyChartPrefs() hereda las preferencias del grafico unico anterior (chartRange/chartType/chartYMargin/chartForecast) en la primera ventana para no perder los ajustes del usuario. RENDIMIENTO: la restauracion y el cambio de proveedor cargan los historicos EN SERIE (reloadAllPriceWindows), no en paralelo, para no lanzar N peticiones simultaneas al proveedor (plan free de Twelve Data = 8 req/min); tope de 8 ventanas. El polling de 3 s (fetchAndRender) ya NO toca el grafico: se elimino la rama \u0027chartMode === LIVE\u0027, muerta desde HV-037 al quitarse el boton En vivo, junto con lastChartAt, positionCountdown y tickCountdownLoop. REGRESION ACEPTADA POR EL USUARIO: al desaparecer el selector global desaparecio su boton ✕ de \u0027dejar de seguir simbolo\u0027; se ofrecio como boton 🗑 por ventana y el usuario pidio quitarlo, asi que la accion de dejar de seguir un simbolo (DELETE /api/instruments/track, que borra su historico de ticks) YA NO ESTA EN LA INTERFAZ -- el endpoint sigue existiendo. Anadir simbolos sigue en el buscador. Bug corregido durante las pruebas: \u0027el.className = ...\u0027 sobrescribia la clase entera y borraba los hooks js-win-delta / js-win-forecast-badge / js-win-signal-badge (funcionaba por cachear la referencia al elemento, pero dejaba el DOM inconsistente); reintroducido el hook en las 10 asignaciones. SOLO FRONTEND: cshtml/css/js, sin cambios en Domain/Application/Infrastructure, sin migracion; 191 tests verdes (sin cambios). Build 0 errores/0 avisos. VERIFICACION end-to-end con Chrome headless pilotado por DevTools Protocol (WebSocket nativo de Node 22, sin instalar Playwright): contenedor 1529 px -\u003e 1 ventana 1529 (ancho completo), 2 -\u003e 757+757, 3 -\u003e 757+757 y 1529 abajo, 4 -\u003e 757x4 en dos filas, y al cerrar una de 4 la ultima de las 3 restantes se estira sola a 1529; 1 columna a 600 px y 2 a 1600 px; los 4 canvas realmente pintados por Chart.js (getImageData); cierre devuelve el simbolo al combo; restauracion tras recarga OK; independencia comprobada (rango 1M solo en NUCL.SW, velas solo en MBOT, margen ±20% solo en ONDS); señales ML por ventana con overlay SSA en la activada y degradacion honesta del clasificador (\u0027se necesitan \u003e= 60 puntos\u0027); 0 errores de consola en todo el recorrido. Rama: main (sin rama feature; el repo local no tenia control de versiones activo en sesiones previas)."
+                                           },
                                            {
                                                "codigo":  "HV-053",
                                                "titulo":  "Agrupar posiciones abiertas por simbolo con precio medio ponderado (estilo broker)",
@@ -1202,28 +1219,28 @@
                                        ]
                    },
     "ultimaSesion":  {
-                         "fecha":  "2026-08-31",
+                         "fecha":  "2026-09-21",
                          "evolutivoActivo":  null,
                          "usuario":  "RemitiraLaLluvia",
                          "ramaActiva":  null,
-                         "proximoPaso":  "Ninguno pendiente. Opcional: aplicar el mismo agrupado de HV-053 en trades cerrados; explorar mas features de regimen de mercado (p.ej. ratio VIX/VIX3M, o VIX de otros indices para instrumentos no-US).",
-                         "resumenSesion":  "Dos cambios: (1) Cabecera del dashboard reorganizada: el estado del feed (Visor, Proveedor, Ticks, BD, Ultimo tick) se movio del bloque duplicado en Index.cshtml al header comun (_Layout.cshtml) via una seccion Razor opcional @section HeaderExtra, eliminando el titulo duplicado; verificado con smoke real (HTML servido por el servidor) confirmando que aparece en el Dashboard y no en Ayuda. (2) HV-052: a peticion del usuario (le comentaron que el VIX podia ser util) se anadio el VIX como feature de regimen de mercado al clasificador ML sube/baja (MlDirectionClassifier, HV-044/045): FeatureCount 12-\u003e14 (nivel + variacion diaria del VIX, alineado por dia UTC con IMarketHistoryProvider/Yahoo), con degradacion a neutro (0) si no hay datos o el simbolo ya es el propio VIX. 191 tests verdes (antes 190, +1 de degradacion). Smoke real Yahoo: AAPL/HY9H.F/^VIX responden featureCount 14 sin errores.",
+                         "proximoPaso":  "Ninguno pendiente. Opcional: reubicar en la interfaz la accion \u0027dejar de seguir simbolo\u0027 retirada en HV-054 (el endpoint DELETE /api/instruments/track sigue disponible); revisar si el tope de 8 ventanas y la altura de 320 px por grafico encajan con el uso real.",
+                         "resumenSesion":  "Evolutivo HV-054: la ventana \u0027Evolucion de precios\u0027 deja de ser unica y pasa a ser un sistema multi-ventana (una por simbolo) en rejilla de maximo 2 columnas, cada una con su boton de cierre ✕. El estado del grafico (rango, linea/velas, margen Y, señales ML) pasa de variables de modulo a un objeto por ventana, con su propia instancia de Chart.js. Con numero impar de ventanas la ultima ocupa todo el ancho (regla CSS :last-child:nth-child(odd), reajuste automatico sin JS). Ventanas persistidas en localStorage y restauradas al recargar, heredando las preferencias del grafico unico anterior. Carga de historicos en serie y tope de 8 ventanas para no saturar al proveedor. Se elimino codigo muerto del modo LIVE (rama de fetchAndRender, lastChartAt, positionCountdown, tickCountdownLoop). A peticion del usuario NO se mantuvo el boton de \u0027dejar de seguir simbolo\u0027, que desaparece de la interfaz (el endpoint sigue existiendo). Solo frontend: 191 tests verdes sin cambios, build 0/0. Verificado end-to-end con Chrome headless via DevTools Protocol (anchos 1/2/3/4 ventanas, cierre, restauracion, independencia entre ventanas, canvas pintados, 0 errores de consola).",
                          "archivosModificados":  [
-                                                     "03_Desarrollo/EnsenameLaPasta.Web/Views/Shared/_Layout.cshtml",
                                                      "03_Desarrollo/EnsenameLaPasta.Web/Views/Dashboard/Index.cshtml",
-                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/MarketData/MlDirectionClassifier.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Tests/Infrastructure/MlDirectionClassifierTests.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/css/site.css",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/js/dashboard.js",
                                                      "_duran/ESTADO_PROYECTO.json",
-                                                     "_duran/FUNCIONALIDADES.md"
+                                                     "_duran/FUNCIONALIDADES.md",
+                                                     "_duran/METRICAS.json"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 40 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte. Header: el estado del feed vive en _Layout.cshtml via seccion Razor HeaderExtra (opcional, solo la vista Dashboard la define)."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-07-08 OK (Ayuda in-app: HelpController + Markdig renderiza manual/glosario/instalacion; build 0/0 con Sonar; smoke endpoints OK)",
+                     "ultimo_build":  "2026-09-21 OK (HV-054 multi-ventana de precios; build 0/0; 191 tests verdes; smoke end-to-end con Chrome headless via CDP)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
-                     "evolutivos_completados_mes":  50
+                     "evolutivos_completados_mes":  51
                  },
     "alertas":  {
                     "activas":  [
