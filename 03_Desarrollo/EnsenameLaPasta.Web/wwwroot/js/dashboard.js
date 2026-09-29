@@ -1085,6 +1085,49 @@
         }
     }
 
+    // ── Noticias por símbolo (HV-055) ───────────────────────────────────────
+    // A diferencia de pronóstico/señal, las noticias son por símbolo (no por rango): se piden
+    // una vez al activar el switch y no se recargan al cambiar de rango.
+    function renderNewsList(win) {
+        const el = win.els.newsList;
+        if (!el) return;
+        if (!win.newsActive) { el.classList.add('d-none'); el.innerHTML = ''; return; }
+        el.classList.remove('d-none');
+
+        const n = win.news;
+        if (!n) { el.innerHTML = '<div class="text-muted">Cargando noticias…</div>'; return; }
+        if (!n.hasNews || !n.items || !n.items.length) {
+            el.innerHTML = '<div class="text-muted">' + escapeHtml(n.message || 'Sin noticias.') + '</div>';
+            return;
+        }
+
+        el.innerHTML = n.items.map(function (item) {
+            const when = item.publishedAtUtc ? new Date(item.publishedAtUtc).toLocaleString('es-ES') : '';
+            const pub = item.publisher ? escapeHtml(item.publisher) : '';
+            const meta = [pub, when].filter(Boolean).join(' · ');
+            return '<div class="news-item">'
+                + '<a href="' + escapeHtml(item.link) + '" target="_blank" rel="noopener noreferrer">'
+                +   escapeHtml(item.title) + '</a>'
+                + (meta ? '<div class="text-muted news-item-meta">' + meta + '</div>' : '')
+                + '</div>';
+        }).join('');
+    }
+
+    async function loadNews(win) {
+        if (!win.newsActive) { win.news = null; renderNewsList(win); return; }
+        renderNewsList(win);   // muestra "Cargando…" mientras llega
+        try {
+            const resp = await fetch('/api/news?symbol=' + encodeURIComponent(win.symbol) + '&max=6');
+            if (!resp.ok) { win.news = null; renderNewsList(win); return; }
+            const n = await resp.json();
+            if (win.closed || n.symbol !== win.symbol) return;   // la ventana se cerró entretanto
+            win.news = n;
+            renderNewsList(win);
+        } catch (e) {
+            win.news = null; renderNewsList(win);
+        }
+    }
+
     // ── Histórico real de Yahoo (/api/history) para una ventana ────────────────
     async function loadHistory(win) {
         const hint = win.els.rangeHint;
@@ -1127,7 +1170,8 @@
             localStorage.setItem(PRICE_WINDOWS_KEY, JSON.stringify(priceWindows.map(function (w) {
                 return {
                     symbol: w.symbol, range: w.range, chartType: w.chartType,
-                    yMarginPct: w.yMarginPct, forecastActive: w.forecastActive
+                    yMarginPct: w.yMarginPct, forecastActive: w.forecastActive,
+                    newsActive: w.newsActive
                 };
             })));
         } catch (e) { }
@@ -1179,6 +1223,11 @@
             +   '</div>'
             +   '<span class="js-win-forecast-badge small fw-semibold"></span>'
             +   '<span class="js-win-signal-badge small fw-semibold"></span>'
+            +   '<div class="form-check form-switch mb-0 small" title="Titulares recientes de Yahoo Finance para este símbolo">'
+            +     '<input class="form-check-input js-win-news" type="checkbox" role="switch" id="' + win.id + '-news"'
+            +       (win.newsActive ? ' checked' : '') + '>'
+            +     '<label class="form-check-label text-muted" for="' + win.id + '-news">📰 Noticias</label>'
+            +   '</div>'
             + '</div>'
             + '<div class="chart-wrap" style="height: 320px;"><canvas class="js-win-canvas"></canvas></div>'
             + '<div class="d-flex flex-wrap align-items-center gap-2 mt-2">'
@@ -1189,6 +1238,7 @@
             +     '<select class="js-win-margin form-select form-select-sm w-auto py-0">' + marginOpts + '</select>'
             +   '</label>'
             + '</div>'
+            + '<div class="js-win-news-list news-list small mt-2' + (win.newsActive ? '' : ' d-none') + '"></div>'
             + '</div>';
     }
 
@@ -1217,6 +1267,8 @@
             forecastActive: !!o.forecastActive,
             forecast: null,
             signal: null,
+            newsActive: !!o.newsActive,
+            news: null,
             chart: null,
             lastSeries: null,
             closed: false,
@@ -1236,7 +1288,8 @@
             rangeHint: card.querySelector('.js-win-hint'),
             forecastBadge: card.querySelector('.js-win-forecast-badge'),
             signalBadge: card.querySelector('.js-win-signal-badge'),
-            rangeBar: card.querySelector('.js-win-range')
+            rangeBar: card.querySelector('.js-win-range'),
+            newsList: card.querySelector('.js-win-news-list')
         };
 
         // ── Listeners propios de esta ventana ──
@@ -1284,12 +1337,25 @@
             }
         });
 
+        card.querySelector('.js-win-news').addEventListener('change', function (e) {
+            win.newsActive = e.target.checked;
+            savePriceWindows();
+            if (win.newsActive) {
+                loadNews(win);
+            } else {
+                win.news = null;
+                renderNewsList(win);
+            }
+        });
+
         priceWindows.push(win);
         savePriceWindows();
         ensureSymbolOptions(lastSeries);   // el símbolo ya no está libre
         // deferLoad: al restaurar varias ventanas de golpe, el llamante las carga en serie
         // (reloadAllPriceWindows) en vez de lanzar N peticiones simultáneas al proveedor.
         if (!o.deferLoad) loadHistory(win);
+        // Las noticias son por símbolo (no dependen del rango): se cargan aparte del histórico.
+        if (win.newsActive) loadNews(win);
         return win;
     }
 

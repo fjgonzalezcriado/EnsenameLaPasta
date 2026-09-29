@@ -118,6 +118,23 @@ body {
 .price-window { min-width: 0; }
 .price-window canvas { max-width: 100%; }
 
+/* ── Noticias por ventana (HV-055) ────────────────────────────────────────
+   Lista de titulares con scroll propio para no descuadrar la altura de la tarjeta. */
+.news-list {
+  max-height: 180px;
+  overflow-y: auto;
+  border-top: 1px solid var(--bs-border-color, #dee2e6);
+  padding-top: .5rem;
+}
+.news-item + .news-item {
+  margin-top: .5rem;
+  padding-top: .5rem;
+  border-top: 1px dashed var(--bs-border-color, #dee2e6);
+}
+.news-item-meta {
+  font-size: .75rem;
+}
+
 /* Modo visor puro (HV-046): oculta los controles de edición (solo lectura). */
 .dashboard.viewer-mode .js-editor-only { display: none !important; }
 #viewerToggle.active { background-color: var(--comillas-azul, #003366); color: #fff; }

@@ -95,8 +95,8 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.44.0-precios-multiventana",
-                   "ultima_actualizacion":  "2026-09-21",
+                   "version_actual":  "1.45.0-noticias-por-simbolo",
+                   "ultima_actualizacion":  "2026-09-29",
                    "actualizado_por":  "RemitiraLaLluvia",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
                },
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-055",
+                                               "titulo":  "Noticias por simbolo (titulares de Yahoo Finance) en cada ventana de precios",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-09-29",
+                                               "fechaInicio":  "2026-09-29",
+                                               "fechaCompletado":  "2026-09-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  null,
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "RemitiraLaLluvia",
+                                               "notas":  "El usuario pregunto si la app podia recopilar noticias/informacion relevante por simbolo. Se propuso Yahoo como fuente (sin API key, coherente con el resto del proyecto) y el usuario confirmo. Backend: INewsProvider + YahooNewsProvider reutilizan el MISMO endpoint que YahooInstrumentSearchProvider (HV-010/034), /v1/finance/search, que ya devuelve un array news[] cuando se pide con newsCount\u003e0 -- cero HttpClient nuevo, cero parsing de RSS. GetNewsAsync degrada honesto (try/catch, nunca lanza): symbol vacio, HTTP no-2xx, JSON invalido o sin cobertura devuelven SymbolNews.HasNews=false con mensaje, mismo principio que SsaPriceForecaster (HV-043) y MlDirectionClassifier (HV-044). Items sin Title/Link se filtran; se ordenan por PublishedAtUtc descendente; se acota a max (clamp 1-20 en el controller). NewsController GET /api/news?symbol\u0026max. DI: INewsProvider singleton, siempre disponible con independencia del proveedor de precios activo (Yahoo/Twelve Data/Alpha Vantage). CORRECCION EN DESARROLLO: la 1a version fijaba lang=es-ES\u0026region=ES para titulares en espanol; verificado contra Yahoo real, eso vaciaba la cobertura de small/mid caps de la watchlist (MBOT y NUCL.SW sin nada) frente a la query sin idioma fijo (cobertura real, mayormente en ingles) -- se quito lang/region, priorizando cobertura sobre idioma (ver LECCIONES.md L-007). Frontend (multi-ventana de HV-054): cada price-window gana un switch \u0027Noticias\u0027 independiente de \u0027Senales ML\u0027 (las noticias son por simbolo, no por rango, así que no se recargan al cambiar de rango) que al activarse pide /api/news y pinta una lista con scroll propio (titular enlazado target=_blank rel=noopener, editorial + fecha es-ES) bajo el grafico; degrada a \u0027Sin noticias para este simbolo.\u0027 sin romper nada cuando no hay cobertura. Estado newsActive anadido al esquema persistido de priceWindows en localStorage (se restaura igual que rango/velas/margen/señales). 8 tests nuevos (YahooNewsProviderTests): mapeo + orden desc por fecha, sin cobertura degrada con mensaje, simbolo vacio no llama al endpoint, HTTP 500 degrada sin lanzar, JSON malformado degrada sin lanzar, item sin titulo/link se filtra, respeta el max indicado, query esperada (q/newsCount/quotesCount). 199 tests verdes (191+8). Build 0 errores/0 avisos. Smoke end-to-end con Yahoo real + Chrome headless via DevTools Protocol (mismo enfoque sin Playwright de HV-054): AAPL/MBOT devuelven titulares reales con enlaces funcionales; NUCL.SW (ETF suizo, cobertura pobre) degrada limpio al mensaje sin cobertura; el estado newsActive de ambas ventanas sobrevive a una recarga completa de pagina. Solo backend+frontend, sin migracion, sin cambios en Domain. Rama: main (sin rama feature, siguiendo la practica de las ultimas sesiones)."
+                                           },
                                            {
                                                "codigo":  "HV-054",
                                                "titulo":  "Evolucion de precios multi-ventana (una por simbolo, rejilla de 2 columnas)",
@@ -1219,25 +1236,31 @@
                                        ]
                    },
     "ultimaSesion":  {
-                         "fecha":  "2026-09-21",
+                         "fecha":  "2026-09-29",
                          "evolutivoActivo":  null,
                          "usuario":  "RemitiraLaLluvia",
                          "ramaActiva":  null,
-                         "proximoPaso":  "Ninguno pendiente. Opcional: reubicar en la interfaz la accion \u0027dejar de seguir simbolo\u0027 retirada en HV-054 (el endpoint DELETE /api/instruments/track sigue disponible); revisar si el tope de 8 ventanas y la altura de 320 px por grafico encajan con el uso real.",
-                         "resumenSesion":  "Evolutivo HV-054: la ventana \u0027Evolucion de precios\u0027 deja de ser unica y pasa a ser un sistema multi-ventana (una por simbolo) en rejilla de maximo 2 columnas, cada una con su boton de cierre ✕. El estado del grafico (rango, linea/velas, margen Y, señales ML) pasa de variables de modulo a un objeto por ventana, con su propia instancia de Chart.js. Con numero impar de ventanas la ultima ocupa todo el ancho (regla CSS :last-child:nth-child(odd), reajuste automatico sin JS). Ventanas persistidas en localStorage y restauradas al recargar, heredando las preferencias del grafico unico anterior. Carga de historicos en serie y tope de 8 ventanas para no saturar al proveedor. Se elimino codigo muerto del modo LIVE (rama de fetchAndRender, lastChartAt, positionCountdown, tickCountdownLoop). A peticion del usuario NO se mantuvo el boton de \u0027dejar de seguir simbolo\u0027, que desaparece de la interfaz (el endpoint sigue existiendo). Solo frontend: 191 tests verdes sin cambios, build 0/0. Verificado end-to-end con Chrome headless via DevTools Protocol (anchos 1/2/3/4 ventanas, cierre, restauracion, independencia entre ventanas, canvas pintados, 0 errores de consola).",
+                         "proximoPaso":  "Ninguno pendiente. Opcional: reubicar en la interfaz la accion \u0027dejar de seguir simbolo\u0027 retirada en HV-054 (el endpoint DELETE /api/instruments/track sigue disponible); revisar si el tope de 8 ventanas y la altura de 320 px por grafico encajan con el uso real; considerar un segundo proveedor de noticias (p.ej. Alpha Vantage NEWS_SENTIMENT) para small/mid caps sin cobertura en Yahoo.",
+                         "resumenSesion":  "Evolutivo HV-055: noticias por simbolo. El usuario pregunto si la app podia recopilar noticias por simbolo; se propuso Yahoo (sin API key) y se implemento INewsProvider/YahooNewsProvider reutilizando el mismo endpoint de busqueda de instrumentos (/v1/finance/search) que ya devuelve un array news[] con newsCount\u003e0, sin HttpClient nuevo ni parsing de RSS. Degrada honesto (nunca lanza), igual que el pronostico SSA y el clasificador ML: sin cobertura, HTTP fallido o JSON invalido devuelven HasNews=false con mensaje. GET /api/news?symbol\u0026max. Frontend: cada ventana de precios (HV-054) gana un switch \u0027Noticias\u0027 independiente de \u0027Senales ML\u0027 (las noticias son por simbolo, no por rango) que pinta una lista con scroll de titulares enlazados (target=_blank) bajo el grafico; newsActive se persiste en el mismo esquema de priceWindows en localStorage. CORRECCION EN DESARROLLO: la primera version fijaba lang=es-ES\u0026region=ES para titulares en espanol, pero eso vaciaba la cobertura de small/mid caps de la watchlist real (MBOT y NUCL.SW sin nada); se quito el idioma fijo, priorizando cobertura sobre idioma (LECCIONES.md L-007). 8 tests nuevos (YahooNewsProviderTests), 199 verdes en total (191+8), build 0/0. Smoke end-to-end con Yahoo real + Chrome headless via DevTools Protocol: AAPL/MBOT con titulares reales y enlaces funcionales, NUCL.SW degrada limpio a \u0027Sin noticias para este simbolo.\u0027, newsActive sobrevive a una recarga completa en ambos casos. Solo backend+frontend, sin migracion, sin cambios en Domain.",
                          "archivosModificados":  [
-                                                     "03_Desarrollo/EnsenameLaPasta.Web/Views/Dashboard/Index.cshtml",
+                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/DependencyInjection.cs",
                                                      "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/css/site.css",
                                                      "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/js/dashboard.js",
                                                      "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/FUNCIONALIDADES.md",
-                                                     "_duran/METRICAS.json"
+                                                     "_duran/LECCIONES.md",
+                                                     "_duran/METRICAS.json",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Dtos/SymbolNews.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/INewsProvider.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/MarketData/YahooNewsProvider.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Tests/Infrastructure/YahooNewsProviderTests.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/Controllers/NewsController.cs"
                                                  ],
-                         "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 40 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte. Header: el estado del feed vive en _Layout.cshtml via seccion Razor HeaderExtra (opcional, solo la vista Dashboard la define)."
+                         "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 41 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte. Header: el estado del feed vive en _Layout.cshtml via seccion Razor HeaderExtra (opcional, solo la vista Dashboard la define). Nuevo: /api/news (INewsProvider/YahooNewsProvider) sin API key, siempre Yahoo con independencia del proveedor de precios activo."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-09-21 OK (HV-054 multi-ventana de precios; build 0/0; 191 tests verdes; smoke end-to-end con Chrome headless via CDP)",
+                     "ultimo_build":  "2026-09-29 OK (HV-055 noticias por simbolo; build 0/0; 199 tests verdes; smoke end-to-end con Chrome headless via CDP)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
                      "evolutivos_completados_mes":  51

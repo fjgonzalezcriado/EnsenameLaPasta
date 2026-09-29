@@ -12,6 +12,11 @@ _Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscad
 
 ## ✅ Completados
 
+#### HV-055 Noticias por símbolo (titulares de Yahoo Finance) en cada ventana de precios ✅
+- **Estado**: ✅ Completado · **Período**: 2026-09-29 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
+- **Spec**: sin spec formal (evolutivo solicitado directamente por el usuario)
+- **Resumen**: El usuario preguntó si la app podía recopilar noticias/información relevante por símbolo. Se propuso Yahoo como fuente (sin API key, coherente con el resto del proyecto) y se implementó `INewsProvider`/`YahooNewsProvider` reutilizando el **mismo endpoint** que `YahooInstrumentSearchProvider` (HV-010/034), `/v1/finance/search`, que ya devuelve un array `news[]` cuando se pide con `newsCount > 0` — cero `HttpClient` nuevo, cero parsing de RSS. `GetNewsAsync` **degrada honesto** (try/catch, nunca lanza): símbolo vacío, HTTP no-2xx, JSON inválido o sin cobertura devuelven `SymbolNews.HasNews = false` con un mensaje, mismo principio que `SsaPriceForecaster` (HV-043) y `MlDirectionClassifier` (HV-044). Los ítems sin título/link se filtran; se ordenan por fecha de publicación descendente; se acotan a `max` (clamp 1-20 en el controller). `NewsController` → `GET /api/news?symbol&max`. DI: `INewsProvider` singleton, siempre disponible con independencia del proveedor de precios activo (Yahoo/Twelve Data/Alpha Vantage). **Corrección durante el desarrollo**: la primera versión fijaba `lang=es-ES&region=ES` para titulares en español; verificado contra Yahoo real, eso **vaciaba la cobertura** de small/mid caps de la watchlist (MBOT y NUCL.SW sin nada) frente a la query sin idioma fijo (cobertura real, mayormente en inglés) — se quitó `lang`/`region`, priorizando cobertura sobre idioma (ver `LECCIONES.md` L-007). **Frontend** (sobre el multi-ventana de HV-054): cada `price-window` gana un switch **"📰 Noticias"** independiente de "🔮 Señales ML" (las noticias son por símbolo, no por rango, así que no se recargan al cambiar de rango) que al activarse pide `/api/news` y pinta una lista con scroll propio (titular enlazado `target="_blank" rel="noopener"`, editorial + fecha `es-ES`) bajo el gráfico; degrada a "Sin noticias para este símbolo." sin romper nada cuando no hay cobertura. `newsActive` añadido al esquema persistido de `priceWindows` en `localStorage` (se restaura igual que rango/velas/margen/señales). 8 tests nuevos (`YahooNewsProviderTests`): mapeo + orden desc por fecha, sin cobertura degrada con mensaje, símbolo vacío no llama al endpoint, HTTP 500 degrada sin lanzar, JSON malformado degrada sin lanzar, ítem sin título/link se filtra, respeta el `max` indicado, query esperada (`q`/`newsCount`/`quotesCount`). **199 tests verdes** (191+8). Build 0 errores/0 avisos. Smoke end-to-end con Yahoo real + Chrome headless vía DevTools Protocol (mismo enfoque sin Playwright de HV-054): AAPL/MBOT devuelven titulares reales con enlaces funcionales; NUCL.SW (ETF suizo, cobertura pobre) degrada limpio al mensaje sin cobertura; el estado `newsActive` de ambas ventanas sobrevive a una recarga completa de página. Solo backend+frontend, sin migración, sin cambios en Domain.
+
 #### HV-054 Evolución de precios multi-ventana (una por símbolo, rejilla de 2 columnas) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-09-21 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: sin spec formal (evolutivo solicitado directamente por el usuario)
@@ -488,5 +493,5 @@ Infrastructure/Background/PortfolioUpdaterService.cs
 
 ---
 
-**Ultima actualizacion**: 2026-09-21
-**Actualizado por**: stic.claude3 (HV-054)
+**Ultima actualizacion**: 2026-09-29
+**Actualizado por**: stic.claude3 (HV-055)

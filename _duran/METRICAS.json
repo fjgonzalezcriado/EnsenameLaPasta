@@ -12,105 +12,6 @@
                          "archivos":  {
 
                                       },
-                         "versionProyecto":  "1.8.0-currency",
-                         "fecha":  "2026-06-29 14:21:24"
-                     },
-                     {
-                         "archivosModificados":  1,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  "_duran/ESTADO_PROYECTO.json",
-                         "versionProyecto":  "1.8.0-currency",
-                         "fecha":  "2026-06-29 14:29:36"
-                     },
-                     {
-                         "archivosModificados":  2,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  [
-                                          "_duran/ESTADO_PROYECTO.json",
-                                          "_duran/METRICAS.json"
-                                      ],
-                         "versionProyecto":  "1.8.0-currency",
-                         "fecha":  "2026-06-29 14:32:54"
-                     },
-                     {
-                         "archivosModificados":  2,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  [
-                                          "_duran/ESTADO_PROYECTO.json",
-                                          "_duran/METRICAS.json"
-                                      ],
-                         "versionProyecto":  "1.8.0-currency",
-                         "fecha":  "2026-06-29 14:34:43"
-                     },
-                     {
-                         "archivosModificados":  2,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  [
-                                          "_duran/ESTADO_PROYECTO.json",
-                                          "_duran/METRICAS.json"
-                                      ],
-                         "versionProyecto":  "1.8.0-currency",
-                         "fecha":  "2026-06-29 14:35:23"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.8.0-currency",
-                         "fecha":  "2026-06-29 14:39:44"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
-                         "versionProyecto":  "1.9.0-fx",
-                         "fecha":  "2026-06-29 14:52:37"
-                     },
-                     {
-                         "archivosModificados":  0,
-                         "agentsDisponibles":  0,
-                         "modoProyecto":  "desarrollo",
-                         "commitsHoy":  0,
-                         "skillsTocados":  [
-
-                                           ],
-                         "archivos":  {
-
-                                      },
                          "versionProyecto":  "1.10.0-cash-fx",
                          "fecha":  "2026-06-29 15:04:38"
                      },
@@ -702,6 +603,120 @@
                                       ],
                          "versionProyecto":  "1.42.0-modo-privacidad",
                          "fecha":  "2026-09-04 13:48:08"
+                     },
+                     {
+                         "archivosModificados":  0,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  {
+
+                                      },
+                         "versionProyecto":  "1.44.0-precios-multiventana",
+                         "fecha":  "2026-09-21 16:34:54"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.44.0-precios-multiventana",
+                         "fecha":  "2026-09-21 16:36:01"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.44.0-precios-multiventana",
+                         "fecha":  "2026-09-21 17:01:43"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.44.0-precios-multiventana",
+                         "fecha":  "2026-09-21 17:04:52"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.44.0-precios-multiventana",
+                         "fecha":  "2026-09-29 10:52:08"
+                     },
+                     {
+                         "archivosModificados":  2,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/METRICAS.json"
+                                      ],
+                         "versionProyecto":  "1.44.0-precios-multiventana",
+                         "fecha":  "2026-09-29 10:56:33"
+                     },
+                     {
+                         "archivosModificados":  12,
+                         "agentsDisponibles":  0,
+                         "modoProyecto":  "desarrollo",
+                         "commitsHoy":  0,
+                         "skillsTocados":  [
+
+                                           ],
+                         "archivos":  [
+                                          "03_Desarrollo/EnsenameLaPasta.Infrastructure/DependencyInjection.cs",
+                                          "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/css/site.css",
+                                          "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/js/dashboard.js",
+                                          "_duran/ESTADO_PROYECTO.json",
+                                          "_duran/FUNCIONALIDADES.md",
+                                          "_duran/LECCIONES.md",
+                                          "_duran/METRICAS.json",
+                                          "03_Desarrollo/EnsenameLaPasta.Application/Common/Dtos/SymbolNews.cs",
+                                          "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/INewsProvider.cs",
+                                          "03_Desarrollo/EnsenameLaPasta.Infrastructure/MarketData/YahooNewsProvider.cs",
+                                          "03_Desarrollo/EnsenameLaPasta.Tests/Infrastructure/YahooNewsProviderTests.cs",
+                                          "03_Desarrollo/EnsenameLaPasta.Web/Controllers/NewsController.cs"
+                                      ],
+                         "versionProyecto":  "1.45.0-noticias-por-simbolo",
+                         "fecha":  "2026-09-29 11:12:44"
                      }
                  ]
 }

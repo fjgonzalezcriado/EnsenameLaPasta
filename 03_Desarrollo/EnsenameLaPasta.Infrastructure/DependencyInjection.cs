@@ -74,6 +74,10 @@ public static class DependencyInjection
         // Clasificación sube/baja con ML.NET (SDCA + features técnicas) (HV-044).
         services.AddSingleton<IDirectionClassifier, MlDirectionClassifier>();
 
+        // Noticias por símbolo (HV-055). Reutiliza el HttpClient "YahooFinance" ya registrado.
+        // Siempre disponible, con independencia del proveedor de precios activo.
+        services.AddSingleton<INewsProvider, YahooNewsProvider>();
+
         // Conversión de divisas (totales en divisa base). Usa el HttpClient de Yahoo.
         services.AddOptions<FxOptions>()
             .Bind(configuration.GetSection(FxOptions.SectionName))

@@ -181,6 +181,18 @@ Ejemplos de preferencias:
 - **Columna decimal→TEXT nueva (HasConversion<string>)**: el `defaultValue` de la migración debe ser **`"0"`, no `""`** (el default de EF para string no nulo). Un `""` rompe el parse decimal al leer filas previas. (HV-050: `Trade.Commission`.)
 - **Advertencias IDE (IDExxxx) del editor**: no salen en `dotnet build` (son sugerencias) salvo `EnforceCodeStyleInBuild`. Detectarlas/arreglarlas con `dotnet format style <sln> --diagnostics IDE0290 --severity info` (`--verify-no-changes` para solo listar). IDE0290 (constructor primario) se auto-corrige **conservando los campos `_field`** (`class X(dep) { private readonly T _f = dep; }`) → satisface el analizador sin romper la convención STIC ni el resto del código. (HV/estilo: 48 archivos, 190 tests verdes.)
 
+### L-007 (Técnica/Yahoo) — `lang`/`region` en `/v1/finance/search` recorta la cobertura de noticias
+- **Fecha**: 2026-09-29 (HV-055)
+- **Síntoma**: `YahooNewsProvider` fijado a `lang=es-ES&region=ES` devolvía "Sin noticias" para MBOT y NUCL.SW (watchlist real), aunque sin esos parámetros sí había noticias (en inglés).
+- **Causa**: esos parámetros filtran a fuentes en español; para small/mid caps (Microbot, ETF suizo) casi no hay cobertura en ese idioma, solo en AAPL/mega-caps.
+- **Fix**: quitar `lang`/`region` de la query (`/v1/finance/search?q=...&quotesCount=0&newsCount=N`). Sale sobre todo en inglés, pero con cobertura real para la watchlist. Mismo endpoint que `YahooInstrumentSearchProvider` (HV-010/034): el array `news` viene gratis con `newsCount > 0`, sin HttpClient ni parsing adicional (nada de RSS).
+
+### L-008 (Herramientas/Peligroso) — `taskkill /F /IM chrome.exe` mata TODO Chrome, no solo el headless de test
+- **Fecha**: 2026-09-29 (HV-055, verificación E2E con CDP)
+- **Síntoma**: al limpiar el Chrome headless lanzado para el test de DevTools Protocol, `taskkill //F //IM chrome.exe` cerró ~24 procesos `chrome.exe` de golpe — potencialmente ventanas/pestañas reales del usuario con trabajo sin guardar, no solo la instancia de prueba.
+- **Causa**: `/IM chrome.exe` mata por nombre de imagen, sin distinguir el Chrome headless (lanzado con `--user-data-dir` propio) del Chrome normal del usuario.
+- **Fix/Prevención**: guardar el PID del proceso Chrome lanzado (`spawn(...).pid` o `taskkill //F //PID <pid>`) y matar solo ese PID; el script Node de la sesión ya hacía `proc.kill()` correctamente — el `taskkill /IM` amplio solo debe usarse si se confirma antes que no hay Chrome "real" del usuario abierto (`tasklist` o preguntar).
+
 ---
 
 *Archivo de lecciones aprendidas - STIC.IA v3.7.0*
