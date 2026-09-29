@@ -193,6 +193,12 @@ Ejemplos de preferencias:
 - **Causa**: `/IM chrome.exe` mata por nombre de imagen, sin distinguir el Chrome headless (lanzado con `--user-data-dir` propio) del Chrome normal del usuario.
 - **Fix/Prevención**: guardar el PID del proceso Chrome lanzado (`spawn(...).pid` o `taskkill //F //PID <pid>`) y matar solo ese PID; el script Node de la sesión ya hacía `proc.kill()` correctamente — el `taskkill /IM` amplio solo debe usarse si se confirma antes que no hay Chrome "real" del usuario abierto (`tasklist` o preguntar).
 
+### L-009 (Entorno/EF Core) — `dotnet-ef` no está instalado por defecto en el entorno
+- **Fecha**: 2026-09-29 (HV-056)
+- **Síntoma**: `dotnet ef migrations add ...` falla con "no se encontró el comando dotnet-ef", aunque migraciones previas ya existen en el repo (se generaron en otra máquina/sesión con la herramienta instalada).
+- **Fix**: `dotnet tool install --global dotnet-ef` (una vez por entorno) antes de generar la migración. Reversible, sin riesgo — no toca el repo.
+- **Nota**: tras instalarla, `dotnet ef migrations add <Nombre> --project EnsenameLaPasta.Infrastructure --startup-project ../EnsenameLaPasta.Web` (desde `03_Desarrollo/`) genera `.cs`+`.Designer.cs`+actualiza `TradingDbContextModelSnapshot.cs` correctamente.
+
 ---
 
 *Archivo de lecciones aprendidas - STIC.IA v3.7.0*

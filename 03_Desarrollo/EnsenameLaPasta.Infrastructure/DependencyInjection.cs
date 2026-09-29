@@ -78,6 +78,16 @@ public static class DependencyInjection
         // Siempre disponible, con independencia del proveedor de precios activo.
         services.AddSingleton<INewsProvider, YahooNewsProvider>();
 
+        // Sentimiento de noticias (HV-056): captura periódica en background, sentando la base
+        // de histórico por símbolo+día para un futuro uso como feature del clasificador ML.
+        // De momento NO se usa en HV-043/044/052 — solo se acumula y se puede consultar.
+        services.AddOptions<NewsSentimentOptions>()
+            .Bind(configuration.GetSection(NewsSentimentOptions.SectionName))
+            .ValidateOnStart();
+        services.AddSingleton<ISentimentScorer, KeywordSentimentScorer>();
+        services.AddScoped<INewsSentimentService, NewsSentimentService>();
+        services.AddHostedService<NewsSentimentCaptureService>();
+
         // Conversión de divisas (totales en divisa base). Usa el HttpClient de Yahoo.
         services.AddOptions<FxOptions>()
             .Bind(configuration.GetSection(FxOptions.SectionName))

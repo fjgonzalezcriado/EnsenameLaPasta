@@ -95,7 +95,7 @@
                    "modo":  "desarrollo",
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
-                   "version_actual":  "1.45.0-noticias-por-simbolo",
+                   "version_actual":  "1.46.0-cimientos-sentimiento-noticias",
                    "ultima_actualizacion":  "2026-09-29",
                    "actualizado_por":  "RemitiraLaLluvia",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
@@ -300,6 +300,23 @@
 
                                       ],
                        "completados":  [
+                                           {
+                                               "codigo":  "HV-056",
+                                               "titulo":  "Cimientos de historico de sentimiento de noticias (base para feature ML futura)",
+                                               "estado":  "completado",
+                                               "asignadoA":  "stic.claude3",
+                                               "prioridad":  "baja",
+                                               "fechaCreacion":  "2026-09-29",
+                                               "fechaInicio":  "2026-09-29",
+                                               "fechaCompletado":  "2026-09-29",
+                                               "duracionDias":  0,
+                                               "resultado":  "cumplido",
+                                               "tipo":  "evolutivo",
+                                               "specFile":  null,
+                                               "rutaCodigo":  "03_Desarrollo",
+                                               "creadoPor":  "RemitiraLaLluvia",
+                                               "notas":  "El usuario pregunto si, ya que hay noticias (HV-055), se podian usar en el ML para optimizar el pronostico. Se explico la limitacion real: para usarla como feature ENTRENADA (como el VIX en HV-052) hace falta un historico de sentimiento por simbolo y dia para alinear con las fechas de entrenamiento, y Yahoo solo da noticias actuales, no una serie historica consultable hacia atras. El usuario eligio la opcion completa: sentar las bases de ese historico, sin tocar todavia el modelo. Nueva entidad de dominio NewsSentiment (Symbol+DateUtc unico, Score en [-1,1], SampleCount, UpdatedAtUtc; Score con HasConversion\u003cstring\u003e por el patron SQLite+decimal del proyecto) + migracion AddNewsSentiment (fue necesario instalar la herramienta global dotnet-ef, no estaba en el entorno). ISentimentScorer/KeywordSentimentScorer: lexico de palabras clave ingles+algo de espanol (Yahoo sale mayormente en ingles), sin NLP entrenado ni dependencias externas -- cuenta ocurrencias positivas/negativas con limite de palabra (\b, evita falsos positivos tipo miss dentro de dismisses) y devuelve (pos-neg)/(pos+neg); 0 si no hay ninguna palabra del lexico (sin senal, no neutro real). INewsSentimentService/NewsSentimentService: CaptureTodayAsync pide noticias al INewsProvider existente (HV-055), puntua cada titular y hace upsert de la fila del dia UTC de hoy (localizada por Symbol+DateUtc); si no hay noticias ese dia NO se escribe una fila a 0 muestras -- mejor un hueco honesto en el historico que un 0 que parezca sentimiento neutro real (el hueco se podra forward-fillear despues, igual que el VIX en HV-052). NewsSentimentCaptureService (BackgroundService, patron identico a PortfolioSnapshotService/FxRefreshService): recorre la watchlist cada IntervalSeconds (6h por defecto, seccion NewsSentiment en appsettings) con una pausa entre simbolos (DelayBetweenSymbolsMs) para no encadenar peticiones a Yahoo; captura tambien al arrancar (CaptureOnStartup). GET /api/news/sentiment-history?symbol= (solo lectura, no dispara captura) para verificar lo acumulado. IMPORTANTE: esta captura NO se usa todavia en ningun pronostico ni clasificador (HV-043/044/052 sin cambios) -- son solo los cimientos; conectarla como feature real requiere semanas acumulando historico. 16 tests nuevos (KeywordSentimentScorerTests + NewsSentimentServiceTests con TimeProvider fijo para probar el upsert mismo-dia vs dia-distinto), 215 verdes en total (199+16). Build 0/0. Smoke real: arrancada la app, la captura al inicio genero para MBOT 1 fila (score 0.4, 5 titulares) y para NUCL.SW ningun hueco espurio (sin cobertura, como se esperaba); 0 errores en el log durante toda la pasada. Rama: main (sin rama feature)."
+                                           },
                                            {
                                                "codigo":  "HV-055",
                                                "titulo":  "Noticias por simbolo (titulares de Yahoo Finance) en cada ventana de precios",
@@ -1240,27 +1257,35 @@
                          "evolutivoActivo":  null,
                          "usuario":  "RemitiraLaLluvia",
                          "ramaActiva":  null,
-                         "proximoPaso":  "Ninguno pendiente. Opcional: reubicar en la interfaz la accion \u0027dejar de seguir simbolo\u0027 retirada en HV-054 (el endpoint DELETE /api/instruments/track sigue disponible); revisar si el tope de 8 ventanas y la altura de 320 px por grafico encajan con el uso real; considerar un segundo proveedor de noticias (p.ej. Alpha Vantage NEWS_SENTIMENT) para small/mid caps sin cobertura en Yahoo.",
-                         "resumenSesion":  "Evolutivo HV-055: noticias por simbolo. El usuario pregunto si la app podia recopilar noticias por simbolo; se propuso Yahoo (sin API key) y se implemento INewsProvider/YahooNewsProvider reutilizando el mismo endpoint de busqueda de instrumentos (/v1/finance/search) que ya devuelve un array news[] con newsCount\u003e0, sin HttpClient nuevo ni parsing de RSS. Degrada honesto (nunca lanza), igual que el pronostico SSA y el clasificador ML: sin cobertura, HTTP fallido o JSON invalido devuelven HasNews=false con mensaje. GET /api/news?symbol\u0026max. Frontend: cada ventana de precios (HV-054) gana un switch \u0027Noticias\u0027 independiente de \u0027Senales ML\u0027 (las noticias son por simbolo, no por rango) que pinta una lista con scroll de titulares enlazados (target=_blank) bajo el grafico; newsActive se persiste en el mismo esquema de priceWindows en localStorage. CORRECCION EN DESARROLLO: la primera version fijaba lang=es-ES\u0026region=ES para titulares en espanol, pero eso vaciaba la cobertura de small/mid caps de la watchlist real (MBOT y NUCL.SW sin nada); se quito el idioma fijo, priorizando cobertura sobre idioma (LECCIONES.md L-007). 8 tests nuevos (YahooNewsProviderTests), 199 verdes en total (191+8), build 0/0. Smoke end-to-end con Yahoo real + Chrome headless via DevTools Protocol: AAPL/MBOT con titulares reales y enlaces funcionales, NUCL.SW degrada limpio a \u0027Sin noticias para este simbolo.\u0027, newsActive sobrevive a una recarga completa en ambos casos. Solo backend+frontend, sin migracion, sin cambios en Domain.",
+                         "proximoPaso":  "Ninguno pendiente. Opcional: reubicar en la interfaz la accion \u0027dejar de seguir simbolo\u0027 retirada en HV-054 (el endpoint DELETE /api/instruments/track sigue disponible); revisar si el tope de 8 ventanas y la altura de 320 px por grafico encajan con el uso real; una vez pasen unas semanas y haya historico suficiente en NewsSentiment, valorar conectarlo como feature real del clasificador ML (HV-044/052), alineado por dia igual que el VIX.",
+                         "resumenSesion":  "Evolutivo HV-056: cimientos de historico de sentimiento de noticias. Continuando HV-055, el usuario pregunto si las noticias se podian usar en el ML para optimizar el pronostico; se explico que usarlas como feature entrenada (como el VIX en HV-052) requiere un historico por simbolo y dia que Yahoo no da (solo noticias actuales), y el usuario eligio sentar esas bases sin tocar aun el modelo. Nueva entidad NewsSentiment (Symbol+DateUtc unico) + migracion AddNewsSentiment. ISentimentScorer/KeywordSentimentScorer: lexico de palabras clave (ingles+espanol), sin NLP entrenado, con limite de palabra para evitar falsos positivos (p.ej. miss dentro de dismisses). NewsSentimentService.CaptureTodayAsync puntua los titulares del INewsProvider existente y hace upsert del agregado del dia UTC; sin noticias ese dia no se escribe fila (hueco honesto, no un 0 falso). NewsSentimentCaptureService (BackgroundService, mismo patron que PortfolioSnapshotService/FxRefreshService) recorre la watchlist cada 6h (config NewsSentiment) con pausa entre simbolos. GET /api/news/sentiment-history?symbol= de solo lectura para verificar lo acumulado. Esta captura NO se usa todavia en ningun pronostico ni clasificador -- son solo los cimientos. 16 tests nuevos, 215 verdes en total (199+16), build 0/0. Smoke real: la captura al arrancar la app genero 1 fila para MBOT (score 0.4, 5 titulares) y ningun hueco espurio para NUCL.SW (sin cobertura); 0 errores en el log.",
                          "archivosModificados":  [
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/ITradingDbContext.cs",
                                                      "03_Desarrollo/EnsenameLaPasta.Infrastructure/DependencyInjection.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/css/site.css",
-                                                     "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/js/dashboard.js",
+                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/Persistence/Migrations/TradingDbContextModelSnapshot.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/Persistence/TradingDbContext.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/Controllers/NewsController.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/appsettings.json",
                                                      "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/FUNCIONALIDADES.md",
                                                      "_duran/LECCIONES.md",
                                                      "_duran/METRICAS.json",
-                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Dtos/SymbolNews.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/INewsProvider.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/MarketData/YahooNewsProvider.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Tests/Infrastructure/YahooNewsProviderTests.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Web/Controllers/NewsController.cs"
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Dtos/NewsSentimentSnapshot.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/INewsSentimentService.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/ISentimentScorer.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Options/NewsSentimentOptions.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Services/KeywordSentimentScorer.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Services/NewsSentimentService.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Domain/Entities/NewsSentiment.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/MarketData/NewsSentimentCaptureService.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/Persistence/Configurations/NewsSentimentConfiguration.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/Persistence/Migrations/20260929100333_AddNewsSentiment.Designer.cs"
                                                  ],
-                         "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 41 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte. Header: el estado del feed vive en _Layout.cshtml via seccion Razor HeaderExtra (opcional, solo la vista Dashboard la define). Nuevo: /api/news (INewsProvider/YahooNewsProvider) sin API key, siempre Yahoo con independencia del proveedor de precios activo."
+                         "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 42 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte. Header: el estado del feed vive en _Layout.cshtml via seccion Razor HeaderExtra (opcional, solo la vista Dashboard la define). Nuevo: /api/news (INewsProvider/YahooNewsProvider) sin API key, siempre Yahoo con independencia del proveedor de precios activo. Nuevo: tabla NewsSentiment (sentimiento diario por simbolo, cimientos para una futura feature ML, aun sin conectar al modelo)."
                      },
     "metricas":  {
                      "cobertura_tests":  0,
-                     "ultimo_build":  "2026-09-29 OK (HV-055 noticias por simbolo; build 0/0; 199 tests verdes; smoke end-to-end con Chrome headless via CDP)",
+                     "ultimo_build":  "2026-09-29 OK (HV-056 cimientos de sentimiento de noticias; build 0/0; 215 tests verdes; smoke real con captura al arrancar)",
                      "ultimo_deploy":  null,
                      "incidencias_abiertas":  0,
                      "evolutivos_completados_mes":  51

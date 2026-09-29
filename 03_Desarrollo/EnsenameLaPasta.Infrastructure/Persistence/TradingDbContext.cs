@@ -12,6 +12,7 @@ public sealed class TradingDbContext(DbContextOptions<TradingDbContext> options)
     public DbSet<TrackedSymbol> TrackedSymbols => Set<TrackedSymbol>();
     public DbSet<CashMovement> CashMovements => Set<CashMovement>();
     public DbSet<Dividend> Dividends => Set<Dividend>();
+    public DbSet<NewsSentiment> NewsSentiments => Set<NewsSentiment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

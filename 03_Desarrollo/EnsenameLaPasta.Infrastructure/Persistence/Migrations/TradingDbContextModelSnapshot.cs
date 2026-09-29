@@ -113,6 +113,38 @@ namespace EnsenameLaPasta.Infrastructure.Persistence.Migrations
                     b.ToTable("MarketTick", (string)null);
                 });
 
+            modelBuilder.Entity("EnsenameLaPasta.Domain.Entities.NewsSentiment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SampleCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Score")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Symbol")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Symbol", "DateUtc")
+                        .IsUnique();
+
+                    b.ToTable("NewsSentiment", (string)null);
+                });
+
             modelBuilder.Entity("EnsenameLaPasta.Domain.Entities.PortfolioSnapshot", b =>
                 {
                     b.Property<Guid>("Id")
