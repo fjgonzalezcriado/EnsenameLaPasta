@@ -6,7 +6,20 @@
 
 ## 🟡 En Progreso
 
-_Vacío. La app evolucionó de simulador a **tracker de precios reales**: buscador de instrumentos + watchlist editable + feed 100% Yahoo (sin simulación ni auto-trading). Próximos candidatos: AlphaVantage/Binance, P&L de holding real (posición vs entrada), dashboard "visor puro"._
+#### HV-057 Segundo proveedor de noticias — RSS de onvista.de
+- **Estado**: 🟡 En progreso
+- **Prioridad**: 🟡 Baja
+- **Inicio**: 2026-11-02
+- **Última sesión**: 2026-11-02
+- **Spec**: `_duran/specs/HV-057.md`
+
+**Checklist:**
+- [x] Decisiones de diseño D1/D2/D3 confirmadas con el usuario: lista única mezclada por fecha (badge de origen), mapeo en `appsettings.json`, degradación silenciosa sin mapeo
+- [x] Implementación backend (`OnvistaNewsProvider` + `INewsAggregatorService`)
+- [x] Tests (14 nuevos, 229 en total verdes)
+- [x] Smoke test real contra onvista.de (HY9H.F: 15 noticias reales; AAPL combina con Yahoo)
+
+**Próximo paso:** Verificación visual del badge de fuente en el navegador (pendiente, sin Chrome conectado en la sesión de implementación).
 
 ---
 

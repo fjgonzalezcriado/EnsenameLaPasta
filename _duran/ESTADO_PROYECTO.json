@@ -96,7 +96,7 @@
                    "fase_actual":  "desarrollo",
                    "sprint_actual":  null,
                    "version_actual":  "1.46.0-cimientos-sentimiento-noticias",
-                   "ultima_actualizacion":  "2026-09-29",
+                   "ultima_actualizacion":  "2026-11-02",
                    "actualizado_por":  "RemitiraLaLluvia",
                    "_fase_explicacion":  "MVP completo + Fase 2. 12 evolutivos cerrados (HV-001..HV-012). La app paso de simulador a tracker de precios reales: buscador de instrumentos, watchlist editable y feed 100% Yahoo (RandomWalk retirado, auto-trading desactivado)."
                },
@@ -291,13 +291,22 @@
                        "proxima_entrega":  "Tracker de precios reales operativo (buscador + watchlist + feed Yahoo)",
                        "notas_sprint":  "App pivotada a tracker: buscador de instrumentos, watchlist persistida (TrackedSymbol) y feed 100% Yahoo. Auto-trading desactivado."
                    },
-    "evolutivoActivo":  null,
+    "evolutivoActivo":  "HV-057",
     "evolutivos":  {
                        "pendientes":  [
 
                                       ],
                        "enProgreso":  [
-
+                                          {
+                                              "id":  "HV-057",
+                                              "nombre":  "Segundo proveedor de noticias - RSS de onvista.de",
+                                              "inicio":  "2026-11-02",
+                                              "ultimaSesion":  "2026-11-02",
+                                              "progreso":  90,
+                                              "prioridad":  "baja",
+                                              "specFile":  "_duran/specs/HV-057.md",
+                                              "rutaCodigo":  "03_Desarrollo"
+                                          }
                                       ],
                        "completados":  [
                                            {
@@ -1253,33 +1262,33 @@
                                        ]
                    },
     "ultimaSesion":  {
-                         "fecha":  "2026-09-29",
+                         "fecha":  "2026-11-02",
                          "evolutivoActivo":  null,
                          "usuario":  "RemitiraLaLluvia",
                          "ramaActiva":  null,
                          "proximoPaso":  "Ninguno pendiente. Opcional: reubicar en la interfaz la accion \u0027dejar de seguir simbolo\u0027 retirada en HV-054 (el endpoint DELETE /api/instruments/track sigue disponible); revisar si el tope de 8 ventanas y la altura de 320 px por grafico encajan con el uso real; una vez pasen unas semanas y haya historico suficiente en NewsSentiment, valorar conectarlo como feature real del clasificador ML (HV-044/052), alineado por dia igual que el VIX.",
                          "resumenSesion":  "Evolutivo HV-056: cimientos de historico de sentimiento de noticias. Continuando HV-055, el usuario pregunto si las noticias se podian usar en el ML para optimizar el pronostico; se explico que usarlas como feature entrenada (como el VIX en HV-052) requiere un historico por simbolo y dia que Yahoo no da (solo noticias actuales), y el usuario eligio sentar esas bases sin tocar aun el modelo. Nueva entidad NewsSentiment (Symbol+DateUtc unico) + migracion AddNewsSentiment. ISentimentScorer/KeywordSentimentScorer: lexico de palabras clave (ingles+espanol), sin NLP entrenado, con limite de palabra para evitar falsos positivos (p.ej. miss dentro de dismisses). NewsSentimentService.CaptureTodayAsync puntua los titulares del INewsProvider existente y hace upsert del agregado del dia UTC; sin noticias ese dia no se escribe fila (hueco honesto, no un 0 falso). NewsSentimentCaptureService (BackgroundService, mismo patron que PortfolioSnapshotService/FxRefreshService) recorre la watchlist cada 6h (config NewsSentiment) con pausa entre simbolos. GET /api/news/sentiment-history?symbol= de solo lectura para verificar lo acumulado. Esta captura NO se usa todavia en ningun pronostico ni clasificador -- son solo los cimientos. 16 tests nuevos, 215 verdes en total (199+16), build 0/0. Smoke real: la captura al arrancar la app genero 1 fila para MBOT (score 0.4, 5 titulares) y ningun hueco espurio para NUCL.SW (sin cobertura); 0 errores en el log.",
                          "archivosModificados":  [
-                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/ITradingDbContext.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Dtos/SymbolNews.cs",
                                                      "03_Desarrollo/EnsenameLaPasta.Infrastructure/DependencyInjection.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/Persistence/Migrations/TradingDbContextModelSnapshot.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/Persistence/TradingDbContext.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Tests/Helpers/MockHttpMessageHandler.cs",
                                                      "03_Desarrollo/EnsenameLaPasta.Web/Controllers/NewsController.cs",
                                                      "03_Desarrollo/EnsenameLaPasta.Web/appsettings.json",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/css/site.css",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/wwwroot/js/dashboard.js",
                                                      "_duran/ESTADO_PROYECTO.json",
                                                      "_duran/FUNCIONALIDADES.md",
-                                                     "_duran/LECCIONES.md",
                                                      "_duran/METRICAS.json",
-                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Dtos/NewsSentimentSnapshot.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/INewsSentimentService.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/ISentimentScorer.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Options/NewsSentimentOptions.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Application/Services/KeywordSentimentScorer.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Application/Services/NewsSentimentService.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Domain/Entities/NewsSentiment.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/MarketData/NewsSentimentCaptureService.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/Persistence/Configurations/NewsSentimentConfiguration.cs",
-                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/Persistence/Migrations/20260929100333_AddNewsSentiment.Designer.cs"
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/INewsAggregatorService.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Interfaces/IOnvistaNewsProvider.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Common/Options/OnvistaOptions.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Application/Services/NewsAggregatorService.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Infrastructure/MarketData/OnvistaNewsProvider.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Tests/Application/NewsAggregatorServiceTests.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Tests/Infrastructure/OnvistaNewsProviderTests.cs",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/app.err.log",
+                                                     "03_Desarrollo/EnsenameLaPasta.Web/app.out.log",
+                                                     "_duran/specs/HV-057.md"
                                                  ],
                          "notas":  "Go-dark activo: no contactar Comillas (Yahoo si). 42 evolutivos completados. Proveedor activo = Yahoo. El grafico de precios usa eje de categorias (findes/festivos colapsados); el de valor de cuenta sigue en eje de tiempo. Codigo del modo LIVE inerte. Header: el estado del feed vive en _Layout.cshtml via seccion Razor HeaderExtra (opcional, solo la vista Dashboard la define). Nuevo: /api/news (INewsProvider/YahooNewsProvider) sin API key, siempre Yahoo con independencia del proveedor de precios activo. Nuevo: tabla NewsSentiment (sentimiento diario por simbolo, cimientos para una futura feature ML, aun sin conectar al modelo)."
                      },

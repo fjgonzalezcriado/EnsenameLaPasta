@@ -78,6 +78,21 @@ public static class DependencyInjection
         // Siempre disponible, con independencia del proveedor de precios activo.
         services.AddSingleton<INewsProvider, YahooNewsProvider>();
 
+        // Segunda fuente de noticias: onvista.de (HV-057), vía su feed RSS filtrado por
+        // instrumento. Solo cubre los símbolos mapeados en Onvista:SymbolMap (su ID interno no
+        // se resuelve desde el ticker). El agregador combina Yahoo + onvista en una sola lista.
+        services.AddOptions<OnvistaOptions>()
+            .Bind(configuration.GetSection(OnvistaOptions.SectionName))
+            .ValidateOnStart();
+        services.AddHttpClient(OnvistaNewsProvider.HttpClientName, (sp, client) =>
+        {
+            var opts = sp.GetRequiredService<IOptions<OnvistaOptions>>().Value;
+            client.BaseAddress = new Uri(opts.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(opts.TimeoutSeconds);
+        });
+        services.AddSingleton<IOnvistaNewsProvider, OnvistaNewsProvider>();
+        services.AddSingleton<INewsAggregatorService, NewsAggregatorService>();
+
         // Sentimiento de noticias (HV-056): captura periódica en background, sentando la base
         // de histórico por símbolo+día para un futuro uso como feature del clasificador ML.
         // De momento NO se usa en HV-043/044/052 — solo se acumula y se puede consultar.

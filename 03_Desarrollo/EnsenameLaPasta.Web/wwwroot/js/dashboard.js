@@ -1104,8 +1104,12 @@
         el.innerHTML = n.items.map(function (item) {
             const when = item.publishedAtUtc ? new Date(item.publishedAtUtc).toLocaleString('es-ES') : '';
             const pub = item.publisher ? escapeHtml(item.publisher) : '';
+            // Fuente del titular (HV-057): Yahoo/onvista combinados en una sola lista por fecha.
+            const source = item.source ? escapeHtml(item.source) : '';
+            const badge = source ? '<span class="badge news-source-badge news-source-' + source.toLowerCase() + '">' + source + '</span>' : '';
             const meta = [pub, when].filter(Boolean).join(' · ');
             return '<div class="news-item">'
+                + badge
                 + '<a href="' + escapeHtml(item.link) + '" target="_blank" rel="noopener noreferrer">'
                 +   escapeHtml(item.title) + '</a>'
                 + (meta ? '<div class="text-muted news-item-meta">' + meta + '</div>' : '')

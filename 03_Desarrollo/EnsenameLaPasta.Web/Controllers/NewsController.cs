@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace EnsenameLaPasta.Web.Controllers;
 
 /// <summary>
-/// Noticias recientes por símbolo, vía Yahoo Finance (HV-055), y su histórico de sentimiento
-/// diario acumulado en background (HV-056).
+/// Noticias recientes por símbolo, combinando Yahoo Finance (HV-055) y onvista.de (HV-057) en
+/// una sola lista ordenada por fecha, y el histórico de sentimiento diario acumulado en
+/// background (HV-056, solo sobre Yahoo).
 /// </summary>
-public sealed class NewsController(INewsProvider newsProvider, INewsSentimentService sentimentService) : Controller
+public sealed class NewsController(INewsAggregatorService newsAggregator, INewsSentimentService sentimentService) : Controller
 {
-    private readonly INewsProvider _newsProvider = newsProvider;
+    private readonly INewsAggregatorService _newsAggregator = newsAggregator;
     private readonly INewsSentimentService _sentimentService = sentimentService;
 
     // GET /api/news?symbol=AAPL&max=6
@@ -21,7 +22,7 @@ public sealed class NewsController(INewsProvider newsProvider, INewsSentimentSer
 
         // Acota para no pedir listas desproporcionadas.
         max = Math.Clamp(max, 1, 20);
-        var news = await _newsProvider.GetNewsAsync(symbol, max, cancellationToken);
+        var news = await _newsAggregator.GetNewsAsync(symbol, max, cancellationToken);
         return Json(news);
     }
 

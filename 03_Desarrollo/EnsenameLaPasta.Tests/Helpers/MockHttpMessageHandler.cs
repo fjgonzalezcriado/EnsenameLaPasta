@@ -28,6 +28,15 @@ public sealed class MockHttpMessageHandler(Func<HttpRequestMessage, HttpResponse
         return new MockHttpMessageHandler(_ => new HttpResponseMessage(status));
     }
 
+    /// <summary>Atajo: responde siempre con el XML dado y el status indicado (default 200).</summary>
+    public static MockHttpMessageHandler Xml(string xml, HttpStatusCode status = HttpStatusCode.OK)
+    {
+        return new MockHttpMessageHandler(_ => new HttpResponseMessage(status)
+        {
+            Content = new StringContent(xml, Encoding.UTF8, "application/xml")
+        });
+    }
+
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         ReceivedRequests.Add(request);

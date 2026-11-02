@@ -134,6 +134,15 @@ body {
 .news-item-meta {
   font-size: .75rem;
 }
+/* Fuente del titular en la lista combinada de noticias (HV-057). */
+.news-source-badge {
+  font-size: .65rem;
+  font-weight: 600;
+  margin-right: .375rem;
+  vertical-align: middle;
+}
+.news-source-yahoo { background-color: #6f42c1; }
+.news-source-onvista { background-color: #495057; }
 
 /* Modo visor puro (HV-046): oculta los controles de edición (solo lectura). */
 .dashboard.viewer-mode .js-editor-only { display: none !important; }
