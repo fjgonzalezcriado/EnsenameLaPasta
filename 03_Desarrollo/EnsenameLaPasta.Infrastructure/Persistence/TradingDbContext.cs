@@ -19,6 +19,12 @@ public sealed class TradingDbContext(DbContextOptions<TradingDbContext> options)
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TradingDbContext).Assembly);
     }
 
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateTime?>().HaveConversion<NullableUtcDateTimeConverter>();
+    }
+
     public async Task<long> GetDatabaseSizeBytesAsync(CancellationToken cancellationToken = default)
     {
         var conn = Database.GetDbConnection();
