@@ -10,7 +10,8 @@ namespace EnsenameLaPasta.Infrastructure.MarketData;
 /// Histórico de precios desde Yahoo Finance (<c>/v8/finance/chart</c> con
 /// <c>range</c>/<c>interval</c>). Reutiliza el HttpClient "YahooFinance".
 /// </summary>
-public sealed class YahooHistoryProvider(IHttpClientFactory httpFactory, ILogger<YahooHistoryProvider> logger) : IMarketHistoryProvider
+public sealed class YahooHistoryProvider(IHttpClientFactory httpFactory, ILogger<YahooHistoryProvider> logger)
+    : IMarketHistoryProvider, IPreviousCloseProvider
 {
     private readonly IHttpClientFactory _httpFactory = httpFactory;
     private readonly ILogger<YahooHistoryProvider> _logger = logger;
@@ -90,6 +91,44 @@ public sealed class YahooHistoryProvider(IHttpClientFactory httpFactory, ILogger
         return points;
     }
 
+    /// <summary>
+    /// Cierre del día de negociación anterior (HV-058), vía <c>meta.previousClose</c> del mismo
+    /// endpoint <c>/v8/finance/chart</c> que usa <see cref="GetHistoryAsync"/>. Mismo
+    /// range/interval que su llamada para "1D" (<c>1d</c>/<c>5m</c>): con <c>interval=1d</c> ese
+    /// campo no viene en meta (Yahoo lo renombra a <c>chartPreviousClose</c> en ese caso) — se
+    /// comprueban ambos nombres por si algún símbolo solo trae uno. Hace su propia petición (no
+    /// reutiliza la de GetHistoryAsync: esta clase es singleton sin estado por símbolo, y
+    /// cachear un único valor pisaría el de otros símbolos). Degrada a null sin lanzar: sin este
+    /// dato, el consumidor cae a su comportamiento anterior.
+    /// </summary>
+    public async Task<decimal?> GetPreviousCloseAsync(string symbol, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(symbol))
+            return null;
+
+        try
+        {
+            var yahooSymbol = NormalizeSymbol(symbol);
+            var client = _httpFactory.CreateClient(YahooFinanceProvider.HttpClientName);
+            var response = await client.GetAsync(
+                $"/v8/finance/chart/{Uri.EscapeDataString(yahooSymbol)}?range=1d&interval=5m",
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var payload = await response.Content.ReadFromJsonAsync<ChartResponse>(cancellationToken: cancellationToken);
+            var meta = payload?.Chart?.Result?.FirstOrDefault()?.Meta;
+            var previousClose = meta?.PreviousClose ?? meta?.ChartPreviousClose;
+            return previousClose is > 0 ? (decimal)previousClose.Value : null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Yahoo previousClose {Symbol} falló.", symbol);
+            return null;
+        }
+    }
+
     /// <summary>Mapea símbolos internos al formato de Yahoo (cripto con guion).</summary>
     private static string NormalizeSymbol(string symbol) => symbol.ToUpperInvariant() switch
     {
@@ -98,7 +137,7 @@ public sealed class YahooHistoryProvider(IHttpClientFactory httpFactory, ILogger
         _ => symbol,
     };
 
-    // DTOs para deserializar /v8/finance/chart (arrays de histórico).
+    // DTOs para deserializar /v8/finance/chart (arrays de histórico + meta.previousClose).
     private sealed record ChartResponse(
         [property: JsonPropertyName("chart")] ChartBody? Chart);
 
@@ -107,7 +146,12 @@ public sealed class YahooHistoryProvider(IHttpClientFactory httpFactory, ILogger
 
     private sealed record ChartResult(
         [property: JsonPropertyName("timestamp")] List<long>? Timestamp,
-        [property: JsonPropertyName("indicators")] ChartIndicators? Indicators);
+        [property: JsonPropertyName("indicators")] ChartIndicators? Indicators,
+        [property: JsonPropertyName("meta")] ChartMeta? Meta = null);
+
+    private sealed record ChartMeta(
+        [property: JsonPropertyName("previousClose")] double? PreviousClose,
+        [property: JsonPropertyName("chartPreviousClose")] double? ChartPreviousClose = null);
 
     private sealed record ChartIndicators(
         [property: JsonPropertyName("quote")] List<ChartQuote>? Quote);

@@ -58,7 +58,11 @@ public static class DependencyInjection
         services.AddSingleton<YahooHistoryProvider>();
         services.AddSingleton<TwelveDataHistoryProvider>();
         services.AddSingleton<AlphaVantageHistoryProvider>();
-        services.AddSingleton<IMarketHistoryProvider, SelectableMarketHistoryProvider>();
+        services.AddSingleton<SelectableMarketHistoryProvider>();
+        services.AddSingleton<IMarketHistoryProvider>(sp => sp.GetRequiredService<SelectableMarketHistoryProvider>());
+        // Cierre del día anterior (HV-058), solo disponible cuando Yahoo es el proveedor activo.
+        // Misma instancia que IMarketHistoryProvider (SelectableMarketHistoryProvider implementa ambas).
+        services.AddSingleton<IPreviousCloseProvider>(sp => sp.GetRequiredService<SelectableMarketHistoryProvider>());
 
         // Búsqueda de instrumentos: ambos proveedores + selector por proveedor activo,
         // para que los resultados usen la convención de símbolos del feed en uso (HV-034).

@@ -1,3 +1,4 @@
+using System.Net;
 using EnsenameLaPasta.Infrastructure.MarketData;
 using EnsenameLaPasta.Tests.Helpers;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -78,5 +79,85 @@ public class YahooHistoryProviderTests
         Assert.Equal(103.0m, points[1].High);
         Assert.Equal(101.0m, points[1].Low);
         Assert.Equal(102.0m, points[1].Price);
+    }
+
+    // GetPreviousCloseAsync (HV-058): cierre de ayer para la variación acumulada del rango 1D.
+    [Fact]
+    public async Task GetPreviousCloseAsync_RespuestaValida_DevuelvePreviousClose()
+    {
+        const string json = """
+            {"chart":{"result":[{"timestamp":[1700000000],
+              "indicators":{"quote":[{"close":[976.0]}]},
+              "meta":{"previousClose":924.0}
+            }],"error":null}}
+            """;
+        var provider = NewProvider(MockHttpMessageHandler.Json(json));
+
+        var previousClose = await provider.GetPreviousCloseAsync("HY9H.F");
+
+        Assert.Equal(924.0m, previousClose);
+    }
+
+    [Fact]
+    public async Task GetPreviousCloseAsync_SoloChartPreviousClose_LoAceptaComoFallback()
+    {
+        // Con interval=1d Yahoo renombra el campo a chartPreviousClose (sin previousClose).
+        // Verificado contra el endpoint real. El provider debe aceptar ambos nombres.
+        const string json = """
+            {"chart":{"result":[{"timestamp":[1700000000],
+              "indicators":{"quote":[{"close":[976.0]}]},
+              "meta":{"chartPreviousClose":924.0}
+            }],"error":null}}
+            """;
+        var provider = NewProvider(MockHttpMessageHandler.Json(json));
+
+        var previousClose = await provider.GetPreviousCloseAsync("HY9H.F");
+
+        Assert.Equal(924.0m, previousClose);
+    }
+
+    [Fact]
+    public async Task GetPreviousCloseAsync_SinMeta_DevuelveNull()
+    {
+        const string json = """
+            {"chart":{"result":[{"timestamp":[1700000000],"indicators":{"quote":[{"close":[976.0]}]}}],"error":null}}
+            """;
+        var provider = NewProvider(MockHttpMessageHandler.Json(json));
+
+        var previousClose = await provider.GetPreviousCloseAsync("HY9H.F");
+
+        Assert.Null(previousClose);
+    }
+
+    [Fact]
+    public async Task GetPreviousCloseAsync_Http404_DegradaANullSinLanzar()
+    {
+        var provider = NewProvider(MockHttpMessageHandler.Status(HttpStatusCode.NotFound));
+
+        var previousClose = await provider.GetPreviousCloseAsync("NOEXISTE");
+
+        Assert.Null(previousClose);
+    }
+
+    [Fact]
+    public async Task GetPreviousCloseAsync_JsonMalformado_DegradaANullSinLanzar()
+    {
+        var provider = NewProvider(MockHttpMessageHandler.Json("{ malformed"));
+
+        var previousClose = await provider.GetPreviousCloseAsync("AAPL");
+
+        Assert.Null(previousClose);
+    }
+
+    [Fact]
+    public async Task GetPreviousCloseAsync_SimboloVacio_DevuelveNullSinLlamar()
+    {
+        var handler = MockHttpMessageHandler.Json("""{"chart":{"result":[{"meta":{"previousClose":100.0}}]}}""");
+        var provider = NewProvider(handler);
+
+        var previousClose = await provider.GetPreviousCloseAsync("   ");
+
+        Assert.Null(previousClose);
+        Assert.Empty(handler.ReceivedRequests);
     }
 }

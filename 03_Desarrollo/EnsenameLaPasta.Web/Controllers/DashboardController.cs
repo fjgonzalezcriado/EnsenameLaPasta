@@ -4,10 +4,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EnsenameLaPasta.Web.Controllers;
 
-public sealed class DashboardController(IDashboardService service, IMarketHistoryProvider history, ILogger<DashboardController> logger) : Controller
+public sealed class DashboardController(
+    IDashboardService service,
+    IMarketHistoryProvider history,
+    IPreviousCloseProvider previousClose,
+    ILogger<DashboardController> logger) : Controller
 {
     private readonly IDashboardService _service = service;
     private readonly IMarketHistoryProvider _history = history;
+    private readonly IPreviousCloseProvider _previousClose = previousClose;
     private readonly ILogger<DashboardController> _logger = logger;
 
     [HttpGet]
@@ -49,7 +54,16 @@ public sealed class DashboardController(IDashboardService service, IMarketHistor
         try
         {
             var points = await _history.GetHistoryAsync(symbol, range, cancellationToken);
-            return Json(new PriceSeriesDto(symbol, points));
+
+            // Variación acumulada del rango "1D" (HV-037): debe calcularse contra el cierre del
+            // día anterior, no contra la apertura de hoy (HV-058). Solo aplica a 1D: para el
+            // resto de rangos "primer punto vs último" dentro de la ventana SÍ es la convención
+            // correcta (rentabilidad del periodo).
+            decimal? dayPreviousClose = string.Equals(range, "1D", StringComparison.OrdinalIgnoreCase)
+                ? await _previousClose.GetPreviousCloseAsync(symbol, cancellationToken)
+                : null;
+
+            return Json(new PriceSeriesDto(symbol, points, dayPreviousClose));
         }
         catch (ArgumentException ex)
         {

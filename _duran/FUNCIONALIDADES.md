@@ -25,6 +25,11 @@
 
 ## ✅ Completados
 
+#### HV-058 Fix variación acumulada del rango 1D (cierre anterior, no apertura de hoy) ✅
+- **Estado**: ✅ Completado · **Período**: 2026-11-02 · **Resultado**: ✅ Cumplido · **Tipo**: Bugfix
+- **Spec**: `_duran/specs/HV-058.md`
+- **Resumen**: El usuario reportó que la variación del rango **1D** no coincidía con onvista.de. Causa: `updateChartDelta` (HV-037) usaba siempre el primer punto de la serie como base, correcto para 5D/1M/etc. pero erróneo para 1D (debería ser el **cierre de ayer**, no la apertura de hoy — convención financiera estándar). Nueva capacidad `IPreviousCloseProvider` (separada de `IMarketHistoryProvider` para no arrastrar cambios a `SsaPriceForecaster`/`MlDirectionClassifier`, que no la necesitan): `YahooHistoryProvider` la implementa vía `meta.previousClose` de `/v8/finance/chart` (con fallback a `meta.chartPreviousClose`, nombre que Yahoo usa según el `interval` — hallazgo durante la implementación, el primer intento con `interval=1d` devolvía siempre null). `SelectableMarketHistoryProvider` solo delega cuando Yahoo está activo. `DashboardController` lo pide solo para `range=="1D"`. `dashboard.js` usa ese valor como base del delta en 1D, sin tocar el cálculo de los demás rangos. 9 tests nuevos, 238 verdes en total. Smoke test real: HY9H.F 1D pasó de `-2,00€ (-0,20%)` (bug) a `+52,00€ (+5,63%)` (correcto, coherente con el +56,00€/+6,07% de onvista en el momento del reporte).
+
 #### HV-056 Cimientos de histórico de sentimiento de noticias (base para feature ML futura) ✅
 - **Estado**: ✅ Completado · **Período**: 2026-09-29 · **Resultado**: ✅ Cumplido · **Tipo**: Evolutivo
 - **Spec**: sin spec formal (continuación directa de HV-055, solicitada por el usuario)

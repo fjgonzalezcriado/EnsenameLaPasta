@@ -71,7 +71,10 @@ public sealed record ClosedTradeDto(
     DateTime CreatedAt,
     DateTime ClosedAt);
 
-public sealed record PriceSeriesDto(string Symbol, IReadOnlyList<PricePoint> Points);
+/// <param name="PreviousClose">Cierre del día de negociación anterior (HV-058), solo cuando el
+/// proveedor activo lo soporta (Yahoo) y el rango es "1D". Null en el resto de casos: el
+/// frontend cae entonces a su cálculo anterior (primer punto de la serie).</param>
+public sealed record PriceSeriesDto(string Symbol, IReadOnlyList<PricePoint> Points, decimal? PreviousClose = null);
 
 // Price = cierre (compatibilidad). Open/High/Low se rellenan en el histórico para el modo velas
 // japonesas (HV-041); valen 0 en el feed en vivo (no se usa para el gráfico).

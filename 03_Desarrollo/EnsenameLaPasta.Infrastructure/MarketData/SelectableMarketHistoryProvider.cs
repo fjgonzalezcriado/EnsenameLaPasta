@@ -11,7 +11,7 @@ public sealed class SelectableMarketHistoryProvider(
     YahooHistoryProvider yahoo,
     TwelveDataHistoryProvider twelveData,
     AlphaVantageHistoryProvider alphaVantage,
-    IMarketProviderState state) : IMarketHistoryProvider
+    IMarketProviderState state) : IMarketHistoryProvider, IPreviousCloseProvider
 {
     private readonly YahooHistoryProvider _yahoo = yahoo;
     private readonly TwelveDataHistoryProvider _twelveData = twelveData;
@@ -27,5 +27,19 @@ public sealed class SelectableMarketHistoryProvider(
             _ => _yahoo,
         };
         return provider.GetHistoryAsync(symbol, range, cancellationToken);
+    }
+
+    // Twelve Data / Alpha Vantage no exponen cierre anterior (HV-058): solo Yahoo lo soporta.
+    // Con otro proveedor activo degrada a null. El consumidor cae a su comportamiento anterior.
+    // Mismo criterio de "Yahoo por defecto" que GetHistoryAsync (el switch de arriba).
+    public Task<decimal?> GetPreviousCloseAsync(string symbol, CancellationToken cancellationToken = default)
+    {
+        var usesYahoo = _state.Current switch
+        {
+            var p when string.Equals(p, "TwelveData", StringComparison.OrdinalIgnoreCase) => false,
+            var p when string.Equals(p, "AlphaVantage", StringComparison.OrdinalIgnoreCase) => false,
+            _ => true,
+        };
+        return usesYahoo ? _yahoo.GetPreviousCloseAsync(symbol, cancellationToken) : Task.FromResult<decimal?>(null);
     }
 }

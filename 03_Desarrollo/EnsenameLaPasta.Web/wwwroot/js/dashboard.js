@@ -472,9 +472,13 @@
             ? s.points.map(function (p) { return Number(p.price); }).filter(function (v) { return Number.isFinite(v); })
             : [];
         if (!s || pts.length < 2) { el.textContent = ''; el.className = 'js-win-delta small fw-semibold'; return; }
-        const first = pts[0], last = pts[pts.length - 1];
-        const delta = last - first;
-        const pct = first !== 0 ? (delta / first * 100) : 0;
+        const last = pts[pts.length - 1];
+        // En 1D la variación se calcula contra el cierre de ayer (HV-058), no contra la apertura
+        // de hoy (pts[0] sería el primer tick de la sesión actual, no el cierre anterior). Para
+        // el resto de rangos "primer punto vs último" dentro de la ventana sí es lo correcto.
+        const baseline = (win.range === '1D' && s.previousClose > 0) ? Number(s.previousClose) : pts[0];
+        const delta = last - baseline;
+        const pct = baseline !== 0 ? (delta / baseline * 100) : 0;
         const cur = symbolCurrency[s.symbol] || '';
         const sign = delta > 0 ? '+' : '';   // money() ya antepone '−' en negativos
         el.textContent = win.range + ': ' + sign + money(delta, cur) + ' (' + pctSigned(pct) + ')';
