@@ -1938,6 +1938,80 @@
         }
     }
 
+    // ── Estimación fiscal FIFO (HV-059): informativa, no asesoramiento fiscal ───
+    function initFifoModal() {
+        const modalEl = document.getElementById('fifoModal');
+        if (!modalEl) return;
+        const symInput = document.getElementById('fifoSymbol');
+        const qtyInput = document.getElementById('fifoQuantity');
+        const priceInput = document.getElementById('fifoPrice');
+        const errBox = document.getElementById('fifoError');
+        const resultBox = document.getElementById('fifoResult');
+        const lotsBody = document.getElementById('fifoLotsBody');
+        const messageEl = document.getElementById('fifoMessage');
+        const totalCostEl = document.getElementById('fifoTotalCost');
+        const totalProceedsEl = document.getElementById('fifoTotalProceeds');
+        const sellCommissionEl = document.getElementById('fifoSellCommission');
+        const estimatedGainEl = document.getElementById('fifoEstimatedGain');
+        const form = document.getElementById('fifoForm');
+
+        function showErr(m) { if (errBox) { errBox.textContent = m; errBox.style.display = ''; } if (resultBox) resultBox.style.display = 'none'; }
+        function clearErr() { if (errBox) { errBox.style.display = 'none'; errBox.textContent = ''; } }
+
+        modalEl.addEventListener('shown.bs.modal', function () {
+            clearErr();
+            if (resultBox) resultBox.style.display = 'none';
+            if (symInput && !symInput.value && priceWindows.length) symInput.value = priceWindows[priceWindows.length - 1].symbol;
+            if (symInput) symInput.focus();
+        });
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            clearErr();
+            const symbol = (symInput.value || '').trim();
+            const quantity = parseFloat(String(qtyInput.value).replace(',', '.'));
+            const priceRaw = (priceInput.value || '').trim();
+            const exitPrice = priceRaw ? parseFloat(priceRaw.replace(',', '.')) : null;
+            if (!symbol) { showErr('Indica un símbolo.'); return; }
+            if (!(quantity > 0)) { showErr('La cantidad debe ser > 0.'); return; }
+
+            try {
+                const qs = new URLSearchParams({ symbol: symbol, quantity: String(quantity) });
+                if (exitPrice !== null && !Number.isNaN(exitPrice) && exitPrice > 0) qs.set('exitPrice', String(exitPrice));
+                const resp = await fetch('/api/tax/fifo-estimate?' + qs.toString());
+                if (!resp.ok) throw new Error((await resp.text()) || ('HTTP ' + resp.status));
+                const data = await resp.json();
+
+                const ccy = data.currency || '';
+                if (!data.lots || !data.lots.length) {
+                    lotsBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Sin lotes abiertos</td></tr>';
+                } else {
+                    lotsBody.innerHTML = data.lots.map(function (l) {
+                        return '<tr>'
+                            + '<td><small>' + new Date(l.purchasedAt).toLocaleDateString('es-ES') + '</small></td>'
+                            + '<td class="text-end">' + num(l.quantityUsed) + '</td>'
+                            + '<td class="text-end">' + money(l.entryPrice, ccy) + '</td>'
+                            + '<td class="text-end">' + money(l.costBasis, ccy) + '</td>'
+                            + '<td class="text-end">' + money(l.proceeds, ccy) + '</td>'
+                            + '<td class="text-end ' + signClass(l.gain) + '">' + money(l.gain, ccy) + '</td>'
+                            + '</tr>';
+                    }).join('');
+                }
+                if (totalCostEl) totalCostEl.textContent = money(data.totalCostBasis, ccy);
+                if (totalProceedsEl) totalProceedsEl.textContent = money(data.totalProceeds, ccy);
+                if (sellCommissionEl) sellCommissionEl.textContent = money(data.sellCommission, ccy);
+                if (estimatedGainEl) {
+                    estimatedGainEl.textContent = money(data.estimatedGain, ccy);
+                    estimatedGainEl.className = signClass(data.estimatedGain);
+                }
+                if (messageEl) messageEl.textContent = data.message || '';
+                if (resultBox) resultBox.style.display = '';
+            } catch (err) {
+                showErr('No se pudo calcular: ' + err.message);
+            }
+        });
+    }
+
     // ── Modo visor puro (HV-046): solo lectura, oculta los controles de edición ──
     function initViewerMode() {
         try { if (localStorage.getItem('viewerMode') === '1') viewerMode = true; } catch (e) { }
@@ -1988,6 +2062,7 @@
     initPositionModal();
     initCashModal();
     initDividendModal();
+    initFifoModal();
     initImportModal();
     initAccountHistoryControl();
     const savedWindows = initPriceWindows();

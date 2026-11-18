@@ -127,6 +127,9 @@ public static class DependencyInjection
         // Dividendos cobrados (HV-050): suman al PnL y al efectivo.
         services.AddScoped<IDividendService, DividendService>();
 
+        // Estimación de ganancia patrimonial FIFO (HV-059), informativa (no asesoramiento fiscal).
+        services.AddScoped<IFifoEstimateService, FifoEstimateService>();
+
         // Bróker (comisión por orden; Trade Republic 1 €). La aplica PositionService al abrir/cerrar.
         services.AddOptions<BrokerOptions>()
             .Bind(configuration.GetSection(BrokerOptions.SectionName))
